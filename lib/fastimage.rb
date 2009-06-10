@@ -21,6 +21,8 @@
 # * http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/
 # * http://pennysmalls.com/2008/08/19/find-jpeg-dimensions-fast-in-ruby/
 #
+require 'net/https'
+
 class FastImage
   attr_reader :size, :type
 
@@ -132,11 +134,13 @@ class FastImage
   private
 
   def setup_http(uri, options)
-    uri_split = URI.split(uri)
-    @http = Net::HTTP.new(uri_split[2], uri_split[3])
+    u = URI.parse(uri)
+    @http = Net::HTTP.new(u.host, u.port)
+    @http.use_ssl = (u.scheme == "https")
+    @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     @http.open_timeout = options[:timeout] || DefaultTimeout
     @http.read_timeout = options[:timeout] || DefaultTimeout
-    @http_get_path = uri_split[5] + (uri_split[7] ? "?#{uri_split[7]}" : "")
+    @http_get_path = u.request_uri
   end
 
   def fetch_type_from_response(res)
