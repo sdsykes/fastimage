@@ -33,6 +33,6 @@ h4. Gem
 
 h2. Documentation
 
-  http://rdoc.info/projects/sdsykes/fastimage
+"http://rdoc.info/projects/sdsykes/fastimage":http://rdoc.info/projects/sdsykes/fastimage
 
 (c) 2009 Stephen Sykes (sdsykes)
