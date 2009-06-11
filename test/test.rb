@@ -1,0 +1,78 @@
+require 'rubygems'
+
+require 'test/unit'
+
+require 'fastimage'
+
+require 'fakeweb'
+
+FixturePath = File.join(File.dirname(__FILE__), "fixtures")
+
+GoodFixtures = {
+  "test.bmp"=>[:bmp, [40, 27]],
+  "test.gif"=>[:gif, [17, 32]],
+  "test.jpg"=>[:jpg, [882, 470]],
+  "test.png"=>[:png, [30, 20]]
+  }
+
+BadFixtures = [
+  "faulty.jpg",
+  "test.ico"
+]
+
+TestUrl = "http://example.nowhere/"
+
+GoodFixtures.each do |fn, info|
+  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :file => File.join(FixturePath, fn))
+end
+BadFixtures.each do |fn|
+  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :file => File.join(FixturePath, fn))
+end
+
+class FasImageTest < Test::Unit::TestCase
+  def test_should_report_type_correctly
+    GoodFixtures.each do |fn, info|
+      assert_equal info[0], FastImage.type(TestUrl + fn)
+    end
+  end
+
+  def test_should_report_size_correctly
+    GoodFixtures.each do |fn, info|
+      assert_equal info[1], FastImage.size(TestUrl + fn)
+    end    
+  end
+  
+  def test_should_return_nil_on_fetch_failure
+    assert_nil FastImage.size(TestUrl + "does_not_exist")
+  end
+  
+  def test_should_return_nil_for_faulty_jpeg_where_size_cannot_be_found
+    assert_nil FastImage.size(TestUrl + "faulty.jpg")
+  end
+
+  def test_should_return_nil_when_image_type_not_known
+    assert_nil FastImage.size(TestUrl + "test.ico")
+  end
+  
+  def test_should_return_nil_if_timeout_occurs
+    assert_nil FastImage.size("http://example.com/does_not_exist", :timeout=>0.001)
+  end
+  
+  def test_should_raise_when_asked_to_when_size_cannot_be_found
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(TestUrl + "faulty.jpg", :raise_on_failure=>true)
+    end
+  end
+
+  def test_should_raise_when_asked_to_when_timeout_occurs
+    assert_raises(FastImage::ImageFetchFailure) do
+      FastImage.size("http://example.com/does_not_exist", :timeout=>0.001, :raise_on_failure=>true)
+    end
+  end
+
+  def test_should_raise_when_asked_when_image_type_not_known
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.size(TestUrl + "test.ico", :raise_on_failure=>true)
+    end
+  end
+end
