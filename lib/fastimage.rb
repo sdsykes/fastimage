@@ -8,6 +8,11 @@
 #
 # FastImage knows about GIF, JPEG, BMP and PNG files.
 #
+# FastImage can also read files from the local filesystem by supplying the path instead of a uri.
+# In this case FastImage uses the open-uri library to read the file in chunks of 256 bytes until
+# it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
+# attached disk rather than truly local.
+#
 # === Examples
 #   require 'fastimage'
 #
@@ -15,6 +20,8 @@
 #   => [266, 56]
 #   FastImage.type("http://stephensykes.com/images/pngimage")
 #   => :png
+#   FastImage.type("/some/local/file.gif")
+#   => :gif
 #
 # === References
 # * http://snippets.dzone.com/posts/show/805
@@ -40,11 +47,13 @@ class FastImage
   end
 
   DefaultTimeout = 2
+  
+  LocalFileChunkSize = 256
 
   # Returns an array containing the width and height of the image.
   # It will return nil if the image could not be fetched, or if the image type was not recognised.
   #
-  # By default there is a timeout of 2 seconds for opening and reading from the remote server.
+  # By default there is a timeout of 2 seconds for opening and reading from a remote server.
   # This can be changed by passing a :timeout => number_of_seconds in the options.
   #
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
@@ -64,6 +73,8 @@ class FastImage
   #   => [500, 375]
   #   FastImage.size("http://www-ece.rice.edu/~wakin/images/lena512.bmp")
   #   => [512, 512]
+  #   FastImage.size("test/fixtures/test.jpg")
+  #   => [882, 470]
   #   FastImage.size("http://pennysmalls.com/does_not_exist")
   #   => nil
   #   FastImage.size("http://pennysmalls.com/does_not_exist", :raise_on_failure=>true)
@@ -88,7 +99,7 @@ class FastImage
   # Returns an symbol indicating the image type fetched from a uri.
   # It will return nil if the image could not be fetched, or if the image type was not recognised.
   #
-  # By default there is a timeout of 2 seconds for opening and reading from the remote server.
+  # By default there is a timeout of 2 seconds for opening and reading from a remote server.
   # This can be changed by passing a :timeout => number_of_seconds in the options.
   #
   # If you wish FastImage to raise if it cannot find the type of the image for any reason, then pass
@@ -106,6 +117,8 @@ class FastImage
   #   => :jpg
   #   FastImage.type("http://www-ece.rice.edu/~wakin/images/lena512.bmp")
   #   => :bmp
+  #   FastImage.type("test/fixtures/test.jpg")
+  #   => :jpg
   #   FastImage.type("http://pennysmalls.com/does_not_exist")
   #   => nil
   #
@@ -144,7 +157,9 @@ class FastImage
     setup_http
     @http.request_get(@parsed_uri.request_uri) do |res|
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
-      fetch_from_response(res)
+      res.read_body do |str|
+        break if parse_packet(str)
+      end
     end
   end
 
@@ -156,9 +171,11 @@ class FastImage
     @http.read_timeout = @timeout
   end
 
-  def fetch_from_response(res)
-    res.read_body do |str|
-      break if parse_packet(str)
+  def fetch_using_open_uri
+    open(@uri) do |s|
+      while str = s.read(LocalFileChunkSize)
+        break if parse_packet(str)
+      end
     end
   end
 
@@ -175,14 +192,6 @@ class FastImage
       end
     rescue MoreCharsNeeded
       false
-    end
-  end
-
-  def fetch_using_open_uri
-    open(@uri) do |s|
-      while str = s.read(256)
-        break if parse_packet(str)
-      end
     end
   end
 
