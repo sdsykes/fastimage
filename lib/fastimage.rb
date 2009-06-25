@@ -23,6 +23,7 @@
 # * http://imagesize.rubyforge.org/
 #
 require 'net/https'
+require 'open-uri'
 
 class FastImage
   attr_reader :size, :type
@@ -119,51 +120,68 @@ class FastImage
   end
 
   def initialize(uri, options={})
-    @type_only = options[:type_only]
-    setup_http(uri, options)
-    @http.request_get(@http_get_path) do |res|
-      raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
-      fetch_size_from_response(res)
+    @property = options[:type_only] ? :type : :size
+    @timeout = options[:timeout] || DefaultTimeout
+    @uri = uri
+    @parsed_uri = URI.parse(uri)
+    if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
+      fetch_using_http
+    else
+      fetch_using_open_uri
     end
-    raise SizeNotFound if options[:raise_on_failure] && !@size
+    raise SizeNotFound if options[:raise_on_failure] && !@type_only && !@size
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, ImageFetchFailure
     raise ImageFetchFailure if options[:raise_on_failure]
+  rescue Errno::ENOENT
+    raise ImageFetchFailure if options[:raise_on_failure]    
   rescue UnknownImageType
     raise UnknownImageType if options[:raise_on_failure]
   end
 
   private
 
-  def setup_http(uri, options)
-    u = URI.parse(uri)
-    @http = Net::HTTP.new(u.host, u.port)
-    @http.use_ssl = (u.scheme == "https")
+  def fetch_using_http
+    setup_http
+    @http.request_get(@parsed_uri.request_uri) do |res|
+      raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
+      fetch_from_response(res)
+    end
+  end
+
+  def setup_http
+    @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.port)
+    @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    @http.open_timeout = options[:timeout] || DefaultTimeout
-    @http.read_timeout = options[:timeout] || DefaultTimeout
-    @http_get_path = u.request_uri
+    @http.open_timeout = @timeout
+    @http.read_timeout = @timeout
   end
 
-  def fetch_type_from_response(res)
-    fetch_from_response(res, :type){parse_type}
-  end
-
-  def fetch_size_from_response(res)
-    fetch_from_response(res, :size){parse_size}
-  end
-
-  def fetch_from_response(res, item)
-    @unused_str = ""
+  def fetch_from_response(res)
     res.read_body do |str|
-      @str = @unused_str + str
-      @strpos = 0
-      begin
-        result = yield
-        if result 
-          instance_variable_set("@#{item}", result)
-          break
-        end
-      rescue MoreCharsNeeded
+      break if parse_packet(str)
+    end
+  end
+
+  # returns true once result is achieved
+  #
+  def parse_packet(str)
+    @str = (@unused_str || "") + str
+    @strpos = 0
+    begin
+      result = send("parse_#{@property}")
+      if result 
+        instance_variable_set("@#{@property}", result)
+        true
+      end
+    rescue MoreCharsNeeded
+      false
+    end
+  end
+
+  def fetch_using_open_uri
+    open(@uri) do |s|
+      while str = s.read(256)
+        break if parse_packet(str)
       end
     end
   end

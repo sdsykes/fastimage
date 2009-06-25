@@ -2,11 +2,13 @@ require 'rubygems'
 
 require 'test/unit'
 
-require 'fastimage'
+PathHere = File.dirname(__FILE__)
+
+require File.join(PathHere, "..", "lib", 'fastimage')
 
 require 'fakeweb'
 
-FixturePath = File.join(File.dirname(__FILE__), "fixtures")
+FixturePath = File.join(PathHere, "fixtures")
 
 GoodFixtures = {
   "test.bmp"=>[:bmp, [40, 27]],
@@ -73,6 +75,36 @@ class FasImageTest < Test::Unit::TestCase
   def test_should_raise_when_asked_when_image_type_not_known
     assert_raises(FastImage::UnknownImageType) do
       FastImage.size(TestUrl + "test.ico", :raise_on_failure=>true)
+    end
+  end
+  
+  def test_should_report_type_correctly_for_local_files
+    GoodFixtures.each do |fn, info|
+      assert_equal info[0], FastImage.type(File.join(FixturePath, fn))
+    end    
+  end
+  
+  def test_should_report_size_correctly_for_local_files
+    GoodFixtures.each do |fn, info|
+      assert_equal info[1], FastImage.size(File.join(FixturePath, fn))
+    end    
+  end
+  
+  def test_should_return_nil_on_fetch_failure_for_local_path
+    assert_nil FastImage.size("does_not_exist")
+  end
+  
+  def test_should_return_nil_for_faulty_jpeg_where_size_cannot_be_found_for_local_file
+    assert_nil FastImage.size(File.join(FixturePath, "faulty.jpg"))
+  end
+
+  def test_should_return_nil_when_image_type_not_known_for_local_file
+    assert_nil FastImage.size(File.join(FixturePath, "test.ico"))
+  end
+  
+  def test_should_raise_when_asked_to_when_size_cannot_be_found_for_local_file
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(File.join(FixturePath, "faulty.jpg"), :raise_on_failure=>true)
     end
   end
 end
