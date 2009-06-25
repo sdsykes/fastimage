@@ -142,7 +142,7 @@ class FastImage
     else
       fetch_using_open_uri
     end
-    raise SizeNotFound if options[:raise_on_failure] && !@type_only && !@size
+    raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, ImageFetchFailure
     raise ImageFetchFailure if options[:raise_on_failure]
   rescue Errno::ENOENT

@@ -35,12 +35,14 @@ class FasImageTest < Test::Unit::TestCase
   def test_should_report_type_correctly
     GoodFixtures.each do |fn, info|
       assert_equal info[0], FastImage.type(TestUrl + fn)
+      assert_equal info[0], FastImage.type(TestUrl + fn, :raise_on_failure=>true)
     end
   end
 
   def test_should_report_size_correctly
     GoodFixtures.each do |fn, info|
       assert_equal info[1], FastImage.size(TestUrl + fn)
+      assert_equal info[1], FastImage.size(TestUrl + fn, :raise_on_failure=>true)
     end    
   end
   
