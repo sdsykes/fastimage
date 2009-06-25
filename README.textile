@@ -14,6 +14,8 @@ FastImage does this minimal fetch for image types GIF, JPEG, PNG and BMP.  And i
 
 You only need supply the uri, and FastImage will do the rest.
 
+Fastimage can also read local (and other) files, and uses the open-uri library to do so.
+
 h2. Examples
 
 <pre>
@@ -24,6 +26,8 @@ FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
 => [266, 56]  # width, height
 FastImage.type("http://stephensykes.com/images/pngimage")
 => :png
+FastImage.type("/some/local/file.gif")
+=> :gif
 </code>
 </pre>
 
@@ -62,10 +66,10 @@ You'll need to 'sudo gem install fakeweb' to be able to run the tests.
 ruby test/test.rb
 Loaded suite test/test
 Started
-.........
-Finished in 0.055059 seconds.
+...............
+Finished in 0.059392 seconds.
 
-9 tests, 15 assertions, 0 failures, 0 errors
+15 tests, 27 assertions, 0 failures, 0 errors
 </code>
 </pre>
 
