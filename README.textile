@@ -35,7 +35,11 @@ h2. Installation
 
 h4. Gem
 
+<pre>
+<code>
   sudo gem install sdsykes-fastimage -s http://gems.github.com
+</code>
+</pre>
 
 h4. Rails
 
