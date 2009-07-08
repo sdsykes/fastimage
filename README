@@ -1,0 +1,74 @@
+FastImage
+
+FastImage finds the size or type of an image given its uri by fetching as little as needed
+
+The problem
+
+Your app needs to find the size or type of an image.  This could be for adding width and height attributes to an image tag, for adjusting layouts or overlays to fit an image or any other of dozens of reasons.
+
+But the image is not locally stored - it's on another asset server, or in the cloud - at Amazon S3 for example.
+
+You don't want to download the entire image to your app server - it could be many tens of kilobytes, or even megabytes just to get this information.  For most image types, the size of the image is simply stored at the start of the file.  For JPEG files it's a little bit more complex, but even so you do not need to fetch most of the image to find the size.
+
+FastImage does this minimal fetch for image types GIF, JPEG, PNG and BMP.  And it doesn't rely on installing external libraries such as RMagick (which relies on ImageMagick or GraphicsMagick) or ImageScience (which relies on FreeImage).
+
+You only need supply the uri, and FastImage will do the rest.
+
+Fastimage can also read local (and other) files, and uses the open-uri library to do so.
+
+Examples
+
+  require 'fastimage'
+
+  FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
+  => [266, 56]  # width, height
+  FastImage.type("http://stephensykes.com/images/pngimage")
+  => :png
+  FastImage.type("/some/local/file.gif")
+  => :gif
+
+Installation
+
+h4. Gem
+
+  sudo gem install sdsykes-fastimage -s http://gems.github.com
+
+h4. Rails
+
+Install the gem as above, and configure it in your environment.rb file as below:
+
+  ...
+  Rails::Initializer.run do |config|
+    ...
+    config.gem "sdsykes-fastimage", :lib=>"fastimage"
+    ...
+  end
+  ...
+
+Then you're off - just use FastImage.size() and FastImage.type() in your code as in the examples.
+
+Documentation
+
+"http://rdoc.info/projects/sdsykes/fastimage":http://rdoc.info/projects/sdsykes/fastimage
+
+Tests
+
+You'll need to 'sudo gem install fakeweb' to be able to run the tests.
+
+  ruby test/test.rb
+  Loaded suite test/test
+  Started
+  ...............
+  Finished in 0.059392 seconds.
+
+  15 tests, 27 assertions, 0 failures, 0 errors
+
+
+References
+* "http://pennysmalls.com/2008/08/19/find-jpeg-dimensions-fast-in-ruby/":http://pennysmalls.com/2008/08/19/find-jpeg-dimensions-fast-in-ruby/
+* "http://snippets.dzone.com/posts/show/805":http://snippets.dzone.com/posts/show/805
+* "http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/":http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/
+* "http://imagesize.rubyforge.org/":http://imagesize.rubyforge.org/
+
+
+(c) 2009 Stephen Sykes
