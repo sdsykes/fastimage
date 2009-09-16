@@ -13,7 +13,7 @@ FixturePath = File.join(PathHere, "fixtures")
 GoodFixtures = {
   "test.bmp"=>[:bmp, [40, 27]],
   "test.gif"=>[:gif, [17, 32]],
-  "test.jpg"=>[:jpg, [882, 470]],
+  "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]]
   }
 

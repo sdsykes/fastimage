@@ -67,7 +67,7 @@ class FastImage
   #
   #   FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
   #   => [266, 56]
-  #   FastImage.type("http://stephensykes.com/images/pngimage")
+  #   FastImage.size("http://stephensykes.com/images/pngimage")
   #   => [16, 16]
   #   FastImage.size("http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg")
   #   => [500, 375]
@@ -114,11 +114,11 @@ class FastImage
   #   FastImage.type("http://stephensykes.com/images/pngimage")
   #   => :png
   #   FastImage.type("http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg")
-  #   => :jpg
+  #   => :jpeg
   #   FastImage.type("http://www-ece.rice.edu/~wakin/images/lena512.bmp")
   #   => :bmp
   #   FastImage.type("test/fixtures/test.jpg")
-  #   => :jpg
+  #   => :jpeg
   #   FastImage.type("http://pennysmalls.com/does_not_exist")
   #   => nil
   #
@@ -227,7 +227,7 @@ class FastImage
     when "GI"
       :gif
     when 0xff.chr + 0xd8.chr
-      :jpg
+      :jpeg
     when 0x89.chr + "P"
       :png
     else
@@ -243,7 +243,7 @@ class FastImage
     get_chars(23)[14..22].unpack('NN')
   end
 
-  def parse_size_for_jpg
+  def parse_size_for_jpeg
     loop do
       @state = case @state
       when nil
