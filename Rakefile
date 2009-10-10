@@ -11,6 +11,7 @@ begin
     s.authors = ["Stephen Sykes"]
     s.files = FileList["[A-Z]*", "{lib,test}/**/*"]
   end
+  Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://
 gems.github.com"
