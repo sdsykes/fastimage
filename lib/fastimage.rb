@@ -275,6 +275,6 @@ class FastImage
 
   def parse_size_for_bmp
     d = get_chars(27)[12..26]
-    d[0] == 40 ? d[4..-1].unpack('LL') : d[4..8].unpack('SS')
+    d.unpack("C")[0] == 40 ? d[4..-1].unpack('LL') : d[4..8].unpack('SS')
   end
 end
