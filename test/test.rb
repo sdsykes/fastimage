@@ -25,10 +25,10 @@ BadFixtures = [
 TestUrl = "http://example.nowhere/"
 
 GoodFixtures.each do |fn, info|
-  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :file => File.join(FixturePath, fn))
+  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
 end
 BadFixtures.each do |fn|
-  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :file => File.join(FixturePath, fn))
+  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
 end
 
 class FastImageTest < Test::Unit::TestCase
