@@ -31,7 +31,7 @@ BadFixtures.each do |fn|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :file => File.join(FixturePath, fn))
 end
 
-class FasImageTest < Test::Unit::TestCase
+class FastImageTest < Test::Unit::TestCase
   def test_should_report_type_correctly
     GoodFixtures.each do |fn, info|
       assert_equal info[0], FastImage.type(TestUrl + fn)
