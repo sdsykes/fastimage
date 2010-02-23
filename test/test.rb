@@ -74,7 +74,7 @@ class FastImageTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_raise_when_asked_to_when_domain_does_not_exist
+  def test_should_raise_when_asked_to_when_file_does_not_exist
     assert_raises(FastImage::ImageFetchFailure) do
       FastImage.size("http://www.google.com/does_not_exist_at_all", :raise_on_failure=>true)
     end
