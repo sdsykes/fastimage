@@ -147,6 +147,8 @@ class FastImage
     raise ImageFetchFailure if options[:raise_on_failure]
   rescue Errno::ENOENT
     raise ImageFetchFailure if options[:raise_on_failure]    
+  rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
+    raise ImageFetchFailure if options[:raise_on_failure]
   rescue UnknownImageType
     raise UnknownImageType if options[:raise_on_failure]
   end
