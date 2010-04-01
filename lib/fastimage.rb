@@ -143,10 +143,9 @@ class FastImage
       fetch_using_open_uri
     end
     raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
-  rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, ImageFetchFailure
+  rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, 
+    ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
     raise ImageFetchFailure if options[:raise_on_failure]
-  rescue Errno::ENOENT
-    raise ImageFetchFailure if options[:raise_on_failure]    
   rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
     raise ImageFetchFailure if options[:raise_on_failure]
   rescue UnknownImageType
