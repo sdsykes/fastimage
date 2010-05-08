@@ -14,7 +14,8 @@ GoodFixtures = {
   "test.bmp"=>[:bmp, [40, 27]],
   "test.gif"=>[:gif, [17, 32]],
   "test.jpg"=>[:jpeg, [882, 470]],
-  "test.png"=>[:png, [30, 20]]
+  "test.png"=>[:png, [30, 20]],
+  "test2.jpg"=>[:jpeg, [250, 188]]
   }
 
 BadFixtures = [
@@ -45,7 +46,7 @@ class FastImageTest < Test::Unit::TestCase
       assert_equal info[1], FastImage.size(TestUrl + fn, :raise_on_failure=>true)
     end    
   end
-  
+
   def test_should_return_nil_on_fetch_failure
     assert_nil FastImage.size(TestUrl + "does_not_exist")
   end

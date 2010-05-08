@@ -198,6 +198,7 @@ class FastImage
 
   def parse_size
     @type = parse_type unless @type
+    @strpos = 0
     send("parse_size_for_#{@type}")
   end
 
@@ -237,11 +238,11 @@ class FastImage
   end
 
   def parse_size_for_gif
-    get_chars(9)[4..8].unpack('SS')
+    get_chars(11)[6..10].unpack('SS')
   end
 
   def parse_size_for_png
-    get_chars(23)[14..22].unpack('NN')
+    get_chars(25)[16..24].unpack('NN')
   end
 
   def parse_size_for_jpeg
@@ -275,7 +276,7 @@ class FastImage
   end
 
   def parse_size_for_bmp
-    d = get_chars(27)[12..26]
+    d = get_chars(29)[14..28]
     d.unpack("C")[0] == 40 ? d[4..-1].unpack('LL') : d[4..8].unpack('SS')
   end
 end
