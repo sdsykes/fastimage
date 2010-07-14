@@ -136,11 +136,16 @@ class FastImage
     @property = options[:type_only] ? :type : :size
     @timeout = options[:timeout] || DefaultTimeout
     @uri = uri
-    @parsed_uri = URI.parse(uri)
-    if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
-      fetch_using_http
-    else
+    begin
+      @parsed_uri = URI.parse(uri)
+    rescue URI::InvalidURIError
       fetch_using_open_uri
+    else
+      if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
+        fetch_using_http
+      else
+        fetch_using_open_uri
+      end
     end
     raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, 

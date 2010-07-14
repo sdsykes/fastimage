@@ -98,6 +98,12 @@ class FastImageTest < Test::Unit::TestCase
       assert_equal info[1], FastImage.size(File.join(FixturePath, fn))
     end    
   end
+
+  def test_should_report_size_correctly_for_local_files_with_path_that_has_spaces
+    Dir.chdir(PathHere) do
+      assert_equal GoodFixtures["test.bmp"][1], FastImage.size(File.join("fixtures", "folder with spaces", "test.bmp"))
+    end
+  end
   
   def test_should_return_nil_on_fetch_failure_for_local_path
     assert_nil FastImage.size("does_not_exist")
