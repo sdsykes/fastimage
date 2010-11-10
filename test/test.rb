@@ -15,7 +15,8 @@ GoodFixtures = {
   "test.gif"=>[:gif, [17, 32]],
   "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]],
-  "test2.jpg"=>[:jpeg, [250, 188]]
+  "test2.jpg"=>[:jpeg, [250, 188]],
+  "test3.jpg"=>[:jpeg, [630,367]]
   }
 
 BadFixtures = [

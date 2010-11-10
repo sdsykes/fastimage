@@ -257,13 +257,15 @@ class FastImage
         get_chars(2)
         :started
       when :started
-        get_byte == 0xFF ? :sof : :started          
+        get_byte == 0xFF ? :sof : :started
       when :sof
         c = get_byte
         if (0xe0..0xef).include?(c)
           :skipframe
         elsif [0xC0..0xC3, 0xC5..0xC7, 0xC9..0xCB, 0xCD..0xCF].detect {|r| r.include? c}
           :readsize
+        elsif c == 0xFF
+          :sof
         else
           :skipframe
         end
