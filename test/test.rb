@@ -100,6 +100,22 @@ class FastImageTest < Test::Unit::TestCase
     end    
   end
 
+  def test_should_report_type_correctly_for_ios
+    GoodFixtures.each do |fn, info|
+      File.open(File.join(FixturePath, fn), "r") do |io|
+        assert_equal info[0], FastImage.type(io)
+      end
+    end
+  end
+  
+  def test_should_report_size_correctly_for_ios
+    GoodFixtures.each do |fn, info|
+      File.open(File.join(FixturePath, fn), "r") do |io|
+        assert_equal info[1], FastImage.size(io)
+      end
+    end
+  end
+
   def test_should_report_size_correctly_for_local_files_with_path_that_has_spaces
     Dir.chdir(PathHere) do
       assert_equal GoodFixtures["test.bmp"][1], FastImage.size(File.join("fixtures", "folder with spaces", "test.bmp"))

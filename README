@@ -31,7 +31,7 @@ Installation
 
 h4. Gem
 
-  sudo gem install sdsykes-fastimage -s http://gems.github.com
+  gem install fastimage
 
 h4. Rails
 
@@ -40,7 +40,7 @@ Install the gem as above, and configure it in your environment.rb file as below:
   ...
   Rails::Initializer.run do |config|
     ...
-    config.gem "sdsykes-fastimage", :lib=>"fastimage"
+    config.gem "fastimage", :lib=>"fastimage"
     ...
   end
   ...

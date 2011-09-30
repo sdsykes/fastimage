@@ -13,6 +13,9 @@
 # it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
 # attached disk rather than truly local.
 #
+# New in v1.2.9, FastImage will automatically read from any object that responds to :read - for 
+# instance an IO object if that is passed instead of a URI.
+#
 # === Examples
 #   require 'fastimage'
 #
@@ -21,6 +24,8 @@
 #   FastImage.type("http://stephensykes.com/images/pngimage")
 #   => :png
 #   FastImage.type("/some/local/file.gif")
+#   => :gif
+#   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
 #   => :gif
 #
 # === References
@@ -121,6 +126,8 @@ class FastImage
   #   => :jpeg
   #   FastImage.type("http://pennysmalls.com/does_not_exist")
   #   => nil
+  #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
+  #   => :gif
   #
   # === Supported options
   # [:timeout]
@@ -136,15 +143,20 @@ class FastImage
     @property = options[:type_only] ? :type : :size
     @timeout = options[:timeout] || DefaultTimeout
     @uri = uri
-    begin
-      @parsed_uri = URI.parse(uri)
-    rescue URI::InvalidURIError
-      fetch_using_open_uri
+    
+    if uri.respond_to?(:read)
+      fetch_using_read(uri)
     else
-      if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
-        fetch_using_http
-      else
+      begin
+        @parsed_uri = URI.parse(uri)
+      rescue URI::InvalidURIError
         fetch_using_open_uri
+      else
+        if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
+          fetch_using_http
+        else
+          fetch_using_open_uri
+        end
       end
     end
     raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
@@ -177,11 +189,15 @@ class FastImage
     @http.read_timeout = @timeout
   end
 
+  def fetch_using_read(readable)
+    while str = readable.read(LocalFileChunkSize)
+      break if parse_packet(str)
+    end
+  end
+
   def fetch_using_open_uri
     open(@uri) do |s|
-      while str = s.read(LocalFileChunkSize)
-        break if parse_packet(str)
-      end
+      fetch_using_read(s)
     end
   end
 
