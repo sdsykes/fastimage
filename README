@@ -65,7 +65,7 @@ You'll need to 'sudo gem install fakeweb' to be able to run the tests.
 
 
 References
-* "http://pennysmalls.com/2008/08/19/find-jpeg-dimensions-fast-in-ruby/":http://pennysmalls.com/2008/08/19/find-jpeg-dimensions-fast-in-ruby/
+* "http://pennysmalls.com/find-jpeg-dimensions-fast-in-pure-ruby-no-ima":http://pennysmalls.com/find-jpeg-dimensions-fast-in-pure-ruby-no-ima
 * "http://snippets.dzone.com/posts/show/805":http://snippets.dzone.com/posts/show/805
 * "http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/":http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/
 * "http://imagesize.rubyforge.org/":http://imagesize.rubyforge.org/
