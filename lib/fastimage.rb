@@ -246,6 +246,14 @@ class FastImage
     send("parse_size_for_#{@type}")
   end
 
+  def has_encoding?
+    if @has_encoding.nil?
+      @has_encoding = String.new.respond_to? :force_encoding
+    else
+      @has_encoding
+    end
+  end
+
   def get_chars(n)
     if @strpos + n - 1 >= @str.size
       @unused_str = @str[@strpos..-1]
@@ -253,7 +261,8 @@ class FastImage
     else
       result = @str[@strpos..(@strpos + n - 1)]
       @strpos += n
-      result
+      # we are dealing with bytes here, so force the encoding
+      has_encoding? ? result.force_encoding("ASCII-8BIT") : result
     end
   end
 
