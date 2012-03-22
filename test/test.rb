@@ -139,4 +139,37 @@ class FastImageTest < Test::Unit::TestCase
       FastImage.size(File.join(FixturePath, "faulty.jpg"), :raise_on_failure=>true)
     end
   end
+  
+  def test_should_handle_permanent_redirect
+    url = "http://example.com/foo.jpeg"
+    register_redirect(url, TestUrl + GoodFixtures.keys.first)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
+  end
+
+  def test_should_handle_permanent_redirect_4_times
+    first_url = "http://example.com/foo.jpeg"
+    register_redirect(first_url, "http://example.com/foo2.jpeg")
+    register_redirect("http://example.com/foo2.jpeg", "http://example.com/foo3.jpeg")
+    register_redirect("http://example.com/foo3.jpeg", "http://example.com/foo4.jpeg")
+    register_redirect("http://example.com/foo4.jpeg", TestUrl + GoodFixtures.keys.first)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(first_url, :raise_on_failure=>true)
+  end
+
+  def test_should_raise_on_permanent_redirect_5_times
+    first_url = "http://example.com/foo.jpeg"
+    register_redirect(first_url, "http://example.com/foo2.jpeg")
+    register_redirect("http://example.com/foo2.jpeg", "http://example.com/foo3.jpeg")
+    register_redirect("http://example.com/foo3.jpeg", "http://example.com/foo4.jpeg")
+    register_redirect("http://example.com/foo4.jpeg", "http://example.com/foo5.jpeg")
+    register_redirect("http://example.com/foo5.jpeg", TestUrl + GoodFixtures.keys.first)
+    assert_raises(FastImage::ImageFetchFailure) do
+      FastImage.size(first_url, :raise_on_failure=>true)
+    end
+  end
+  
+  def register_redirect(from, to)
+    resp = Net::HTTPMovedPermanently.new(1.0, 302, "Moved")
+    resp['Location'] = to
+    FakeWeb.register_uri(:get, from, :response=>resp)
+  end
 end

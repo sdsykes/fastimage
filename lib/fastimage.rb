@@ -143,7 +143,7 @@ class FastImage
     @property = options[:type_only] ? :type : :size
     @timeout = options[:timeout] || DefaultTimeout
     @uri = uri
-    
+
     if uri.respond_to?(:read)
       fetch_using_read(uri)
     else
@@ -172,9 +172,27 @@ class FastImage
   private
 
   def fetch_using_http
+    @redirect_count = 0
+
+    fetch_using_http_from_parsed_uri
+  end
+  
+  def fetch_using_http_from_parsed_uri
     setup_http
     @http.request_get(@parsed_uri.request_uri) do |res|
+      if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
+        @redirect_count += 1
+        begin
+          @parsed_uri = URI.parse(res['Location'])
+        rescue URI::InvalidURIError
+        else
+          fetch_using_http_from_parsed_uri
+          break
+        end
+      end
+
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
+
       res.read_body do |str|
         break if parse_packet(str)
       end
