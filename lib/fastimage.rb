@@ -16,6 +16,8 @@
 # New in v1.2.9, FastImage will automatically read from any object that responds to :read - for 
 # instance an IO object if that is passed instead of a URI.
 #
+# New in v1.2.10 FastImage will follow up to 4 HTTP redirects to get the image.
+#
 # === Examples
 #   require 'fastimage'
 #
