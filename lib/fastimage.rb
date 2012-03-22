@@ -1,3 +1,5 @@
+# coding: ASCII-8BIT
+
 # FastImage finds the size or type of an image given its uri.
 # It is careful to only fetch and parse as much of the image as is needed to determine the result.
 # It does this by using a feature of Net::HTTP that yields strings from the resource being fetched
@@ -36,6 +38,7 @@
 # * http://pennysmalls.com/find-jpeg-dimensions-fast-in-pure-ruby-no-ima
 # * http://imagesize.rubyforge.org/
 #
+
 require 'net/https'
 require 'open-uri'
 
