@@ -26,6 +26,12 @@ BadFixtures = [
 
 TestUrl = "http://example.nowhere/"
 
+# this image fetch allows me to really test that fastimage is truly fast
+# but it's not ideal relying on external resources and connectivity speed
+LargeImage = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
+LargeImageInfo = [:jpeg, [9545, 6623]]
+LargeImageFetchLimit = 2  # seconds
+
 GoodFixtures.each do |fn, info|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
 end
@@ -171,5 +177,18 @@ class FastImageTest < Test::Unit::TestCase
     resp = Net::HTTPMovedPermanently.new(1.0, 302, "Moved")
     resp['Location'] = to
     FakeWeb.register_uri(:get, from, :response=>resp)
+  end
+  
+  def test_should_fetch_info_of_large_image_faster_than_downloading_the_whole_thing
+    time = Time.now
+    size = FastImage.size(LargeImage)
+    size_time = Time.now
+    assert size_time - time < LargeImageFetchLimit
+    assert_equal LargeImageInfo[1], size
+    time = Time.now
+    type = FastImage.type(LargeImage)
+    type_time = Time.now
+    assert type_time - time < LargeImageFetchLimit
+    assert_equal LargeImageInfo[0], type
   end
 end

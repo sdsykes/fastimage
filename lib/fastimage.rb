@@ -201,6 +201,8 @@ class FastImage
       res.read_body do |str|
         break if parse_packet(str)
       end
+      
+      break  # needed to actively quit out of the fetch
     end
   end
 
