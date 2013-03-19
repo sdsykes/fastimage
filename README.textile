@@ -14,12 +14,20 @@ FastImage does this minimal fetch for image types GIF, JPEG, PNG and BMP.  And i
 
 You only need supply the uri, and FastImage will do the rest.
 
+h2. Features
+
 Fastimage can also read local (and other) files, and uses the open-uri library to do so.
 
-And new in v1.2.9, FastImage will automatically read from any object that responds to :read - for 
+FastImage will automatically read from any object that responds to :read - for 
 instance an IO object if that is passed instead of a URI.
 
-New in v1.2.10 FastImage will follow up to 4 HTTP redirects to get the image.
+FastImage will follow up to 4 HTTP redirects to get the image.
+
+FastImage will obey the http_proxy setting in your environment to route requests via a proxy.
+
+You can add a timeout to the request which will limit the request time by passing :timeout => number_of_seconds.
+
+FastImage normally replies will nil if it encounters an error, but you can pass :raise_on_failure => true to get an exception.
 
 h2. Examples
 
@@ -33,6 +41,10 @@ FastImage.type("http://stephensykes.com/images/pngimage")
 => :png
 FastImage.type("/some/local/file.gif")
 => :gif
+FastImage.size("http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg", :raise_on_failure=>true, :timeout=>0.1)
+=> FastImage::ImageFetchFailure: FastImage::ImageFetchFailure
+FastImage.size("http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg", :raise_on_failure=>true, :timeout=>2.0)
+=> [9545, 6623]
 </code>
 </pre>
 
