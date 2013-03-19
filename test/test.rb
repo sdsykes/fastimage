@@ -191,4 +191,16 @@ class FastImageTest < Test::Unit::TestCase
     assert type_time - time < LargeImageFetchLimit
     assert_equal LargeImageInfo[0], type
   end
+  
+  # This test doesn't actually test the proxy function, but at least
+  # it excercises the code. You could put anything in the http_proxy and it would still pass.
+  # Any ideas on how to actually test this?
+  def test_should_fetch_via_proxy
+    file = "test.gif"
+    actual_size = GoodFixtures[file][1]
+    ENV['http_proxy'] = "http://my.proxy.host:8080"
+    size = FastImage.size(TestUrl + file)
+    ENV['http_proxy'] = nil
+    assert_equal actual_size, size
+  end
 end

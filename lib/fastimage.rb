@@ -206,8 +206,24 @@ class FastImage
     end
   end
 
+  def proxy_uri
+    begin
+      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? URI.parse(ENV['http_proxy']) : nil
+    rescue URI::InvalidURIError
+      proxy = nil
+    end
+    proxy
+  end
+
   def setup_http
-    @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.port)
+    proxy = proxy_uri
+
+    if proxy
+      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.port)
+    else
+      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.port)
+    end
+    
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     @http.open_timeout = @timeout
