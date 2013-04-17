@@ -246,6 +246,7 @@ class FastImage
   #
   def parse_packet(str)
     @str = (@unused_str || "") + str
+    @str.force_encoding("ASCII-8BIT") if has_encoding?
     @strpos = 0
     begin
       result = send("parse_#{@property}")
@@ -325,12 +326,12 @@ class FastImage
       when :started
         get_byte == 0xFF ? :sof : :started
       when :sof
-        c = get_byte
-        if (0xe0..0xef).include?(c)
+        case get_byte
+        when 0xe0..0xef
           :skipframe
-        elsif [0xC0..0xC3, 0xC5..0xC7, 0xC9..0xCB, 0xCD..0xCF].detect {|r| r.include? c}
+        when 0xC0..0xC3, 0xC5..0xC7, 0xC9..0xCB, 0xCD..0xCF
           :readsize
-        elsif c == 0xFF
+        when 0xFF
           :sof
         else
           :skipframe
