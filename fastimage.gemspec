@@ -8,23 +8,22 @@ Gem::Specification.new do |s|
   s.description = %q{FastImage finds the size or type of an image given its uri by fetching as little as needed.}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = [
-    "README",
-     "README.textile"
+    "README.textile"
   ]
   s.files = [
-    "README",
-     "README.textile",
-     "lib/fastimage.rb",
-     "test/fixtures/faulty.jpg",
-     "test/fixtures/test.bmp",
-     "test/fixtures/test.gif",
-     "test/fixtures/test.ico",
-     "test/fixtures/test.jpg",
-     "test/fixtures/test.png",
-     "test/fixtures/test2.jpg",
-     "test/fixtures/test3.jpg",
-     "test/fixtures/folder with spaces/test.bmp",
-     "test/test.rb"
+    "MIT-LICENSE",
+    "README.textile",
+    "lib/fastimage.rb",
+    "test/fixtures/faulty.jpg",
+    "test/fixtures/test.bmp",
+    "test/fixtures/test.gif",
+    "test/fixtures/test.ico",
+    "test/fixtures/test.jpg",
+    "test/fixtures/test.png",
+    "test/fixtures/test2.jpg",
+    "test/fixtures/test3.jpg",
+    "test/fixtures/folder with spaces/test.bmp",
+    "test/test.rb"
   ]
   s.homepage = %q{http://github.com/sdsykes/fastimage}
   s.rdoc_options = ["--charset=UTF-8"]
