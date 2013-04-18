@@ -64,7 +64,7 @@ Then you're off - just use @FastImage.size()@ and @FastImage.type()@ in your cod
 
 h2. Documentation
 
-"http://rdoc.info/projects/sdsykes/fastimage":http://rdoc.info/projects/sdsykes/fastimage
+"http://sdsykes.github.io/fastimage/rdoc/FastImage.html":http://sdsykes.github.io/fastimage/rdoc/FastImage.html
 
 h2. Tests
 
