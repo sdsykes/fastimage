@@ -93,6 +93,12 @@
   
     <li><a href="./FastImage.html">FastImage</a>
   
+    <li><a href="./Fiber.html">Fiber</a>
+  
+    <li><a href="./FiberError.html">FiberError</a>
+  
+    <li><a href="./RootFiber.html">RootFiber</a>
+  
   </ul>
 </nav>
 
@@ -139,6 +145,19 @@
     <section id="attribute-method-details" class="method-section section">
       <h3 class="section-header">Attributes</h3>
 
+      
+      <div id="attribute-i-bytes_read" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">bytes_read</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
       
       <div id="attribute-i-size" class="method-detail">
         <div class="method-heading attribute-method-heading">
@@ -194,7 +213,7 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 146</span>
+            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 154</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>={})
   <span class="ruby-ivar">@property</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:type_only</span>] <span class="ruby-operator">?</span> <span class="ruby-value">:type</span> <span class="ruby-operator">:</span> <span class="ruby-value">:size</span>
   <span class="ruby-ivar">@timeout</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:timeout</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">DefaultTimeout</span>
@@ -215,7 +234,9 @@
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
+  
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">SizeNotFound</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@property</span> <span class="ruby-operator">==</span> <span class="ruby-value">:size</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@size</span>
+
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Timeout</span><span class="ruby-operator">::</span><span class="ruby-constant">Error</span>, <span class="ruby-constant">SocketError</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ECONNREFUSED</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">EHOSTUNREACH</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ECONNRESET</span>, 
   <span class="ruby-constant">ImageFetchFailure</span>, <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTPBadResponse</span>, <span class="ruby-constant">EOFError</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ENOENT</span>
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ImageFetchFailure</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
@@ -223,6 +244,15 @@
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ImageFetchFailure</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">UnknownImageType</span>
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">UnknownImageType</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
+<span class="ruby-keyword">rescue</span> <span class="ruby-constant">CannotParseImage</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@property</span> <span class="ruby-operator">==</span> <span class="ruby-value">:size</span>
+      <span class="ruby-identifier">raise</span> <span class="ruby-constant">SizeNotFound</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">raise</span> <span class="ruby-constant">ImageFetchFailure</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
 <span class="ruby-keyword">end</span></pre>
           </div><!-- new-source -->
           
@@ -259,8 +289,8 @@ number_of_seconds in the options.</p>
 size the image for any reason, then pass :raise_on_failure =&gt; true in
 the options.</p>
 
-<p><a href="FastImage.html">FastImage</a> knows about GIF, JPEG, BMP and PNG
-files.</p>
+<p><a href="FastImage.html">FastImage</a> knows about GIF, JPEG, BMP, TIFF and
+PNG files.</p>
 
 <h3 id="method-c-size-label-Example">Example<span><a href="#method-c-size-label-Example">&para;</a> <a href="#documentation">&uarr;</a></span></h3>
 
@@ -303,7 +333,7 @@ found for any reason.</p>
 
           
           <div class="method-source-code" id="size-source">
-            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 104</span>
+            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 110</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">size</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>={})
   <span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>).<span class="ruby-identifier">size</span>
 <span class="ruby-keyword">end</span></pre>
@@ -360,6 +390,8 @@ find the type of the image for any reason, then pass :raise_on_failure
 =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>
 <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&quot;/some/local/file.gif&quot;</span>, <span class="ruby-string">&quot;r&quot;</span>) {<span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span> <span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-identifier">io</span>)}
 =<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">gif</span>
+<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;test/fixtures/test.tiff&quot;</span>)
+=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">tiff</span>
 </pre>
 
 <h3 id="method-c-type-label-Supported+options">Supported options<span><a href="#method-c-type-label-Supported+options">&para;</a> <a href="#documentation">&uarr;</a></span></h3>
@@ -377,7 +409,7 @@ found for any reason.</p>
 
           
           <div class="method-source-code" id="type-source">
-            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 142</span>
+            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 150</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">type</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>={})
   <span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-value">:type_only=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">true</span>)).<span class="ruby-identifier">type</span>
 <span class="ruby-keyword">end</span></pre>
