@@ -8,7 +8,7 @@
 # No external libraries such as ImageMagick are used here, this is a very lightweight solution to 
 # finding image information.
 #
-# FastImage knows about GIF, JPEG, BMP and PNG files.
+# FastImage knows about GIF, JPEG, BMP, TIFF and PNG files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
 # In this case FastImage uses the open-uri library to read the file in chunks of 256 bytes until
@@ -37,13 +37,17 @@
 # * http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/
 # * http://pennysmalls.wordpress.com/2008/08/19/find-jpeg-dimensions-fast-in-pure-ruby-no-ima/
 # * http://imagesize.rubyforge.org/
+# * https://github.com/remvee/exifr
 #
 
 require 'net/https'
 require 'open-uri'
+require 'fastimage/fbr.rb'
 
 class FastImage
   attr_reader :size, :type
+  
+  attr_reader :bytes_read
 
   class FastImageException < StandardError # :nodoc:
   end
@@ -54,6 +58,8 @@ class FastImage
   class ImageFetchFailure < FastImageException # :nodoc:
   end
   class SizeNotFound < FastImageException # :nodoc:
+  end
+  class CannotParseImage < FastImageException # :nodoc:
   end
 
   DefaultTimeout = 2
@@ -69,7 +75,7 @@ class FastImage
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
   # :raise_on_failure => true in the options.
   #
-  # FastImage knows about GIF, JPEG, BMP and PNG files.
+  # FastImage knows about GIF, JPEG, BMP, TIFF and PNG files.
   #
   # === Example
   #
@@ -133,6 +139,8 @@ class FastImage
   #   => nil
   #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
   #   => :gif
+  #   FastImage.type("test/fixtures/test.tiff")
+  #   => :tiff
   #
   # === Supported options
   # [:timeout]
@@ -164,7 +172,9 @@ class FastImage
         end
       end
     end
+    
     raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
+  
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, 
     ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
     raise ImageFetchFailure if options[:raise_on_failure]
@@ -172,6 +182,15 @@ class FastImage
     raise ImageFetchFailure if options[:raise_on_failure]
   rescue UnknownImageType
     raise UnknownImageType if options[:raise_on_failure]
+  rescue CannotParseImage
+    if options[:raise_on_failure]
+      if @property == :size
+        raise SizeNotFound
+      else
+        raise ImageFetchFailure
+      end
+    end
+    
   end
 
   private
@@ -198,9 +217,13 @@ class FastImage
 
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
 
-      res.read_body do |str|
-        break if parse_packet(str)
+      @read_fiber = Fiber.new do
+        res.read_body do |str|
+          Fiber.yield str
+        end
       end
+      
+      parse_packets
       
       break  # needed to actively quit out of the fetch
     end
@@ -231,9 +254,13 @@ class FastImage
   end
 
   def fetch_using_read(readable)
-    while str = readable.read(LocalFileChunkSize)
-      break if parse_packet(str)
+    @read_fiber = Fiber.new do
+      while str = readable.read(LocalFileChunkSize)
+        Fiber.yield str
+      end
     end
+    
+    parse_packets
   end
 
   def fetch_using_open_uri
@@ -242,20 +269,21 @@ class FastImage
     end
   end
 
-  # returns true once result is achieved
-  #
-  def parse_packet(str)
-    @str = (@unused_str || "") + str
+  def parse_packets
+    @str = ""
     @str.force_encoding("ASCII-8BIT") if has_encoding?
     @strpos = 0
+    @bytes_read = 0
+    
     begin
       result = send("parse_#{@property}")
       if result 
         instance_variable_set("@#{@property}", result)
-        true
+      else
+        raise CannotParseImage
       end
-    rescue MoreCharsNeeded
-      false
+    rescue FiberError
+      raise CannotParseImage
     end
   end
 
@@ -274,15 +302,25 @@ class FastImage
   end
 
   def get_chars(n)
-    if @strpos + n - 1 >= @str.size
-      @unused_str = @str[@strpos..-1]
-      raise MoreCharsNeeded
-    else
-      result = @str[@strpos..(@strpos + n - 1)]
-      @strpos += n
+    while @strpos + n - 1 >= @str.size
+      unused_str = @str[@strpos..-1]
+      new_string = @read_fiber.resume
+      raise CannotParseImage if !new_string
+
       # we are dealing with bytes here, so force the encoding
-      has_encoding? ? result.force_encoding("ASCII-8BIT") : result
+      if has_encoding?
+        new_string.force_encoding("ASCII-8BIT")
+      end
+
+      @bytes_read += new_string.size
+      
+      @str = unused_str + new_string
+      @strpos = 0
     end
+    
+    result = @str[@strpos..(@strpos + n - 1)]
+    @strpos += n
+    result
   end
 
   def get_byte
@@ -304,6 +342,10 @@ class FastImage
       :jpeg
     when 0x89.chr + "P"
       :png
+    when "II"
+      :tiff
+    when "MM"
+      :tiff
     else
       raise UnknownImageType
     end
@@ -352,5 +394,38 @@ class FastImage
   def parse_size_for_bmp
     d = get_chars(29)[14..28]
     d.unpack("C")[0] == 40 ? d[4..-1].unpack('LL') : d[4..8].unpack('SS')
+  end
+
+  def parse_size_for_tiff
+    byte_order = get_chars(2)
+    case byte_order
+      when 'II'; short, long = 'v', 'V'
+      when 'MM'; short, long = 'n', 'N'
+    end
+    get_chars(2) # 42
+
+    offset = get_chars(4).unpack(long)[0]
+    get_chars(offset - 8)
+
+    width = height = nil
+
+    tag_count = get_chars(2).unpack(short)[0]
+    tag_count.downto(1) do
+      type = get_chars(2).unpack(short)[0]
+      get_chars(6)
+      data = get_chars(2).unpack(short)[0]
+      case type
+      when 0x0100 # image width
+        width = data
+      when 0x0101 # image height
+        height = data
+      end
+      if width && height
+        return [width, height]
+      end
+      get_chars(2)
+    end
+    
+    raise CannotParseImage
   end
 end

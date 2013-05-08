@@ -3,9 +3,9 @@ require 'rubygems'
 require 'test/unit'
 
 PathHere = File.dirname(__FILE__)
+$LOAD_PATH.unshift File.join(PathHere, "..", "lib")
 
-require File.join(PathHere, "..", "lib", 'fastimage')
-
+require 'fastimage'
 require 'fakeweb'
 
 FixturePath = File.join(PathHere, "fixtures")
@@ -16,7 +16,9 @@ GoodFixtures = {
   "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]],
   "test2.jpg"=>[:jpeg, [250, 188]],
-  "test3.jpg"=>[:jpeg, [630,367]]
+  "test3.jpg"=>[:jpeg, [630, 367]],
+  "test.tiff"=>[:tiff, [85, 67]],
+  "test2.tiff"=>[:tiff, [333, 225]]
   }
 
 BadFixtures = [
