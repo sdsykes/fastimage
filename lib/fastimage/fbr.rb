@@ -4,9 +4,10 @@
 unless defined? Fiber
   require 'thread'
 
-  class FiberError < StandardError; end
+  class FiberError < StandardError; # :nodoc:
+  end
 
-  class Fiber
+  class Fiber # :nodoc:
     def initialize
       raise ArgumentError, 'new Fiber requires a block' unless block_given?
 
@@ -53,7 +54,7 @@ unless defined? Fiber
     end
   end
 
-  class RootFiber < Fiber
+  class RootFiber < Fiber # :nodoc:
     def initialize
       # XXX: what is a root fiber anyway?
     end
