@@ -124,6 +124,15 @@ class FastImageTest < Test::Unit::TestCase
       end
     end
   end
+  
+  def test_should_report_size_correctly_on_io_object_twice
+    GoodFixtures.each do |fn, info|
+      File.open(File.join(FixturePath, fn), "r") do |io|
+        assert_equal info[1], FastImage.size(io)
+        assert_equal info[1], FastImage.size(io)
+      end
+    end
+  end
 
   def test_should_report_size_correctly_for_local_files_with_path_that_has_spaces
     Dir.chdir(PathHere) do

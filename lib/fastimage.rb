@@ -173,6 +173,8 @@ class FastImage
       end
     end
     
+    uri.rewind if uri.respond_to?(:rewind)
+    
     raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
   
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, 
