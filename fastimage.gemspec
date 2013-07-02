@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
     "test/fixtures/test3.jpg",
     "test/fixtures/test.tiff",
     "test/fixtures/test2.tiff",
+    "test/fixtures/exif_orientation.jpg",
     "test/fixtures/folder with spaces/test.bmp",
     "test/test.rb"
   ]
@@ -36,4 +37,5 @@ Gem::Specification.new do |s|
   s.test_files = [
     "test/test.rb"
   ]
+  s.licenses = ['MIT']
 end
