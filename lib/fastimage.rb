@@ -274,6 +274,7 @@ class FastImage
     @str.force_encoding("ASCII-8BIT") if has_encoding?
     @strpos = 0
     @bytes_read = 0
+    @bytes_delivered = 0
     
     begin
       result = send("parse_#{@property}")
@@ -290,6 +291,7 @@ class FastImage
   def parse_size
     @type = parse_type unless @type
     @strpos = 0
+    @bytes_delivered = 0
     send("parse_size_for_#{@type}")
   end
 
@@ -320,6 +322,7 @@ class FastImage
     
     result = @str[@strpos..(@strpos + n - 1)]
     @strpos += n
+    @bytes_delivered += n
     result
   end
 
@@ -369,6 +372,15 @@ class FastImage
         get_byte == 0xFF ? :sof : :started
       when :sof
         case get_byte
+        when 0xe1 # APP1
+          skip_chars = read_int(get_chars(2)) - 2
+          skip_from = @bytes_delivered
+          if get_chars(4) == "Exif"
+            get_chars(2)
+            parse_exif
+          end
+          get_chars(skip_chars - (@bytes_delivered - skip_from))
+          :started
         when 0xe0..0xef
           :skipframe
         when 0xC0..0xC3, 0xC5..0xC7, 0xC9..0xCB, 0xCD..0xCF
@@ -379,14 +391,16 @@ class FastImage
           :skipframe
         end
       when :skipframe
-        @skip_chars = read_int(get_chars(2)) - 2
-        :do_skip
-      when :do_skip
-        get_chars(@skip_chars)
+        skip_chars = read_int(get_chars(2)) - 2
+        get_chars(skip_chars)
         :started
       when :readsize
         s = get_chars(7)
-        return [read_int(s[5..6]), read_int(s[3..4])]
+        if @exif_orientation && @exif_orientation >= 5
+          return [read_int(s[3..4]), read_int(s[5..6])]
+        else
+          return [read_int(s[5..6]), read_int(s[3..4])]
+        end          
       end
     end
   end
@@ -396,36 +410,67 @@ class FastImage
     d.unpack("C")[0] == 40 ? d[4..-1].unpack('LL') : d[4..8].unpack('SS')
   end
 
-  def parse_size_for_tiff
+  def get_exif_byte_order
     byte_order = get_chars(2)
     case byte_order
-      when 'II'; short, long = 'v', 'V'
-      when 'MM'; short, long = 'n', 'N'
+    when 'II'
+      @short, @long = 'v', 'V'
+    when 'MM'
+      @short, @long = 'n', 'N'
+    else
+      raise CannotParseImage
     end
-    get_chars(2) # 42
+  end
 
-    offset = get_chars(4).unpack(long)[0]
-    get_chars(offset - 8)
-
-    width = height = nil
-
-    tag_count = get_chars(2).unpack(short)[0]
+  def parse_exif_ifd
+    tag_count = get_chars(2).unpack(@short)[0]
     tag_count.downto(1) do
-      type = get_chars(2).unpack(short)[0]
+      type = get_chars(2).unpack(@short)[0]
       get_chars(6)
-      data = get_chars(2).unpack(short)[0]
+      data = get_chars(2).unpack(@short)[0]
       case type
       when 0x0100 # image width
-        width = data
+        @exif_width = data
       when 0x0101 # image height
-        height = data
+        @exif_height = data
+      when 0x0112 # orientation
+        @exif_orientation = data
       end
-      if width && height
-        return [width, height]
+      if @type == :tiff && @exif_width && @exif_height && @exif_orientation
+        return # no need to parse more
       end
       get_chars(2)
     end
+
+    next_offset = get_chars(4).unpack(@long)[0]
+    if next_offset > 0
+      get_chars(next_offset - (@bytes_delivered - @exif_start_byte))
+      parse_exif_ifd
+    end
+  end
+
+  def parse_exif
+    @exif_start_byte = @bytes_delivered
     
+    get_exif_byte_order
+    
+    get_chars(2) # 42
+
+    offset = get_chars(4).unpack(@long)[0]
+    get_chars(offset - 8)
+
+    parse_exif_ifd
+  end
+
+  def parse_size_for_tiff
+    parse_exif
+
+    if @exif_orientation && @exif_orientation >= 5
+      return [@exif_height, @exif_width]
+    else
+      return [@exif_width, @exif_height]
+    end
+
     raise CannotParseImage
   end
 end

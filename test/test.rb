@@ -18,7 +18,8 @@ GoodFixtures = {
   "test2.jpg"=>[:jpeg, [250, 188]],
   "test3.jpg"=>[:jpeg, [630, 367]],
   "test.tiff"=>[:tiff, [85, 67]],
-  "test2.tiff"=>[:tiff, [333, 225]]
+  "test2.tiff"=>[:tiff, [333, 225]],
+  "exif_orientation.jpg"=>[:jpeg, [2448, 3264]]
   }
 
 BadFixtures = [
