@@ -445,8 +445,9 @@ class FastImage
     end
 
     next_offset = get_chars(4).unpack(@long)[0]
-    if next_offset > 0
-      get_chars(next_offset - (@bytes_delivered - @exif_start_byte))
+    relative_offset = next_offset - (@bytes_delivered - @exif_start_byte)
+    if relative_offset >= 0
+      get_chars(relative_offset)
       parse_exif_ifd
     end
   end
