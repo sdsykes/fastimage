@@ -186,6 +186,12 @@ class FastImageTest < Test::Unit::TestCase
     end
   end
   
+  def test_should_handle_permanent_redirect_with_relative_url
+    url = "http://example.nowhere/foo.jpeg"
+    register_redirect(url, "/" + GoodFixtures.keys.first)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
+  end
+
   def register_redirect(from, to)
     resp = Net::HTTPMovedPermanently.new(1.0, 302, "Moved")
     resp['Location'] = to

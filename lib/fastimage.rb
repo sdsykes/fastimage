@@ -209,7 +209,13 @@ class FastImage
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          @parsed_uri = URI.parse(res['Location'])
+          newly_parsed_uri = URI.parse(res['Location'])
+          # The new location may be relative - check for that
+          if newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
+            @parsed_uri.path = res['Location']
+          else
+            @parsed_uri = newly_parsed_uri
+          end
         rescue URI::InvalidURIError
         else
           fetch_using_http_from_parsed_uri
