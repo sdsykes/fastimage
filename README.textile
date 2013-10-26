@@ -16,7 +16,7 @@ You only need supply the uri, and FastImage will do the rest.
 
 h2. Features
 
-Fastimage can also read local (and other) files, and uses the open-uri library to do so.
+Fastimage can also read local (and other) files, and uses the Addressable library to do so.
 
 FastImage will automatically read from any object that responds to :read - for
 instance an IO object if that is passed instead of a URI.
