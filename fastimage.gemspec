@@ -35,8 +35,8 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.6}
   s.summary = %q{FastImage - Image info fast}
-  s.add_runtime_dependency 'addressable', '~> 2.3.5'
-  s.add_development_dependency 'fakeweb', '~> 1.3.0'
+  s.add_runtime_dependency 'addressable', '~> 2.3', '>= 2.3.5'
+  s.add_development_dependency 'fakeweb', '~> 1.3'
   s.test_files = [
     "test/test.rb"
   ]
