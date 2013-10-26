@@ -11,7 +11,7 @@
 # FastImage knows about GIF, JPEG, BMP, TIFF and PNG files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
-# In this case FastImage uses the open-uri library to read the file in chunks of 256 bytes until
+# In this case FastImage uses the Addressable library to read the file in chunks of 256 bytes until
 # it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
 # attached disk rather than truly local.
 #
@@ -41,7 +41,7 @@
 #
 
 require 'net/https'
-require 'open-uri'
+require 'addressable/uri'
 require 'fastimage/fbr.rb'
 
 class FastImage
@@ -161,8 +161,8 @@ class FastImage
       fetch_using_read(uri)
     else
       begin
-        @parsed_uri = URI.parse(uri)
-      rescue URI::InvalidURIError
+        @parsed_uri = Addressable::URI.parse(uri)
+      rescue Addressable::URI::InvalidURIError
         fetch_using_open_uri
       else
         if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
@@ -209,14 +209,14 @@ class FastImage
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          newly_parsed_uri = URI.parse(res['Location'])
+          newly_parsed_uri = Addressable::URI.parse(res['Location'])
           # The new location may be relative - check for that
           if newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
             @parsed_uri.path = res['Location']
           else
             @parsed_uri = newly_parsed_uri
           end
-        rescue URI::InvalidURIError
+        rescue Addressable::URI::InvalidURIError
         else
           fetch_using_http_from_parsed_uri
           break
@@ -239,8 +239,8 @@ class FastImage
 
   def proxy_uri
     begin
-      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? URI.parse(ENV['http_proxy']) : nil
-    rescue URI::InvalidURIError
+      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
+    rescue Addressable::URI::InvalidURIError
       proxy = nil
     end
     proxy
