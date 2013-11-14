@@ -36,6 +36,9 @@ LargeImage = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_
 LargeImageInfo = [:jpeg, [9545, 6623]]
 LargeImageFetchLimit = 2  # seconds
 
+HTTPSImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
+HTTPSImageInfo = [:jpeg, [9545, 6623]]
+
 GoodFixtures.each do |fn, info|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
 end
@@ -221,5 +224,10 @@ class FastImageTest < Test::Unit::TestCase
     size = FastImage.size(TestUrl + file)
     ENV['http_proxy'] = nil
     assert_equal actual_size, size
+  end
+  
+  def test_should_handle_https_image
+    size = FastImage.size(HTTPSImage)
+    assert_equal HTTPSImageInfo[1], size    
   end
 end

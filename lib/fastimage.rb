@@ -230,7 +230,7 @@ class FastImage
           Fiber.yield str
         end
       end
-      
+
       parse_packets
       
       break  # needed to actively quit out of the fetch
@@ -250,11 +250,10 @@ class FastImage
     proxy = proxy_uri
 
     if proxy
-      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.port)
+      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.inferred_port)
     else
-      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.port)
+      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.inferred_port)
     end
-    
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     @http.open_timeout = @timeout
@@ -283,7 +282,7 @@ class FastImage
     @strpos = 0
     @bytes_read = 0
     @bytes_delivered = 0
-    
+
     begin
       result = send("parse_#{@property}")
       if result 
