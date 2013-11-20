@@ -44,6 +44,15 @@ BadFixtures.each do |fn|
 end
 
 class FastImageTest < Test::Unit::TestCase
+
+  def test_should_default_to_port_443_for_https
+    fast_image = FastImage.new("https://example.nowhere/test.bmp")
+    assert_equal 443, fast_image.instance_variable_get(:@http).port
+
+    fast_image = FastImage.new("https://example.nowhere:200/test.bmp")
+    assert_equal 80, fast_image.instance_variable_get(:@http).port
+  end
+
   def test_should_report_type_correctly
     GoodFixtures.each do |fn, info|
       assert_equal info[0], FastImage.type(TestUrl + fn)
