@@ -50,7 +50,7 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal 443, fast_image.instance_variable_get(:@http).port
 
     fast_image = FastImage.new("https://example.nowhere:200/test.bmp")
-    assert_equal 80, fast_image.instance_variable_get(:@http).port
+    assert_equal 200, fast_image.instance_variable_get(:@http).port
   end
 
   def test_should_report_type_correctly
