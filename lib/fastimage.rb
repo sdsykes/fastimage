@@ -413,8 +413,17 @@ class FastImage
   end
 
   def parse_size_for_bmp
-    d = get_chars(29)[14..28]
-    d.unpack("C")[0] == 40 ? d[4..-1].unpack('LL') : d[4..8].unpack('SS')
+    d = get_chars(32)[14..28]
+    header = d.unpack("C")[0]
+    
+    result = if header == 40
+               d[4..-1].unpack('l<l<')
+             else
+               d[4..8].unpack('SS')
+             end
+
+    # ImageHeight is expressed in pixels. The absolute value is necessary because ImageHeight can be negative
+    [result.first, result.last.abs]
   end
 
   def get_exif_byte_order
