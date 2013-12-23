@@ -42,7 +42,7 @@
 
 require 'net/https'
 require 'addressable/uri'
-require 'fastimage/fbr.rb'
+#require 'fastimage/fbr.rb'
 
 class FastImage
   attr_reader :size, :type
@@ -225,12 +225,13 @@ class FastImage
 
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
 
-      @read_fiber = Fiber.new do
-        res.read_body do |str|
-          Fiber.yield str
-        end
-      end
-
+      # Remove fiber, as it has memory leak
+      #@read_fiber = Fiber.new do
+      #  res.read_body do |str|
+      #    Fiber.yield str
+      #  end
+      #end
+      @res_body = res.read_body
       parse_packets
       
       break  # needed to actively quit out of the fetch
@@ -261,12 +262,12 @@ class FastImage
   end
 
   def fetch_using_read(readable)
-    @read_fiber = Fiber.new do
-      while str = readable.read(LocalFileChunkSize)
-        Fiber.yield str
-      end
-    end
-    
+    #@read_fiber = Fiber.new do
+    #  while str = readable.read(LocalFileChunkSize)
+    #    Fiber.yield str
+    #  end
+    #end
+    @res_body = readable.read(LocalFileChunkSize)
     parse_packets
   end
 
@@ -313,7 +314,8 @@ class FastImage
   def get_chars(n)
     while @strpos + n - 1 >= @str.size
       unused_str = @str[@strpos..-1]
-      new_string = @read_fiber.resume
+      #new_string = @read_fiber.resume
+      new_string = @res_body
       raise CannotParseImage if !new_string
 
       # we are dealing with bytes here, so force the encoding
