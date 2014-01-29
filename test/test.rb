@@ -21,6 +21,7 @@ GoodFixtures = {
   "test4.jpg"=>[:jpeg, [1485, 1299]],
   "test.tiff"=>[:tiff, [85, 67]],
   "test2.tiff"=>[:tiff, [333, 225]],
+  "test.psd"=>[:psd, [17, 32]],
   "exif_orientation.jpg"=>[:jpeg, [2448, 3264]],
   "infinite.jpg"=>[:jpeg, [160,240]]
   }

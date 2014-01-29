@@ -356,10 +356,10 @@ class FastImage
       :jpeg
     when 0x89.chr + "P"
       :png
-    when "II"
+    when "II", "MM"
       :tiff
-    when "MM"
-      :tiff
+    when '8B'
+      :psd
     else
       raise UnknownImageType
     end
@@ -504,5 +504,9 @@ class FastImage
     else
       [exif.width, exif.height]
     end
+  end
+
+  def parse_size_for_psd
+    @stream.read(26).unpack("x14NN").reverse
   end
 end
