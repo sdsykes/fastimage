@@ -296,7 +296,18 @@ class FastImage
     send("parse_size_for_#{@type}")
   end
 
+  module StreamUtil
+    def read_byte
+      read(1).ord
+    end
+
+    def read_int
+      read(2).unpack('n')[0]
+    end
+  end
+
   class FiberStream
+    include StreamUtil
     attr_reader :bytes_delivered
 
     def initialize(read_fiber)
@@ -328,14 +339,6 @@ class FastImage
       @bytes_delivered += n
       result
     end
-  end
-
-  def get_byte
-    @stream.read(1).unpack("C")[0]
-  end
-
-  def get_int
-    @stream.read(2).unpack('n')[0]
   end
 
   def parse_type
@@ -372,11 +375,11 @@ class FastImage
         @stream.read(2)
         :started
       when :started
-        get_byte == 0xFF ? :sof : :started
+        @stream.read_byte == 0xFF ? :sof : :started
       when :sof
-        case get_byte
+        case @stream.read_byte
         when 0xe1 # APP1
-          skip_chars = get_int - 2
+          skip_chars = @stream.read_int - 2
           skip_from = @stream.bytes_delivered
           if @stream.read(4) == "Exif"
             @stream.read(2)
@@ -394,13 +397,13 @@ class FastImage
           :skipframe
         end
       when :skipframe
-        skip_chars = get_int - 2
+        skip_chars = @stream.read_int - 2
         @stream.read(skip_chars)
         :started
       when :readsize
         s = @stream.read(3)
-        height = get_int
-        width = get_int
+        height = @stream.read_int
+        width = @stream.read_int
         width, height = height, width if @exif_orientation && @exif_orientation >= 5
         return [width, height]
       end
