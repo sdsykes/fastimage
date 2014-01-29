@@ -308,11 +308,11 @@ class FastImage
 
   class FiberStream
     include StreamUtil
-    attr_reader :bytes_delivered
+    attr_reader :pos
 
     def initialize(read_fiber)
       @read_fiber = read_fiber
-      @bytes_delivered = 0
+      @pos = 0
       @strpos = 0
       @str = ''
     end
@@ -336,7 +336,7 @@ class FastImage
     def read(n)
       result = peek(n)
       @strpos += n
-      @bytes_delivered += n
+      @pos += n
       result
     end
   end
@@ -380,12 +380,12 @@ class FastImage
         case @stream.read_byte
         when 0xe1 # APP1
           skip_chars = @stream.read_int - 2
-          skip_from = @stream.bytes_delivered
+          skip_from = @stream.pos
           if @stream.read(4) == "Exif"
             @stream.read(2)
             @exif = Exif.new(@stream)
           end
-          @stream.read(skip_chars - (@stream.bytes_delivered - skip_from))
+          @stream.read(skip_chars - (@stream.pos - skip_from))
           :started
         when 0xe0..0xef
           :skipframe
@@ -470,7 +470,7 @@ class FastImage
       end
 
       next_offset = @stream.read(4).unpack(@long)[0]
-      relative_offset = next_offset - (@stream.bytes_delivered - @start_byte)
+      relative_offset = next_offset - (@stream.pos - @start_byte)
       if relative_offset >= 0
         @stream.read(relative_offset)
         parse_exif_ifd
@@ -478,7 +478,7 @@ class FastImage
     end
 
     def parse_exif
-      @start_byte = @stream.bytes_delivered
+      @start_byte = @stream.pos
 
       get_exif_byte_order
 
