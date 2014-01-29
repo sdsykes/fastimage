@@ -76,7 +76,7 @@ class FastImage
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
   # :raise_on_failure => true in the options.
   #
-  # FastImage knows about GIF, JPEG, BMP, TIFF and PNG files.
+  # FastImage knows about GIF, JPEG, BMP, TIFF, PNG and PSD files.
   #
   # === Example
   #
