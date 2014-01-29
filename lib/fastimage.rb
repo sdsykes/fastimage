@@ -279,7 +279,6 @@ class FastImage
   def parse_packets
     @str = ""
     @strpos = 0
-    @bytes_read = 0
     @bytes_delivered = 0
 
     begin
@@ -307,8 +306,6 @@ class FastImage
 
       # we are dealing with bytes here, so force the encoding
       new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
-
-      @bytes_read += new_string.size
 
       @str = unused_str + new_string
       @strpos = 0
