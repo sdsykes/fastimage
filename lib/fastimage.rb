@@ -43,6 +43,7 @@
 require 'net/https'
 require 'addressable/uri'
 require 'fastimage/fbr.rb'
+require 'delegate'
 
 class FastImage
   attr_reader :size, :type
@@ -341,6 +342,10 @@ class FastImage
     end
   end
 
+  class IOStream < SimpleDelegator
+    include StreamUtil
+  end
+
   def parse_type
     case @stream.peek(2)
     when "BM"
@@ -380,12 +385,12 @@ class FastImage
         case @stream.read_byte
         when 0xe1 # APP1
           skip_chars = @stream.read_int - 2
-          skip_from = @stream.pos
-          if @stream.read(4) == "Exif"
-            @stream.read(2)
-            @exif = Exif.new(@stream)
+          data = @stream.read(skip_chars)
+          io = StringIO.new(data)
+          if io.read(4) == "Exif"
+            io.read(2)
+            @exif = Exif.new(IOStream.new(io)) rescue nil
           end
-          @stream.read(skip_chars - (@stream.pos - skip_from))
           :started
         when 0xe0..0xef
           :skipframe
