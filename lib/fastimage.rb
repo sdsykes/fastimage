@@ -469,11 +469,9 @@ class FastImage
     parse_exif
 
     if @exif_orientation && @exif_orientation >= 5
-      return [@exif_height, @exif_width]
+      [@exif_height, @exif_width]
     else
-      return [@exif_width, @exif_height]
+      [@exif_width, @exif_height]
     end
-
-    raise CannotParseImage
   end
 end
