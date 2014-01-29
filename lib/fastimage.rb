@@ -5,7 +5,7 @@
 # It does this by using a feature of Net::HTTP that yields strings from the resource being fetched
 # as soon as the packets arrive.
 #
-# No external libraries such as ImageMagick are used here, this is a very lightweight solution to 
+# No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
 # FastImage knows about GIF, JPEG, BMP, TIFF and PNG files.
@@ -15,7 +15,7 @@
 # it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
 # attached disk rather than truly local.
 #
-# New in v1.2.9, FastImage will automatically read from any object that responds to :read - for 
+# New in v1.2.9, FastImage will automatically read from any object that responds to :read - for
 # instance an IO object if that is passed instead of a URI.
 #
 # New in v1.2.10 FastImage will follow up to 4 HTTP redirects to get the image.
@@ -46,7 +46,7 @@ require 'fastimage/fbr.rb'
 
 class FastImage
   attr_reader :size, :type
-  
+
   attr_reader :bytes_read
 
   class FastImageException < StandardError # :nodoc:
@@ -63,7 +63,7 @@ class FastImage
   end
 
   DefaultTimeout = 2
-  
+
   LocalFileChunkSize = 256
 
   # Returns an array containing the width and height of the image.
@@ -172,12 +172,12 @@ class FastImage
         end
       end
     end
-    
+
     uri.rewind if uri.respond_to?(:rewind)
-    
+
     raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
-  
-  rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, 
+
+  rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET,
     ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
     raise ImageFetchFailure if options[:raise_on_failure]
   rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
@@ -192,7 +192,7 @@ class FastImage
         raise ImageFetchFailure
       end
     end
-    
+
   end
 
   private
@@ -202,7 +202,7 @@ class FastImage
 
     fetch_using_http_from_parsed_uri
   end
-  
+
   def fetch_using_http_from_parsed_uri
     setup_http
     @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
@@ -232,7 +232,7 @@ class FastImage
       end
 
       parse_packets
-      
+
       break  # needed to actively quit out of the fetch
     end
   end
@@ -266,7 +266,7 @@ class FastImage
         Fiber.yield str
       end
     end
-    
+
     parse_packets
   end
 
@@ -285,7 +285,7 @@ class FastImage
 
     begin
       result = send("parse_#{@property}")
-      if result 
+      if result
         instance_variable_set("@#{@property}", result)
       else
         raise CannotParseImage
@@ -322,11 +322,11 @@ class FastImage
       end
 
       @bytes_read += new_string.size
-      
+
       @str = unused_str + new_string
       @strpos = 0
     end
-    
+
     result = @str[@strpos..(@strpos + n - 1)]
     @strpos += n
     @bytes_delivered += n
@@ -407,7 +407,7 @@ class FastImage
           return [read_int(s[3..4]), read_int(s[5..6])]
         else
           return [read_int(s[5..6]), read_int(s[3..4])]
-        end          
+        end
       end
     end
   end
@@ -415,7 +415,7 @@ class FastImage
   def parse_size_for_bmp
     d = get_chars(32)[14..28]
     header = d.unpack("C")[0]
-    
+
     result = if header == 40
                d[4..-1].unpack('l<l<')
              else
@@ -468,9 +468,9 @@ class FastImage
 
   def parse_exif
     @exif_start_byte = @bytes_delivered
-    
+
     get_exif_byte_order
-    
+
     get_chars(2) # 42
 
     offset = get_chars(4).unpack(@long)[0]
