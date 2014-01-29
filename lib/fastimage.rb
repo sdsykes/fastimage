@@ -8,17 +8,17 @@
 # No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
-# FastImage knows about GIF, JPEG, BMP, TIFF and PNG files.
+# FastImage knows about GIF, JPEG, BMP, TIFF, PNG and PSD files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
 # In this case FastImage uses the Addressable library to read the file in chunks of 256 bytes until
 # it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
 # attached disk rather than truly local.
 #
-# New in v1.2.9, FastImage will automatically read from any object that responds to :read - for
+# FastImage will automatically read from any object that responds to :read - for
 # instance an IO object if that is passed instead of a URI.
 #
-# New in v1.2.10 FastImage will follow up to 4 HTTP redirects to get the image.
+# FastImage will follow up to 4 HTTP redirects to get the image.
 #
 # === Examples
 #   require 'fastimage'
@@ -142,6 +142,8 @@ class FastImage
   #   => :gif
   #   FastImage.type("test/fixtures/test.tiff")
   #   => :tiff
+  #   FastImage.type("test/fixtures/test.psd")
+  #   => :psd
   #
   # === Supported options
   # [:timeout]
