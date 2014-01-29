@@ -337,9 +337,8 @@ class FastImage
     get_chars(1).unpack("C")[0]
   end
 
-  def read_int(str)
-    size_bytes = str.unpack("CC")
-    (size_bytes[0] << 8) + size_bytes[1]
+  def get_int
+    get_chars(2).unpack('n')[0]
   end
 
   def parse_type
@@ -380,7 +379,7 @@ class FastImage
       when :sof
         case get_byte
         when 0xe1 # APP1
-          skip_chars = read_int(get_chars(2)) - 2
+          skip_chars = get_int - 2
           skip_from = @bytes_delivered
           if get_chars(4) == "Exif"
             get_chars(2)
@@ -398,16 +397,15 @@ class FastImage
           :skipframe
         end
       when :skipframe
-        skip_chars = read_int(get_chars(2)) - 2
+        skip_chars = get_int - 2
         get_chars(skip_chars)
         :started
       when :readsize
-        s = get_chars(7)
-        if @exif_orientation && @exif_orientation >= 5
-          return [read_int(s[3..4]), read_int(s[5..6])]
-        else
-          return [read_int(s[5..6]), read_int(s[3..4])]
-        end
+        s = get_chars(3)
+        height = get_int
+        width = get_int
+        width, height = height, width if @exif_orientation && @exif_orientation >= 5
+        return [width, height]
       end
     end
   end
