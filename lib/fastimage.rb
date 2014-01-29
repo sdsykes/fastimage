@@ -330,10 +330,6 @@ class FastImage
     end
   end
 
-  def peek_chars(n)
-    @stream.peek(n)
-  end
-
   def get_chars(n)
     @stream.read(n)
   end
@@ -347,7 +343,7 @@ class FastImage
   end
 
   def parse_type
-    case peek_chars(2)
+    case @stream.peek(2)
     when "BM"
       :bmp
     when "GI"
