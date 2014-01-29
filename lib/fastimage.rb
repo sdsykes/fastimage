@@ -225,13 +225,13 @@ class FastImage
 
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
 
-      @read_fiber = Fiber.new do
+      read_fiber = Fiber.new do
         res.read_body do |str|
           Fiber.yield str
         end
       end
 
-      parse_packets
+      parse_packets FiberStream.new(read_fiber)
 
       break  # needed to actively quit out of the fetch
     end
@@ -261,13 +261,13 @@ class FastImage
   end
 
   def fetch_using_read(readable)
-    @read_fiber = Fiber.new do
+    read_fiber = Fiber.new do
       while str = readable.read(LocalFileChunkSize)
         Fiber.yield str
       end
     end
 
-    parse_packets
+    parse_packets FiberStream.new(read_fiber)
   end
 
   def fetch_using_open_uri
@@ -276,10 +276,8 @@ class FastImage
     end
   end
 
-  def parse_packets
-    @str = ""
-    @strpos = 0
-    @bytes_delivered = 0
+  def parse_packets(stream)
+    @stream = stream
 
     begin
       result = send("parse_#{@property}")
@@ -298,27 +296,46 @@ class FastImage
     send("parse_size_for_#{@type}")
   end
 
-  def peek_chars(n)
-    while @strpos + n - 1 >= @str.size
-      unused_str = @str[@strpos..-1]
-      new_string = @read_fiber.resume
-      raise CannotParseImage if !new_string
+  class FiberStream
+    attr_reader :bytes_delivered
 
-      # we are dealing with bytes here, so force the encoding
-      new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
-
-      @str = unused_str + new_string
+    def initialize(read_fiber)
+      @read_fiber = read_fiber
+      @bytes_delivered = 0
       @strpos = 0
+      @str = ''
     end
 
-    result = @str[@strpos..(@strpos + n - 1)]
+    def peek(n)
+      while @strpos + n - 1 >= @str.size
+        unused_str = @str[@strpos..-1]
+        new_string = @read_fiber.resume
+        raise CannotParseImage if !new_string
+
+        # we are dealing with bytes here, so force the encoding
+        new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
+
+        @str = unused_str + new_string
+        @strpos = 0
+      end
+
+      result = @str[@strpos..(@strpos + n - 1)]
+    end
+
+    def read(n)
+      result = peek(n)
+      @strpos += n
+      @bytes_delivered += n
+      result
+    end
+  end
+
+  def peek_chars(n)
+    @stream.peek(n)
   end
 
   def get_chars(n)
-    result = peek_chars(n)
-    @strpos += n
-    @bytes_delivered += n
-    result
+    @stream.read(n)
   end
 
   def get_byte
@@ -368,12 +385,12 @@ class FastImage
         case get_byte
         when 0xe1 # APP1
           skip_chars = get_int - 2
-          skip_from = @bytes_delivered
+          skip_from = @stream.bytes_delivered
           if get_chars(4) == "Exif"
             get_chars(2)
             parse_exif
           end
-          get_chars(skip_chars - (@bytes_delivered - skip_from))
+          get_chars(skip_chars - (@stream.bytes_delivered - skip_from))
           :started
         when 0xe0..0xef
           :skipframe
@@ -445,7 +462,7 @@ class FastImage
     end
 
     next_offset = get_chars(4).unpack(@long)[0]
-    relative_offset = next_offset - (@bytes_delivered - @exif_start_byte)
+    relative_offset = next_offset - (@stream.bytes_delivered - @exif_start_byte)
     if relative_offset >= 0
       get_chars(relative_offset)
       parse_exif_ifd
@@ -453,7 +470,7 @@ class FastImage
   end
 
   def parse_exif
-    @exif_start_byte = @bytes_delivered
+    @exif_start_byte = @stream.bytes_delivered
 
     get_exif_byte_order
 
