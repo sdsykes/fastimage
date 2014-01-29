@@ -330,16 +330,12 @@ class FastImage
     end
   end
 
-  def get_chars(n)
-    @stream.read(n)
-  end
-
   def get_byte
-    get_chars(1).unpack("C")[0]
+    @stream.read(1).unpack("C")[0]
   end
 
   def get_int
-    get_chars(2).unpack('n')[0]
+    @stream.read(2).unpack('n')[0]
   end
 
   def parse_type
@@ -362,18 +358,18 @@ class FastImage
   end
 
   def parse_size_for_gif
-    get_chars(11)[6..10].unpack('SS')
+    @stream.read(11)[6..10].unpack('SS')
   end
 
   def parse_size_for_png
-    get_chars(25)[16..24].unpack('NN')
+    @stream.read(25)[16..24].unpack('NN')
   end
 
   def parse_size_for_jpeg
     loop do
       @state = case @state
       when nil
-        get_chars(2)
+        @stream.read(2)
         :started
       when :started
         get_byte == 0xFF ? :sof : :started
@@ -382,11 +378,11 @@ class FastImage
         when 0xe1 # APP1
           skip_chars = get_int - 2
           skip_from = @stream.bytes_delivered
-          if get_chars(4) == "Exif"
-            get_chars(2)
+          if @stream.read(4) == "Exif"
+            @stream.read(2)
             parse_exif
           end
-          get_chars(skip_chars - (@stream.bytes_delivered - skip_from))
+          @stream.read(skip_chars - (@stream.bytes_delivered - skip_from))
           :started
         when 0xe0..0xef
           :skipframe
@@ -399,10 +395,10 @@ class FastImage
         end
       when :skipframe
         skip_chars = get_int - 2
-        get_chars(skip_chars)
+        @stream.read(skip_chars)
         :started
       when :readsize
-        s = get_chars(3)
+        s = @stream.read(3)
         height = get_int
         width = get_int
         width, height = height, width if @exif_orientation && @exif_orientation >= 5
@@ -412,7 +408,7 @@ class FastImage
   end
 
   def parse_size_for_bmp
-    d = get_chars(32)[14..28]
+    d = @stream.read(32)[14..28]
     header = d.unpack("C")[0]
 
     result = if header == 40
@@ -426,7 +422,7 @@ class FastImage
   end
 
   def get_exif_byte_order
-    byte_order = get_chars(2)
+    byte_order = @stream.read(2)
     case byte_order
     when 'II'
       @short, @long = 'v', 'V'
@@ -438,11 +434,11 @@ class FastImage
   end
 
   def parse_exif_ifd
-    tag_count = get_chars(2).unpack(@short)[0]
+    tag_count = @stream.read(2).unpack(@short)[0]
     tag_count.downto(1) do
-      type = get_chars(2).unpack(@short)[0]
-      get_chars(6)
-      data = get_chars(2).unpack(@short)[0]
+      type = @stream.read(2).unpack(@short)[0]
+      @stream.read(6)
+      data = @stream.read(2).unpack(@short)[0]
       case type
       when 0x0100 # image width
         @exif_width = data
@@ -454,13 +450,13 @@ class FastImage
       if @type == :tiff && @exif_width && @exif_height && @exif_orientation
         return # no need to parse more
       end
-      get_chars(2)
+      @stream.read(2)
     end
 
-    next_offset = get_chars(4).unpack(@long)[0]
+    next_offset = @stream.read(4).unpack(@long)[0]
     relative_offset = next_offset - (@stream.bytes_delivered - @exif_start_byte)
     if relative_offset >= 0
-      get_chars(relative_offset)
+      @stream.read(relative_offset)
       parse_exif_ifd
     end
   end
@@ -470,10 +466,10 @@ class FastImage
 
     get_exif_byte_order
 
-    get_chars(2) # 42
+    @stream.read(2) # 42
 
-    offset = get_chars(4).unpack(@long)[0]
-    get_chars(offset - 8)
+    offset = @stream.read(4).unpack(@long)[0]
+    @stream.read(offset - 8)
 
     parse_exif_ifd
   end
