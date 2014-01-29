@@ -1,0 +1,22 @@
+PATH
+  remote: .
+  specs:
+    fastimage (1.5.5)
+      addressable (~> 2.3, >= 2.3.5)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.3.5)
+    fakeweb (1.3.0)
+    rake (10.1.0)
+    rdoc (4.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  fakeweb (~> 1.3)
+  fastimage!
+  rake
+  rdoc
