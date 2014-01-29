@@ -299,7 +299,7 @@ class FastImage
     send("parse_size_for_#{@type}")
   end
 
-  module StreamUtil
+  module StreamUtil # :nodoc:
     def read_byte
       read(1).ord
     end
@@ -309,7 +309,7 @@ class FastImage
     end
   end
 
-  class FiberStream
+  class FiberStream # :nodoc:
     include StreamUtil
     attr_reader :pos
 
@@ -344,7 +344,7 @@ class FastImage
     end
   end
 
-  class IOStream < SimpleDelegator
+  class IOStream < SimpleDelegator # :nodoc:
     include StreamUtil
   end
 
@@ -431,7 +431,7 @@ class FastImage
     [result.first, result.last.abs]
   end
 
-  class Exif
+  class Exif # :nodoc:
     attr_reader :width, :height
     def initialize(stream)
       @stream = stream
