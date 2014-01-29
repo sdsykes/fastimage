@@ -5,7 +5,7 @@
 # It does this by using a feature of Net::HTTP that yields strings from the resource being fetched
 # as soon as the packets arrive.
 #
-# No external libraries such as ImageMagick are used here, this is a very lightweight solution to 
+# No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
 # FastImage knows about GIF, JPEG, BMP, TIFF and PNG files.
@@ -15,7 +15,7 @@
 # it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
 # attached disk rather than truly local.
 #
-# New in v1.2.9, FastImage will automatically read from any object that responds to :read - for 
+# New in v1.2.9, FastImage will automatically read from any object that responds to :read - for
 # instance an IO object if that is passed instead of a URI.
 #
 # New in v1.2.10 FastImage will follow up to 4 HTTP redirects to get the image.
@@ -43,10 +43,11 @@
 require 'net/https'
 require 'addressable/uri'
 require 'fastimage/fbr.rb'
+require 'delegate'
 
 class FastImage
   attr_reader :size, :type
-  
+
   attr_reader :bytes_read
 
   class FastImageException < StandardError # :nodoc:
@@ -63,7 +64,7 @@ class FastImage
   end
 
   DefaultTimeout = 2
-  
+
   LocalFileChunkSize = 256
 
   # Returns an array containing the width and height of the image.
@@ -172,12 +173,12 @@ class FastImage
         end
       end
     end
-    
+
     uri.rewind if uri.respond_to?(:rewind)
-    
+
     raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
-  
-  rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET, 
+
+  rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET,
     ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
     raise ImageFetchFailure if options[:raise_on_failure]
   rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
@@ -192,7 +193,7 @@ class FastImage
         raise ImageFetchFailure
       end
     end
-    
+
   end
 
   private
@@ -202,7 +203,7 @@ class FastImage
 
     fetch_using_http_from_parsed_uri
   end
-  
+
   def fetch_using_http_from_parsed_uri
     setup_http
     @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
@@ -225,14 +226,14 @@ class FastImage
 
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
 
-      @read_fiber = Fiber.new do
+      read_fiber = Fiber.new do
         res.read_body do |str|
           Fiber.yield str
         end
       end
 
-      parse_packets
-      
+      parse_packets FiberStream.new(read_fiber)
+
       break  # needed to actively quit out of the fetch
     end
   end
@@ -261,13 +262,13 @@ class FastImage
   end
 
   def fetch_using_read(readable)
-    @read_fiber = Fiber.new do
+    read_fiber = Fiber.new do
       while str = readable.read(LocalFileChunkSize)
         Fiber.yield str
       end
     end
-    
-    parse_packets
+
+    parse_packets FiberStream.new(read_fiber)
   end
 
   def fetch_using_open_uri
@@ -276,16 +277,12 @@ class FastImage
     end
   end
 
-  def parse_packets
-    @str = ""
-    @str.force_encoding("ASCII-8BIT") if has_encoding?
-    @strpos = 0
-    @bytes_read = 0
-    @bytes_delivered = 0
+  def parse_packets(stream)
+    @stream = stream
 
     begin
       result = send("parse_#{@property}")
-      if result 
+      if result
         instance_variable_set("@#{@property}", result)
       else
         raise CannotParseImage
@@ -297,53 +294,60 @@ class FastImage
 
   def parse_size
     @type = parse_type unless @type
-    @strpos = 0
-    @bytes_delivered = 0
     send("parse_size_for_#{@type}")
   end
 
-  def has_encoding?
-    if @has_encoding.nil?
-      @has_encoding = String.new.respond_to? :force_encoding
-    else
-      @has_encoding
+  module StreamUtil
+    def read_byte
+      read(1).ord
+    end
+
+    def read_int
+      read(2).unpack('n')[0]
     end
   end
 
-  def get_chars(n)
-    while @strpos + n - 1 >= @str.size
-      unused_str = @str[@strpos..-1]
-      new_string = @read_fiber.resume
-      raise CannotParseImage if !new_string
+  class FiberStream
+    include StreamUtil
+    attr_reader :pos
 
-      # we are dealing with bytes here, so force the encoding
-      if has_encoding?
-        new_string.force_encoding("ASCII-8BIT")
+    def initialize(read_fiber)
+      @read_fiber = read_fiber
+      @pos = 0
+      @strpos = 0
+      @str = ''
+    end
+
+    def peek(n)
+      while @strpos + n - 1 >= @str.size
+        unused_str = @str[@strpos..-1]
+        new_string = @read_fiber.resume
+        raise CannotParseImage if !new_string
+
+        # we are dealing with bytes here, so force the encoding
+        new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
+
+        @str = unused_str + new_string
+        @strpos = 0
       end
 
-      @bytes_read += new_string.size
-      
-      @str = unused_str + new_string
-      @strpos = 0
+      result = @str[@strpos..(@strpos + n - 1)]
     end
-    
-    result = @str[@strpos..(@strpos + n - 1)]
-    @strpos += n
-    @bytes_delivered += n
-    result
+
+    def read(n)
+      result = peek(n)
+      @strpos += n
+      @pos += n
+      result
+    end
   end
 
-  def get_byte
-    get_chars(1).unpack("C")[0]
-  end
-
-  def read_int(str)
-    size_bytes = str.unpack("CC")
-    (size_bytes[0] << 8) + size_bytes[1]
+  class IOStream < SimpleDelegator
+    include StreamUtil
   end
 
   def parse_type
-    case get_chars(2)
+    case @stream.peek(2)
     when "BM"
       :bmp
     when "GI"
@@ -352,41 +356,41 @@ class FastImage
       :jpeg
     when 0x89.chr + "P"
       :png
-    when "II"
+    when "II", "MM"
       :tiff
-    when "MM"
-      :tiff
+    when '8B'
+      :psd
     else
       raise UnknownImageType
     end
   end
 
   def parse_size_for_gif
-    get_chars(11)[6..10].unpack('SS')
+    @stream.read(11)[6..10].unpack('SS')
   end
 
   def parse_size_for_png
-    get_chars(25)[16..24].unpack('NN')
+    @stream.read(25)[16..24].unpack('NN')
   end
 
   def parse_size_for_jpeg
     loop do
       @state = case @state
       when nil
-        get_chars(2)
+        @stream.read(2)
         :started
       when :started
-        get_byte == 0xFF ? :sof : :started
+        @stream.read_byte == 0xFF ? :sof : :started
       when :sof
-        case get_byte
+        case @stream.read_byte
         when 0xe1 # APP1
-          skip_chars = read_int(get_chars(2)) - 2
-          skip_from = @bytes_delivered
-          if get_chars(4) == "Exif"
-            get_chars(2)
-            parse_exif
+          skip_chars = @stream.read_int - 2
+          data = @stream.read(skip_chars)
+          io = StringIO.new(data)
+          if io.read(4) == "Exif"
+            io.read(2)
+            @exif = Exif.new(IOStream.new(io)) rescue nil
           end
-          get_chars(skip_chars - (@bytes_delivered - skip_from))
           :started
         when 0xe0..0xef
           :skipframe
@@ -398,24 +402,23 @@ class FastImage
           :skipframe
         end
       when :skipframe
-        skip_chars = read_int(get_chars(2)) - 2
-        get_chars(skip_chars)
+        skip_chars = @stream.read_int - 2
+        @stream.read(skip_chars)
         :started
       when :readsize
-        s = get_chars(7)
-        if @exif_orientation && @exif_orientation >= 5
-          return [read_int(s[3..4]), read_int(s[5..6])]
-        else
-          return [read_int(s[5..6]), read_int(s[3..4])]
-        end          
+        s = @stream.read(3)
+        height = @stream.read_int
+        width = @stream.read_int
+        width, height = height, width if @exif && @exif.rotated?
+        return [width, height]
       end
     end
   end
 
   def parse_size_for_bmp
-    d = get_chars(32)[14..28]
+    d = @stream.read(32)[14..28]
     header = d.unpack("C")[0]
-    
+
     result = if header == 40
                d[4..-1].unpack('l<l<')
              else
@@ -426,68 +429,84 @@ class FastImage
     [result.first, result.last.abs]
   end
 
-  def get_exif_byte_order
-    byte_order = get_chars(2)
-    case byte_order
-    when 'II'
-      @short, @long = 'v', 'V'
-    when 'MM'
-      @short, @long = 'n', 'N'
-    else
-      raise CannotParseImage
-    end
-  end
-
-  def parse_exif_ifd
-    tag_count = get_chars(2).unpack(@short)[0]
-    tag_count.downto(1) do
-      type = get_chars(2).unpack(@short)[0]
-      get_chars(6)
-      data = get_chars(2).unpack(@short)[0]
-      case type
-      when 0x0100 # image width
-        @exif_width = data
-      when 0x0101 # image height
-        @exif_height = data
-      when 0x0112 # orientation
-        @exif_orientation = data
-      end
-      if @type == :tiff && @exif_width && @exif_height && @exif_orientation
-        return # no need to parse more
-      end
-      get_chars(2)
+  class Exif
+    attr_reader :width, :height
+    def initialize(stream)
+      @stream = stream
+      parse_exif
     end
 
-    next_offset = get_chars(4).unpack(@long)[0]
-    relative_offset = next_offset - (@bytes_delivered - @exif_start_byte)
-    if relative_offset >= 0
-      get_chars(relative_offset)
+    def rotated?
+      @orientation && @orientation >= 5
+    end
+
+    private
+
+    def get_exif_byte_order
+      byte_order = @stream.read(2)
+      case byte_order
+      when 'II'
+        @short, @long = 'v', 'V'
+      when 'MM'
+        @short, @long = 'n', 'N'
+      else
+        raise CannotParseImage
+      end
+    end
+
+    def parse_exif_ifd
+      tag_count = @stream.read(2).unpack(@short)[0]
+      tag_count.downto(1) do
+        type = @stream.read(2).unpack(@short)[0]
+        @stream.read(6)
+        data = @stream.read(2).unpack(@short)[0]
+        case type
+        when 0x0100 # image width
+          @width = data
+        when 0x0101 # image height
+          @height = data
+        when 0x0112 # orientation
+          @orientation = data
+        end
+        if @width && @height && @orientation
+          return # no need to parse more
+        end
+        @stream.read(2)
+      end
+
+      next_offset = @stream.read(4).unpack(@long)[0]
+      relative_offset = next_offset - (@stream.pos - @start_byte)
+      if relative_offset >= 0
+        @stream.read(relative_offset)
+        parse_exif_ifd
+      end
+    end
+
+    def parse_exif
+      @start_byte = @stream.pos
+
+      get_exif_byte_order
+
+      @stream.read(2) # 42
+
+      offset = @stream.read(4).unpack(@long)[0]
+      @stream.read(offset - 8)
+
       parse_exif_ifd
     end
-  end
 
-  def parse_exif
-    @exif_start_byte = @bytes_delivered
-    
-    get_exif_byte_order
-    
-    get_chars(2) # 42
-
-    offset = get_chars(4).unpack(@long)[0]
-    get_chars(offset - 8)
-
-    parse_exif_ifd
   end
 
   def parse_size_for_tiff
-    parse_exif
-
-    if @exif_orientation && @exif_orientation >= 5
-      return [@exif_height, @exif_width]
+    exif = Exif.new(@stream)
+    if exif.rotated?
+      [exif.height, exif.width]
     else
-      return [@exif_width, @exif_height]
+      [exif.width, exif.height]
     end
+  end
 
-    raise CannotParseImage
+  def parse_size_for_psd
+    @stream.read(26).unpack("x14NN").reverse
   end
 end
