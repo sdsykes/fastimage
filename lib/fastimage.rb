@@ -297,8 +297,6 @@ class FastImage
 
   def parse_size
     @type = parse_type unless @type
-    @strpos = 0
-    @bytes_delivered = 0
     send("parse_size_for_#{@type}")
   end
 
@@ -310,7 +308,7 @@ class FastImage
     end
   end
 
-  def get_chars(n)
+  def peek_chars(n)
     while @strpos + n - 1 >= @str.size
       unused_str = @str[@strpos..-1]
       new_string = @read_fiber.resume
@@ -328,6 +326,10 @@ class FastImage
     end
 
     result = @str[@strpos..(@strpos + n - 1)]
+  end
+
+  def get_chars(n)
+    result = peek_chars(n)
     @strpos += n
     @bytes_delivered += n
     result
@@ -342,7 +344,7 @@ class FastImage
   end
 
   def parse_type
-    case get_chars(2)
+    case peek_chars(2)
     when "BM"
       :bmp
     when "GI"
