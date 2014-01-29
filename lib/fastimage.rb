@@ -383,7 +383,7 @@ class FastImage
           skip_from = @stream.bytes_delivered
           if @stream.read(4) == "Exif"
             @stream.read(2)
-            parse_exif
+            @exif = Exif.new(@stream)
           end
           @stream.read(skip_chars - (@stream.bytes_delivered - skip_from))
           :started
@@ -404,7 +404,7 @@ class FastImage
         s = @stream.read(3)
         height = @stream.read_int
         width = @stream.read_int
-        width, height = height, width if @exif_orientation && @exif_orientation >= 5
+        width, height = height, width if @exif && @exif.rotated?
         return [width, height]
       end
     end
@@ -424,66 +424,80 @@ class FastImage
     [result.first, result.last.abs]
   end
 
-  def get_exif_byte_order
-    byte_order = @stream.read(2)
-    case byte_order
-    when 'II'
-      @short, @long = 'v', 'V'
-    when 'MM'
-      @short, @long = 'n', 'N'
-    else
-      raise CannotParseImage
-    end
-  end
-
-  def parse_exif_ifd
-    tag_count = @stream.read(2).unpack(@short)[0]
-    tag_count.downto(1) do
-      type = @stream.read(2).unpack(@short)[0]
-      @stream.read(6)
-      data = @stream.read(2).unpack(@short)[0]
-      case type
-      when 0x0100 # image width
-        @exif_width = data
-      when 0x0101 # image height
-        @exif_height = data
-      when 0x0112 # orientation
-        @exif_orientation = data
-      end
-      if @type == :tiff && @exif_width && @exif_height && @exif_orientation
-        return # no need to parse more
-      end
-      @stream.read(2)
+  class Exif
+    attr_reader :width, :height
+    def initialize(stream)
+      @stream = stream
+      parse_exif
     end
 
-    next_offset = @stream.read(4).unpack(@long)[0]
-    relative_offset = next_offset - (@stream.bytes_delivered - @exif_start_byte)
-    if relative_offset >= 0
-      @stream.read(relative_offset)
+    def rotated?
+      @orientation && @orientation >= 5
+    end
+
+    private
+
+    def get_exif_byte_order
+      byte_order = @stream.read(2)
+      case byte_order
+      when 'II'
+        @short, @long = 'v', 'V'
+      when 'MM'
+        @short, @long = 'n', 'N'
+      else
+        raise CannotParseImage
+      end
+    end
+
+    def parse_exif_ifd
+      tag_count = @stream.read(2).unpack(@short)[0]
+      tag_count.downto(1) do
+        type = @stream.read(2).unpack(@short)[0]
+        @stream.read(6)
+        data = @stream.read(2).unpack(@short)[0]
+        case type
+        when 0x0100 # image width
+          @width = data
+        when 0x0101 # image height
+          @height = data
+        when 0x0112 # orientation
+          @orientation = data
+        end
+        if @width && @height && @orientation
+          return # no need to parse more
+        end
+        @stream.read(2)
+      end
+
+      next_offset = @stream.read(4).unpack(@long)[0]
+      relative_offset = next_offset - (@stream.bytes_delivered - @start_byte)
+      if relative_offset >= 0
+        @stream.read(relative_offset)
+        parse_exif_ifd
+      end
+    end
+
+    def parse_exif
+      @start_byte = @stream.bytes_delivered
+
+      get_exif_byte_order
+
+      @stream.read(2) # 42
+
+      offset = @stream.read(4).unpack(@long)[0]
+      @stream.read(offset - 8)
+
       parse_exif_ifd
     end
-  end
 
-  def parse_exif
-    @exif_start_byte = @stream.bytes_delivered
-
-    get_exif_byte_order
-
-    @stream.read(2) # 42
-
-    offset = @stream.read(4).unpack(@long)[0]
-    @stream.read(offset - 8)
-
-    parse_exif_ifd
   end
 
   def parse_size_for_tiff
-    parse_exif
-
-    if @exif_orientation && @exif_orientation >= 5
-      [@exif_height, @exif_width]
+    exif = Exif.new(@stream)
+    if exif.rotated?
+      [exif.height, exif.width]
     else
-      [@exif_width, @exif_height]
+      [exif.width, exif.height]
     end
   end
 end
