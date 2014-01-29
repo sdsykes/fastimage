@@ -278,7 +278,6 @@ class FastImage
 
   def parse_packets
     @str = ""
-    @str.force_encoding("ASCII-8BIT") if has_encoding?
     @strpos = 0
     @bytes_read = 0
     @bytes_delivered = 0
@@ -300,14 +299,6 @@ class FastImage
     send("parse_size_for_#{@type}")
   end
 
-  def has_encoding?
-    if @has_encoding.nil?
-      @has_encoding = String.new.respond_to? :force_encoding
-    else
-      @has_encoding
-    end
-  end
-
   def peek_chars(n)
     while @strpos + n - 1 >= @str.size
       unused_str = @str[@strpos..-1]
@@ -315,9 +306,7 @@ class FastImage
       raise CannotParseImage if !new_string
 
       # we are dealing with bytes here, so force the encoding
-      if has_encoding?
-        new_string.force_encoding("ASCII-8BIT")
-      end
+      new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
 
       @bytes_read += new_string.size
 
