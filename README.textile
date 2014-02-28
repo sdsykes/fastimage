@@ -1,3 +1,5 @@
+!https://travis-ci.org/sdsykes/fastimage.png?branch=master!:https://travis-ci.org/sdsykes/fastimage
+
 h1. FastImage
 
 h4. FastImage finds the size or type of an image given its uri by fetching as little as needed
