@@ -301,7 +301,7 @@ class FastImage
 
   module StreamUtil # :nodoc:
     def read_byte
-      read(1).ord
+      read(1)[0].ord
     end
 
     def read_int
