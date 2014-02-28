@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fastimage (1.6.0)
+    fastimage (1.6.1)
       addressable (~> 2.3, >= 2.3.5)
 
 GEM
