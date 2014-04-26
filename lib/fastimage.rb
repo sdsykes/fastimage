@@ -217,7 +217,7 @@ class FastImage
       @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
         if res.is_a?(Net::HTTPRedirection) && redirect_count < 4
           redirect_count += 1
-          get_new_uri_from(res['Location'])
+          raise ImageFetchFailure unless get_new_uri_from(res['Location'])
         elsif res.is_a?(Net::HTTPSuccess)
           read_fiber = Fiber.new do
             res.read_body do |str|
@@ -243,7 +243,7 @@ class FastImage
       @parsed_uri.path = location
     end
   rescue Addressable::URI::InvalidURIError
-    raise ImageFetchFailure
+    nil
   end
 
   def proxy_uri
