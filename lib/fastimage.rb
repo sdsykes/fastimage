@@ -241,12 +241,9 @@ class FastImage
   end
 
   def proxy_uri
-    begin
-      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
-    rescue Addressable::URI::InvalidURIError
-      proxy = nil
-    end
-    proxy
+    ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
+  rescue Addressable::URI::InvalidURIError
+    nil
   end
 
   def setup_http
