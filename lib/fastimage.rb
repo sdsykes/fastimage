@@ -203,6 +203,12 @@ class FastImage
   def fetch_using_http
     @redirect_count = 0
 
+    proxy = proxy_uri
+    @http_class = if proxy
+                    Net::HTTP::Proxy(proxy.host, proxy.port)
+                  else
+                    Net::HTTP
+                  end
     fetch_using_http_from_parsed_uri
   end
 
@@ -247,13 +253,7 @@ class FastImage
   end
 
   def setup_http
-    proxy = proxy_uri
-    http_class = if proxy
-                   Net::HTTP::Proxy(proxy.host, proxy.port)
-                 else
-                   Net::HTTP
-                 end
-    @http = http_class.new(@parsed_uri.host, @parsed_uri.inferred_port)
+    @http = @http_class.new(@parsed_uri.host, @parsed_uri.inferred_port)
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     @http.open_timeout = @timeout
