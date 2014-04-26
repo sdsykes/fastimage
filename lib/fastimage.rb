@@ -168,7 +168,7 @@ class FastImage
       rescue Addressable::URI::InvalidURIError
         fetch_using_open_uri
       else
-        if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
+        if @parsed_uri.scheme =~ /^https?$/
           fetch_using_http
         else
           fetch_using_open_uri
@@ -214,10 +214,10 @@ class FastImage
         begin
           newly_parsed_uri = Addressable::URI.parse(res['Location'])
           # The new location may be relative - check for that
-          if newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
-            @parsed_uri.path = res['Location']
-          else
+          if newly_parsed_uri.scheme =~ /^https?$/
             @parsed_uri = newly_parsed_uri
+          else
+            @parsed_uri.path = res['Location']
           end
         rescue Addressable::URI::InvalidURIError
         else
