@@ -217,19 +217,9 @@ class FastImage
     @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
-        begin
-          newly_parsed_uri = Addressable::URI.parse(res['Location'])
-          # The new location may be relative - check for that
-          if newly_parsed_uri.scheme =~ /^https?$/
-            @parsed_uri = newly_parsed_uri
-          else
-            @parsed_uri.path = res['Location']
-          end
-        rescue Addressable::URI::InvalidURIError
-        else
-          fetch_using_http_from_parsed_uri
-          break
-        end
+        get_new_uri_from(res['Location'])
+        fetch_using_http_from_parsed_uri
+        break
       end
 
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
@@ -244,6 +234,18 @@ class FastImage
 
       break  # needed to actively quit out of the fetch
     end
+  end
+
+  def get_new_uri_from(location)
+    newly_parsed_uri = Addressable::URI.parse(location)
+    # The new location may be relative - check for that
+    if newly_parsed_uri.scheme =~ /^https?$/
+      @parsed_uri = newly_parsed_uri
+    else
+      @parsed_uri.path = location
+    end
+  rescue Addressable::URI::InvalidURIError
+    raise ImageFetchFailure
   end
 
   def proxy_uri
