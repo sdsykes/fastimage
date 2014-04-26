@@ -201,8 +201,6 @@ class FastImage
   private
 
   def fetch_using_http
-    @redirect_count = 0
-
     proxy = proxy_uri
     @http_class = if proxy
                     Net::HTTP::Proxy(proxy.host, proxy.port)
@@ -213,26 +211,26 @@ class FastImage
   end
 
   def fetch_using_http_from_parsed_uri
-    setup_http
-    @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
-      if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
-        @redirect_count += 1
-        get_new_uri_from(res['Location'])
-        fetch_using_http_from_parsed_uri
-        break
-      end
-
-      raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
-
-      read_fiber = Fiber.new do
-        res.read_body do |str|
-          Fiber.yield str
+    redirect_count = 0
+    loop do
+      setup_http
+      @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
+        if res.is_a?(Net::HTTPRedirection) && redirect_count < 4
+          redirect_count += 1
+          get_new_uri_from(res['Location'])
+        elsif res.is_a?(Net::HTTPSuccess)
+          read_fiber = Fiber.new do
+            res.read_body do |str|
+              Fiber.yield str
+            end
+          end
+          parse_packets FiberStream.new(read_fiber)
+          return # needed to get out of the loop
+        else
+          raise ImageFetchFailure
         end
+        break # needed to actively quit out of the fetch
       end
-
-      parse_packets FiberStream.new(read_fiber)
-
-      break  # needed to actively quit out of the fetch
     end
   end
 
