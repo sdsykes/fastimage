@@ -248,12 +248,12 @@ class FastImage
 
   def setup_http
     proxy = proxy_uri
-
-    if proxy
-      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.inferred_port)
-    else
-      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.inferred_port)
-    end
+    http_class = if proxy
+                   Net::HTTP::Proxy(proxy.host, proxy.port)
+                 else
+                   Net::HTTP
+                 end
+    @http = http_class.new(@parsed_uri.host, @parsed_uri.inferred_port)
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     @http.open_timeout = @timeout
