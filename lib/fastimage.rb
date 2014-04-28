@@ -475,13 +475,6 @@ class FastImage
         end
         @stream.read(2)
       end
-
-      next_offset = @stream.read(4).unpack(@long)[0]
-      relative_offset = next_offset - (@stream.pos - @start_byte)
-      if relative_offset >= 0
-        @stream.read(relative_offset)
-        parse_exif_ifd
-      end
     end
 
     def parse_exif

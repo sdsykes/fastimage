@@ -22,8 +22,9 @@ GoodFixtures = {
   "test.tiff"=>[:tiff, [85, 67]],
   "test2.tiff"=>[:tiff, [333, 225]],
   "test.psd"=>[:psd, [17, 32]],
-  "exif_orientation.jpg"=>[:jpeg, [2448, 3264]],
-  "infinite.jpg"=>[:jpeg, [160,240]]
+  "exif_orientation.jpg"=>[:jpeg, [600, 450]],
+  "infinite.jpg"=>[:jpeg, [160,240]],
+  "orient_2.jpg"=>[:jpeg, [230,408]]
   }
 
 BadFixtures = [
