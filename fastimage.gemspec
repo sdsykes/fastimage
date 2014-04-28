@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = %q{fastimage}
-  s.version = "1.6.1"
+  s.version = "1.6.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Stephen Sykes"]
-  s.date = %q{2014-02-28}
+  s.date = %q{2014-04-29}
   s.description = %q{FastImage finds the size or type of an image given its uri by fetching as little as needed.}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = [
@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
     "test/fixtures/test2.tiff",
     "test/fixtures/exif_orientation.jpg",
     "test/fixtures/infinite.jpg",
+    "test/fixtures/orient_2.jpg",
     "test/fixtures/folder with spaces/test.bmp",
     "test/test.rb",
     "test/fixtures/test.psd"
