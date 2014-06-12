@@ -25,7 +25,7 @@ GoodFixtures = {
   "exif_orientation.jpg"=>[:jpeg, [600, 450]],
   "infinite.jpg"=>[:jpeg, [160,240]],
   "orient_2.jpg"=>[:jpeg, [230,408]]
-  }
+}
 
 BadFixtures = [
   "faulty.jpg",
@@ -233,5 +233,14 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_handle_https_image
     size = FastImage.size(HTTPSImage)
     assert_equal HTTPSImageInfo[1], size
+  end
+  
+  require 'pathname'
+  def test_should_handle_pathname
+    # bad.jpg does not have the size info in the first 256 bytes
+    # so this tests if we are able to read past that using a
+    # Pathname (which has a different API from an IO).
+    path = Pathname.new(File.join(FixturePath, "bad.jpg"))
+    assert_equal([500,500], FastImage.size(path))
   end
 end

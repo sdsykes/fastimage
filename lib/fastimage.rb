@@ -44,6 +44,7 @@ require 'net/https'
 require 'addressable/uri'
 require 'fastimage/fbr.rb'
 require 'delegate'
+require 'pathname'
 
 class FastImage
   attr_reader :size, :type
@@ -264,9 +265,23 @@ class FastImage
   end
 
   def fetch_using_read(readable)
-    read_fiber = Fiber.new do
-      while str = readable.read(LocalFileChunkSize)
-        Fiber.yield str
+    # Pathnames respond to read, but always return the first
+    # chunk of the file unlike an IO (even though the
+    # docuementation for it refers to IO). Need to supply
+    # an offset in this case.
+    if readable.is_a?(Pathname)
+      read_fiber = Fiber.new do
+        offset = 0
+        while str = readable.read(LocalFileChunkSize, offset)
+          Fiber.yield str
+          offset += LocalFileChunkSize
+        end
+      end
+    else
+      read_fiber = Fiber.new do
+        while str = readable.read(LocalFileChunkSize)
+          Fiber.yield str
+        end
       end
     end
 
