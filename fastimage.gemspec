@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
     "lib/fastimage/fbr.rb",
     "test/fixtures/faulty.jpg",
     "test/fixtures/test.bmp",
+    "test/fixtures/test2.bmp",
     "test/fixtures/test.gif",
     "test/fixtures/test.ico",
     "test/fixtures/test.jpg",
