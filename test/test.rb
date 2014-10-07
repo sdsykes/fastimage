@@ -243,4 +243,13 @@ class FastImageTest < Test::Unit::TestCase
     path = Pathname.new(File.join(FixturePath, "bad.jpg"))
     assert_equal([500,500], FastImage.size(path))
   end
+  
+  def test_should_report_type_and_size_correctly_for_stringios
+    GoodFixtures.each do |fn, info|
+      string = File.read(File.join(FixturePath, fn))
+      stringio = StringIO.new(string)
+      assert_equal info[0], FastImage.type(stringio)
+      assert_equal info[1], FastImage.size(stringio)
+    end
+  end
 end
