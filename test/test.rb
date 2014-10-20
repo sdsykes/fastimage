@@ -24,13 +24,17 @@ GoodFixtures = {
   "test.psd"=>[:psd, [17, 32]],
   "exif_orientation.jpg"=>[:jpeg, [600, 450]],
   "infinite.jpg"=>[:jpeg, [160,240]],
-  "orient_2.jpg"=>[:jpeg, [230,408]]
+  "orient_2.jpg"=>[:jpeg, [230,408]],
+  "favicon.ico" => [:ico, [16, 16]],
+  "man.ico" => [:ico, [48, 48]]
 }
 
 BadFixtures = [
   "faulty.jpg",
-  "test.ico"
+  "test_rgb.ct"
 ]
+# man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
+# test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
 
 TestUrl = "http://example.nowhere/"
 
@@ -74,7 +78,7 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_return_nil_when_image_type_not_known
-    assert_nil FastImage.size(TestUrl + "test.ico")
+    assert_nil FastImage.size(TestUrl + "test_rgb.ct")
   end
 
   def test_should_return_nil_if_timeout_occurs
@@ -101,7 +105,7 @@ class FastImageTest < Test::Unit::TestCase
 
   def test_should_raise_when_asked_when_image_type_not_known
     assert_raises(FastImage::UnknownImageType) do
-      FastImage.size(TestUrl + "test.ico", :raise_on_failure=>true)
+      FastImage.size(TestUrl + "test_rgb.ct", :raise_on_failure=>true)
     end
   end
 
@@ -157,7 +161,7 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_return_nil_when_image_type_not_known_for_local_file
-    assert_nil FastImage.size(File.join(FixturePath, "test.ico"))
+    assert_nil FastImage.size(File.join(FixturePath, "test_rgb.ct"))
   end
 
   def test_should_raise_when_asked_to_when_size_cannot_be_found_for_local_file
