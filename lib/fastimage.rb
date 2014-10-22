@@ -77,7 +77,7 @@ class FastImage
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
   # :raise_on_failure => true in the options.
   #
-  # FastImage knows about GIF, JPEG, BMP, TIFF, PNG and PSD files.
+  # FastImage knows about GIF, JPEG, BMP, TIFF, PNG, PSD, ICO and CUR files.
   #
   # === Example
   #
@@ -379,7 +379,10 @@ class FastImage
       :psd
     when "\0\0"
       # ico has either a 1 (for ico format) or 2 (for cursor) at offset 3
-      {1 => :ico, 2 => :cur}[@stream.peek(3)[2].unpack('C')[0]]
+      case @stream.peek(3).bytes.to_a.last
+      when 1 then :ico
+      when 2 then :cur
+      end
     else
       raise UnknownImageType
     end
