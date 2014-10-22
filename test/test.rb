@@ -26,7 +26,8 @@ GoodFixtures = {
   "infinite.jpg"=>[:jpeg, [160,240]],
   "orient_2.jpg"=>[:jpeg, [230,408]],
   "favicon.ico" => [:ico, [16, 16]],
-  "man.ico" => [:ico, [48, 48]]
+  "man.ico" => [:ico, [48, 48]],
+  "test.cur" => [:cur, [32, 32]]
 }
 
 BadFixtures = [
@@ -35,6 +36,7 @@ BadFixtures = [
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
+# test.cur courtesy of http://mimidestino.deviantart.com/art/Clash-Of-Clans-Dragon-Cursor-s-Punteros-489070897
 
 TestUrl = "http://example.nowhere/"
 

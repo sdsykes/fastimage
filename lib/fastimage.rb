@@ -379,8 +379,7 @@ class FastImage
       :psd
     when "\0\0"
       # ico has either a 1 (for ico format) or 2 (for cursor) at offset 3
-      format = @stream.peek(3)
-      format == [0,0,1].pack('c*') ? :ico : (format == [0,0,10].pack('c*') ? :cur : nil)  
+      {1 => :ico, 2 => :cur}[@stream.peek(3)[2].unpack('C')[0]]
     else
       raise UnknownImageType
     end
@@ -389,6 +388,7 @@ class FastImage
   def parse_size_for_ico
     @stream.read(8)[6..7].unpack('CC').map{|byte| byte == 0 ? 256 : byte }
   end
+  alias_method :parse_size_for_cur, :parse_size_for_ico
 
   def parse_size_for_gif
     @stream.read(11)[6..10].unpack('SS')
