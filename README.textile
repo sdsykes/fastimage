@@ -130,3 +130,5 @@ Pull requests and suggestions are always welcome. Thanks to all the contributors
 * @benjaminjackson
 * @muffinista
 * @marcandre
+* @apanzerj
+
