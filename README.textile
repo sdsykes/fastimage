@@ -98,7 +98,7 @@ irb> puts Benchmark.measure {p FastImage.size(uri)}
 
 h2. Tests
 
-You'll need to @gem install fakeweb@ to be able to run the tests.
+You'll need to @gem install fakeweb@ and possibly also  @gem install test-unit@ to be able to run the tests.
 
 bc.. $ ruby test.rb 
 Run options: 
