@@ -8,7 +8,7 @@
 # No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
-# FastImage knows about GIF, JPEG, BMP, TIFF, PNG and PSD files.
+# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG and PSD files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
 # In this case FastImage uses the Addressable library to read the file in chunks of 256 bytes until
@@ -98,6 +98,8 @@ class FastImage
   #   FastImage.size("http://pennysmalls.com/does_not_exist", :raise_on_failure=>true)
   #   => raises FastImage::ImageFetchFailure
   #   FastImage.size("http://stephensykes.com/favicon.ico", :raise_on_failure=>true)
+  #   => [16, 16]
+  #   FastImage.size("http://stephensykes.com/images/squareBlue.icns", :raise_on_failure=>true)
   #   => raises FastImage::UnknownImageType
   #   FastImage.size("http://stephensykes.com/favicon.ico", :raise_on_failure=>true, :timeout=>0.01)
   #   => raises FastImage::ImageFetchFailure
@@ -137,7 +139,7 @@ class FastImage
   #   => :bmp
   #   FastImage.type("test/fixtures/test.jpg")
   #   => :jpeg
-  #   FastImage.type("http://pennysmalls.com/does_not_exist")
+  #   FastImage.type("http://stephensykes.com/does_not_exist")
   #   => nil
   #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
   #   => :gif
