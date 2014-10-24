@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
     "test/fixtures/test.bmp",
     "test/fixtures/test2.bmp",
     "test/fixtures/test.gif",
-    "test/fixtures/test.ico",
     "test/fixtures/test.jpg",
     "test/fixtures/test.png",
     "test/fixtures/test2.jpg",
@@ -33,7 +32,9 @@ Gem::Specification.new do |s|
     "test/fixtures/folder with spaces/test.bmp",
     "test/test.rb",
     "test/fixtures/test.psd",
-    "test/fixtures/bad.jpg"
+    "test/fixtures/bad.jpg",
+    "test/fixtures/man.ico",
+    "test/fixtures/test.cur"
   ]
   s.homepage = %q{http://github.com/sdsykes/fastimage}
   s.rdoc_options = ["--charset=UTF-8"]
