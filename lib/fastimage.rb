@@ -171,7 +171,7 @@ class FastImage
       rescue Addressable::URI::InvalidURIError
         fetch_using_open_uri
       else
-        if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
+        if @parsed_uri.scheme =~ /^https?$/
           fetch_using_http
         else
           fetch_using_open_uri
@@ -204,62 +204,59 @@ class FastImage
   private
 
   def fetch_using_http
-    @redirect_count = 0
-
+    proxy = proxy_uri
+    @http_class = if proxy
+                    Net::HTTP::Proxy(proxy.host, proxy.port)
+                  else
+                    Net::HTTP
+                  end
     fetch_using_http_from_parsed_uri
   end
 
   def fetch_using_http_from_parsed_uri
-    setup_http
-    @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
-      if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
-        @redirect_count += 1
-        begin
-          newly_parsed_uri = Addressable::URI.parse(res['Location'])
-          # The new location may be relative - check for that
-          if newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
-            @parsed_uri.path = res['Location']
-          else
-            @parsed_uri = newly_parsed_uri
+    redirect_count = 0
+    loop do
+      setup_http
+      @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
+        if res.is_a?(Net::HTTPRedirection) && redirect_count < 4
+          redirect_count += 1
+          raise ImageFetchFailure unless get_new_uri_from(res['Location'])
+        elsif res.is_a?(Net::HTTPSuccess)
+          read_fiber = Fiber.new do
+            res.read_body do |str|
+              Fiber.yield str
+            end
           end
-        rescue Addressable::URI::InvalidURIError
+          parse_packets FiberStream.new(read_fiber)
+          return # needed to get out of the loop
         else
-          fetch_using_http_from_parsed_uri
-          break
+          raise ImageFetchFailure
         end
+        break # needed to actively quit out of the fetch
       end
-
-      raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
-
-      read_fiber = Fiber.new do
-        res.read_body do |str|
-          Fiber.yield str
-        end
-      end
-
-      parse_packets FiberStream.new(read_fiber)
-
-      break  # needed to actively quit out of the fetch
     end
+  end
+
+  def get_new_uri_from(location)
+    newly_parsed_uri = Addressable::URI.parse(location)
+    # The new location may be relative - check for that
+    if newly_parsed_uri.scheme =~ /^https?$/
+      @parsed_uri = newly_parsed_uri
+    else
+      @parsed_uri.path = location
+    end
+  rescue Addressable::URI::InvalidURIError
+    nil
   end
 
   def proxy_uri
-    begin
-      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
-    rescue Addressable::URI::InvalidURIError
-      proxy = nil
-    end
-    proxy
+    ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
+  rescue Addressable::URI::InvalidURIError
+    nil
   end
 
   def setup_http
-    proxy = proxy_uri
-
-    if proxy
-      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.inferred_port)
-    else
-      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.inferred_port)
-    end
+    @http = @http_class.new(@parsed_uri.host, @parsed_uri.inferred_port)
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     @http.open_timeout = @timeout
