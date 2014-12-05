@@ -53,8 +53,6 @@ class FastImage
 
   class FastImageException < StandardError # :nodoc:
   end
-  class MoreCharsNeeded < FastImageException # :nodoc:
-  end
   class UnknownImageType < FastImageException # :nodoc:
   end
   class ImageFetchFailure < FastImageException # :nodoc:
