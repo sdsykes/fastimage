@@ -45,6 +45,7 @@ require 'addressable/uri'
 require 'fastimage/fbr.rb'
 require 'delegate'
 require 'pathname'
+require 'zlib'
 
 class FastImage
   attr_reader :size, :type
