@@ -237,6 +237,21 @@ class FastImage
         end
       end
 
+      case res['content-encoding']
+      when 'deflate', 'gzip', 'x-gzip'
+        begin
+          gzip = Zlib::GzipReader.new(FiberStream.new(read_fiber))
+        rescue FiberError, Zlib::GzipFile::Error
+          raise CannotParseImage
+        end
+
+        read_fiber = Fiber.new do
+          while data = gzip.readline
+            Fiber.yield data
+          end
+        end
+      end
+      
       parse_packets FiberStream.new(read_fiber)
 
       break  # needed to actively quit out of the fetch

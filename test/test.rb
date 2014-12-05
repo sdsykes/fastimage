@@ -56,6 +56,12 @@ BadFixtures.each do |fn|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
 end
 
+GzipTestImg = "gzipped.jpg"
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImg}", :body => File.join(FixturePath, GzipTestImg), :content_encoding => "gzip") 
+GzipTestImgTruncated = "truncated_gzipped.jpg"
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImgTruncated}", :body => File.join(FixturePath, GzipTestImgTruncated), :content_encoding => "gzip") 
+GzipTestImgSize = [970, 450]
+
 class FastImageTest < Test::Unit::TestCase
   def test_should_report_type_correctly
     GoodFixtures.each do |fn, info|
@@ -256,6 +262,18 @@ class FastImageTest < Test::Unit::TestCase
       stringio = StringIO.new(string)
       assert_equal info[0], FastImage.type(stringio)
       assert_equal info[1], FastImage.size(stringio)
+    end
+  end
+  
+  def test_gzipped_file
+    url = "http://example.nowhere/#{GzipTestImg}"
+    assert_equal([970, 450], FastImage.size(url))
+  end
+
+  def test_truncated_gzipped_file
+    url = "http://example.nowhere/#{GzipTestImgTruncated}"
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(url, :raise_on_failure => true)
     end
   end
 end
