@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = %q{fastimage}
-  s.version = "1.6.4"
+  s.version = "1.6.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Stephen Sykes"]
-  s.date = %q{2014-10-24}
+  s.date = %q{2014-12-05}
   s.description = %q{FastImage finds the size or type of an image given its uri by fetching as little as needed.}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = [
@@ -34,7 +34,9 @@ Gem::Specification.new do |s|
     "test/fixtures/test.psd",
     "test/fixtures/bad.jpg",
     "test/fixtures/man.ico",
-    "test/fixtures/test.cur"
+    "test/fixtures/test.cur",
+    "test/fixtures/gzipped.jpg",
+    "test/fixtures/truncated_gzipped.jpg"
   ]
   s.homepage = %q{http://github.com/sdsykes/fastimage}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -43,8 +45,8 @@ Gem::Specification.new do |s|
   s.summary = %q{FastImage - Image info fast}
   s.add_runtime_dependency 'addressable', '~> 2.3', '>= 2.3.5'
   s.add_development_dependency 'fakeweb', '~> 1.3'
-  s.add_development_dependency(%q<rake>, [">= 0"])
-  s.add_development_dependency(%q<rdoc>, [">= 0"])  
+  s.add_development_dependency('rake')
+  s.add_development_dependency('rdoc')  
 
   s.test_files = [
     "test/test.rb"
