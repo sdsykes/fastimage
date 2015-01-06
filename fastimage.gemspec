@@ -36,7 +36,10 @@ Gem::Specification.new do |s|
     "test/fixtures/man.ico",
     "test/fixtures/test.cur",
     "test/fixtures/gzipped.jpg",
-    "test/fixtures/truncated_gzipped.jpg"
+    "test/fixtures/truncated_gzipped.jpg",
+    "test/fixtures/webp_vp8.webp",
+    "test/fixtures/webp_vp8l.webp",
+    "test/fixtures/webp_vp8x.webp"
   ]
   s.homepage = %q{http://github.com/sdsykes/fastimage}
   s.rdoc_options = ["--charset=UTF-8"]

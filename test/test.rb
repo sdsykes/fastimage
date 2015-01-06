@@ -27,7 +27,10 @@ GoodFixtures = {
   "orient_2.jpg"=>[:jpeg, [230,408]],
   "favicon.ico" => [:ico, [16, 16]],
   "man.ico" => [:ico, [48, 48]],
-  "test.cur" => [:cur, [32, 32]]
+  "test.cur" => [:cur, [32, 32]],
+  "webp_vp8x.webp" => [:webp, [386, 395]],
+  "webp_vp8l.webp" => [:webp, [386, 395]],
+  "webp_vp8.webp" => [:webp, [550, 368]]
 }
 
 BadFixtures = [
