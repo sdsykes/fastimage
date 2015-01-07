@@ -8,7 +8,7 @@
 # No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
-# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG and PSD files.
+# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
 # In this case FastImage uses the Addressable library to read the file in chunks of 256 bytes until
@@ -36,7 +36,7 @@
 # * http://snippets.dzone.com/posts/show/805
 # * http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/
 # * http://pennysmalls.wordpress.com/2008/08/19/find-jpeg-dimensions-fast-in-pure-ruby-no-ima/
-# * http://imagesize.rubyforge.org/
+# * https://rubygems.org/gems/imagesize
 # * https://github.com/remvee/exifr
 #
 
@@ -76,7 +76,7 @@ class FastImage
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
   # :raise_on_failure => true in the options.
   #
-  # FastImage knows about GIF, JPEG, BMP, TIFF, PNG, PSD, ICO and CUR files.
+  # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
   #
   # === Example
   #
