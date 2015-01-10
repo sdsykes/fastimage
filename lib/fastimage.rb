@@ -63,9 +63,9 @@ class FastImage
   class CannotParseImage < FastImageException # :nodoc:
   end
 
-  DefaultTimeout = 2
+  DefaultTimeout = 2 unless const_defined?(:DefaultTimeout)
 
-  LocalFileChunkSize = 256
+  LocalFileChunkSize = 256 unless const_defined?(:LocalFileChunkSize)
 
   # Returns an array containing the width and height of the image.
   # It will return nil if the image could not be fetched, or if the image type was not recognised.
