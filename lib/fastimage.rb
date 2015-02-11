@@ -11,7 +11,7 @@
 # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
-# In this case FastImage uses the Addressable library to read the file in chunks of 256 bytes until
+# In this case FastImage uses the open-uri library to read the file in chunks of 256 bytes until
 # it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
 # attached disk rather than truly local.
 #
@@ -41,8 +41,8 @@
 #
 
 require 'net/https'
-require 'addressable/uri'
 require 'fastimage/fbr.rb'
+require 'open-uri'
 require 'delegate'
 require 'pathname'
 require 'zlib'
@@ -66,6 +66,28 @@ class FastImage
   DefaultTimeout = 2 unless const_defined?(:DefaultTimeout)
 
   LocalFileChunkSize = 256 unless const_defined?(:LocalFileChunkSize)
+
+  # Parser object should respond to #parse
+  # and raise a URI::InvalidURIError if something goes wrong
+  def self.uri_parser=(parser)
+    @uri_parser = parser
+  end
+
+  # Helper that sets URI parsing to use the Addressable gem
+  def self.use_addressable_uri_parser
+    require 'addressable/uri'
+    self.uri_parser = Class.new do
+      def self.parse(location)
+        Addressable::URI.parse(location)
+      rescue Addressable::URI::InvalidURIError
+        raise URI::InvalidURIError
+      end
+    end
+  end
+
+  def self.parse_uri(location)
+    (@uri_parser || URI).parse(location)
+  end
 
   # Returns an array containing the width and height of the image.
   # It will return nil if the image could not be fetched, or if the image type was not recognised.
@@ -166,8 +188,8 @@ class FastImage
       fetch_using_read(uri)
     else
       begin
-        @parsed_uri = Addressable::URI.parse(uri)
-      rescue Addressable::URI::InvalidURIError
+        @parsed_uri = self.class.parse_uri(uri)
+      rescue URI::InvalidURIError
         fetch_using_open_uri
       else
         if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
@@ -214,14 +236,14 @@ class FastImage
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          newly_parsed_uri = Addressable::URI.parse(res['Location'])
+          newly_parsed_uri = self.class.parse_uri(res['Location'])
           # The new location may be relative - check for that
           if newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
             @parsed_uri.path = res['Location']
           else
             @parsed_uri = newly_parsed_uri
           end
-        rescue Addressable::URI::InvalidURIError
+        rescue URI::InvalidURIError
         else
           fetch_using_http_from_parsed_uri
           break
@@ -259,8 +281,8 @@ class FastImage
 
   def proxy_uri
     begin
-      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
-    rescue Addressable::URI::InvalidURIError
+      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? self.class.parse_uri(ENV['http_proxy']) : nil
+    rescue URI::InvalidURIError
       proxy = nil
     end
     proxy
@@ -269,10 +291,13 @@ class FastImage
   def setup_http
     proxy = proxy_uri
 
+    port = @parsed_uri.port
+    port ||= @parsed_uri.scheme == "https" ? 443 : 80
+
     if proxy
-      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.inferred_port)
+      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, port)
     else
-      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.inferred_port)
+      @http = Net::HTTP.new(@parsed_uri.host, port)
     end
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -364,7 +389,7 @@ class FastImage
         @strpos = 0
       end
 
-      result = @str[@strpos..(@strpos + n - 1)]
+      @str[@strpos..(@strpos + n - 1)]
     end
 
     def read(n)
@@ -456,7 +481,7 @@ class FastImage
         @stream.read(skip_chars)
         :started
       when :readsize
-        s = @stream.read(3)
+        _s = @stream.read(3)
         height = @stream.read_int
         width = @stream.read_int
         width, height = height, width if @exif && @exif.rotated?
@@ -481,7 +506,7 @@ class FastImage
 
   def parse_size_for_webp
     vp8 = @stream.read(16)[12..15]
-    len = @stream.read(4).unpack("V")
+    _len = @stream.read(4).unpack("V")
     case vp8
     when "VP8 "
       parse_size_vp8
