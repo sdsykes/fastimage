@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     fastimage (1.6.6)
-      addressable (~> 2.3, >= 2.3.5)
 
 GEM
   remote: https://rubygems.org/
@@ -18,6 +17,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  addressable (~> 2.3, >= 2.3.5)
   fakeweb (~> 1.3)
   fastimage!
   rake

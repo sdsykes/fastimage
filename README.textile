@@ -18,7 +18,7 @@ You only need supply the uri, and FastImage will do the rest.
 
 h2. Features
 
-Fastimage can also read local (and other) files, and uses the Addressable library to do so.
+Fastimage can also read local (and other) files, and uses the open-uri library to do so.
 
 FastImage will automatically read from any object that responds to :read - for
 instance an IO object if that is passed instead of a URI.
@@ -30,6 +30,21 @@ FastImage will obey the http_proxy setting in your environment to route requests
 You can add a timeout to the request which will limit the request time by passing :timeout => number_of_seconds.
 
 FastImage normally replies will nil if it encounters an error, but you can pass :raise_on_failure => true to get an exception.
+
+You may optionally use the `addressable` gem for URI parsing or a custom URI parser.
+
+To use the `addressable` gem for uri parsing.
+
+<pre lang="ruby"><code>
+require 'addressable/uri'
+FastImage.use_addressable_uri_parser
+</code></pre>
+
+To use a custom URI parser like, for example, the old URI parser in Ruby 2.2 for example use:
+
+<pre lang="ruby"><code>
+FastImage.uri_parser =  URI::RFC2396_Parser.new
+</code></pre>
 
 h2. Examples
 
