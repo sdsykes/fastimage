@@ -5,5 +5,6 @@ rvm:
   - 1.9.3
   - 2.0.0
   - 2.1.2
-# uncomment this line if your project needs to run something other than `rake`:
-# script: bundle exec rspec spec
+# need to run in dev mode otherwise we will
+# not get addressable
+bundler_args: --retry=3 --jobs=3
