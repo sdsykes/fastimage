@@ -364,7 +364,7 @@ class FastImage
         @strpos = 0
       end
 
-      result = @str[@strpos..(@strpos + n - 1)]
+      @str[@strpos..(@strpos + n - 1)]
     end
 
     def read(n)
@@ -456,7 +456,7 @@ class FastImage
         @stream.read(skip_chars)
         :started
       when :readsize
-        s = @stream.read(3)
+        _s = @stream.read(3)
         height = @stream.read_int
         width = @stream.read_int
         width, height = height, width if @exif && @exif.rotated?
@@ -481,7 +481,7 @@ class FastImage
 
   def parse_size_for_webp
     vp8 = @stream.read(16)[12..15]
-    len = @stream.read(4).unpack("V")
+    _len = @stream.read(4).unpack("V")
     case vp8
     when "VP8 "
       parse_size_vp8
