@@ -11,7 +11,7 @@
 # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
-# In this case FastImage uses the Addressable library to read the file in chunks of 256 bytes until
+# In this case FastImage reads the file in chunks of 256 bytes until
 # it has enough. This is possibly a useful bandwidth-saving feature if the file is on a network
 # attached disk rather than truly local.
 #
@@ -168,12 +168,12 @@ class FastImage
       begin
         @parsed_uri = Addressable::URI.parse(uri)
       rescue Addressable::URI::InvalidURIError
-        fetch_using_open_uri
+        fetch_using_file_open
       else
         if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
           fetch_using_http
         else
-          fetch_using_open_uri
+          fetch_using_file_open
         end
       end
     end
@@ -304,8 +304,8 @@ class FastImage
     parse_packets FiberStream.new(read_fiber)
   end
 
-  def fetch_using_open_uri
-    open(@uri) do |s|
+  def fetch_using_file_open
+    File.open(@uri) do |s|
       fetch_using_read(s)
     end
   end

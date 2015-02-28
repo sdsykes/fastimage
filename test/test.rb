@@ -279,4 +279,15 @@ class FastImageTest < Test::Unit::TestCase
       FastImage.size(url, :raise_on_failure => true)
     end
   end
+  
+  def test_cant_access_shell
+    url = "|echo>shell_test"
+    %x{rm -f shell_test}
+    FastImage.size(url)
+    assert_raises(Errno::ENOENT) do
+      File.open("shell_test")
+    end
+  ensure
+    %x{rm -f shell_test}
+  end
 end

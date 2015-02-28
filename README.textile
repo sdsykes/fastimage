@@ -18,9 +18,10 @@ You only need supply the uri, and FastImage will do the rest.
 
 h2. Features
 
-Fastimage can also read local (and other) files, and uses the Addressable library to do so.
+Fastimage can also read local (and other) files - anything that is not parseable as a URI will be
+interpreted as a filename, and FastImage will attempt to open it with File#open.
 
-FastImage will automatically read from any object that responds to :read - for
+FastImage will also automatically read from any object that responds to :read - for
 instance an IO object if that is passed instead of a URI.
 
 FastImage will follow up to 4 HTTP redirects to get the image.
@@ -30,6 +31,10 @@ FastImage will obey the http_proxy setting in your environment to route requests
 You can add a timeout to the request which will limit the request time by passing :timeout => number_of_seconds.
 
 FastImage normally replies will nil if it encounters an error, but you can pass :raise_on_failure => true to get an exception.
+
+h2. Security
+
+As of v1.6.7 FastImage no longer uses openuri to open files, but directly calls File.open. But take care to sanitise the strings passed to FastImage; it will try to read from whatever is passed.
 
 h2. Examples
 
