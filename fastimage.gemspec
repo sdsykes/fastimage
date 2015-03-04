@@ -49,7 +49,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'addressable', '~> 2.3', '>= 2.3.5'
   s.add_development_dependency 'fakeweb', '~> 1.3'
   s.add_development_dependency('rake')
-  s.add_development_dependency('rdoc')  
+  s.add_development_dependency('rdoc')
+  s.add_development_dependency('test-unit')
 
   s.test_files = [
     "test/test.rb"
