@@ -250,7 +250,7 @@ class FastImage
           end
         end
       end
-      
+
       parse_packets FiberStream.new(read_fiber)
 
       break  # needed to actively quit out of the fetch
@@ -404,7 +404,7 @@ class FastImage
         :webp
       else
         raise UnknownImageType
-      end        
+      end
     else
       raise UnknownImageType
     end
@@ -493,18 +493,18 @@ class FastImage
       nil
     end
   end
-  
+
   def parse_size_vp8
     w, h = @stream.read(10).unpack("@6vv")
     [w & 0x3fff, h & 0x3fff]
   end
-  
+
   def parse_size_vp8l
     @stream.read(1) # 0x2f
     b1, b2, b3, b4 = @stream.read(4).bytes.to_a
     [1 + (((b2 & 0x3f) << 8) | b1), 1 + (((b4 & 0xF) << 10) | (b3 << 2) | ((b2 & 0xC0) >> 6))]
   end
-  
+
   def parse_size_vp8x
     flags = @stream.read(4).unpack("C")[0]
     b1, b2, b3, b4, b5, b6 = @stream.read(6).unpack("CCCCCC")
@@ -514,7 +514,7 @@ class FastImage
       # parse exif for orientation
       # TODO: find or create test images for this
     end
-    
+
     return [width, height]
   end
 
