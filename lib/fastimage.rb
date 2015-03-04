@@ -160,6 +160,7 @@ class FastImage
   def initialize(uri, options={})
     @property = options[:type_only] ? :type : :size
     @timeout = options[:timeout] || DefaultTimeout
+    @proxy_url = options[:proxy]
     @uri = uri
 
     if uri.respond_to?(:read)
@@ -259,7 +260,11 @@ class FastImage
 
   def proxy_uri
     begin
-      proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
+      if @proxy_url
+        proxy = Addressable::URI.parse(@proxy_url)
+      else
+        proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
+      end
     rescue Addressable::URI::InvalidURIError
       proxy = nil
     end
