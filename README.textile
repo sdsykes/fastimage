@@ -26,7 +26,7 @@ instance an IO object if that is passed instead of a URI.
 
 FastImage will follow up to 4 HTTP redirects to get the image.
 
-FastImage will obey the http_proxy setting in your environment to route requests via a proxy.
+FastImage will obey the http_proxy setting in your environment to route requests via a proxy. You can also pass a :proxy argument if you want to specify the proxy address in the call.
 
 You can add a timeout to the request which will limit the request time by passing :timeout => number_of_seconds.
 
@@ -142,4 +142,5 @@ Pull requests and suggestions are always welcome. Thanks to all the contributors
 * @muffinista
 * @marcandre
 * @apanzerj
+* @forresty
 
