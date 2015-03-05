@@ -248,7 +248,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_fetch_via_proxy_option
     file = "test.gif"
     actual_size = GoodFixtures[file][1]
-    size = FastImage.size(TestUrl + file, proxy: "http://my.proxy.host:8080")
+    size = FastImage.size(TestUrl + file, :proxy => "http://my.proxy.host:8080")
     assert_equal actual_size, size
   end
 
