@@ -60,9 +60,9 @@ BadFixtures.each do |fn|
 end
 
 GzipTestImg = "gzipped.jpg"
-FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImg}", :body => File.join(FixturePath, GzipTestImg), :content_encoding => "gzip") 
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImg}", :body => File.join(FixturePath, GzipTestImg), :content_encoding => "gzip")
 GzipTestImgTruncated = "truncated_gzipped.jpg"
-FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImgTruncated}", :body => File.join(FixturePath, GzipTestImgTruncated), :content_encoding => "gzip") 
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImgTruncated}", :body => File.join(FixturePath, GzipTestImgTruncated), :content_encoding => "gzip")
 GzipTestImgSize = [970, 450]
 
 class FastImageTest < Test::Unit::TestCase
@@ -245,11 +245,18 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal actual_size, size
   end
 
+  def test_should_fetch_via_proxy_option
+    file = "test.gif"
+    actual_size = GoodFixtures[file][1]
+    size = FastImage.size(TestUrl + file, proxy: "http://my.proxy.host:8080")
+    assert_equal actual_size, size
+  end
+
   def test_should_handle_https_image
     size = FastImage.size(HTTPSImage)
     assert_equal HTTPSImageInfo[1], size
   end
-  
+
   require 'pathname'
   def test_should_handle_pathname
     # bad.jpg does not have the size info in the first 256 bytes
@@ -258,7 +265,7 @@ class FastImageTest < Test::Unit::TestCase
     path = Pathname.new(File.join(FixturePath, "bad.jpg"))
     assert_equal([500,500], FastImage.size(path))
   end
-  
+
   def test_should_report_type_and_size_correctly_for_stringios
     GoodFixtures.each do |fn, info|
       string = File.read(File.join(FixturePath, fn))
@@ -267,7 +274,7 @@ class FastImageTest < Test::Unit::TestCase
       assert_equal info[1], FastImage.size(stringio)
     end
   end
-  
+
   def test_gzipped_file
     url = "http://example.nowhere/#{GzipTestImg}"
     assert_equal([970, 450], FastImage.size(url))
@@ -279,7 +286,7 @@ class FastImageTest < Test::Unit::TestCase
       FastImage.size(url, :raise_on_failure => true)
     end
   end
-  
+
   def test_cant_access_shell
     url = "|echo>shell_test"
     %x{rm -f shell_test}

@@ -64,4 +64,3 @@ unless defined? Fiber
     end
   end
 end
-
