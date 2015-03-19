@@ -126,6 +126,7 @@ h2. FastImage in other languages
 * "Python by bmuller":https://github.com/bmuller/fastimage
 * "Swift by kaishin":https://github.com/kaishin/ImageScout
 * "Go by rubenfonseca":https://github.com/rubenfonseca/fastimage
+* "PHP by tommoor":https://github.com/tommoor/fastimage
 
 h2. Licence
 
