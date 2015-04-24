@@ -30,7 +30,9 @@ GoodFixtures = {
   "test.cur" => [:cur, [32, 32]],
   "webp_vp8x.webp" => [:webp, [386, 395]],
   "webp_vp8l.webp" => [:webp, [386, 395]],
-  "webp_vp8.webp" => [:webp, [550, 368]]
+  "webp_vp8.webp" => [:webp, [550, 368]],
+  "test.svg" => [:svg, [200, 300]],
+  "test2.svg" => [:svg, [150, 150]]
 }
 
 BadFixtures = [

@@ -8,7 +8,7 @@
 # No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
-# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
+# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG and WEBP files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
 # In this case FastImage reads the file in chunks of 256 bytes until
@@ -76,7 +76,7 @@ class FastImage
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
   # :raise_on_failure => true in the options.
   #
-  # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
+  # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG and WEBP files.
   #
   # === Example
   #
@@ -410,6 +410,8 @@ class FastImage
       else
         raise UnknownImageType
       end
+    when "<?", "<s"
+      :svg
     else
       raise UnknownImageType
     end
@@ -595,5 +597,35 @@ class FastImage
 
   def parse_size_for_psd
     @stream.read(26).unpack("x14NN").reverse
+  end
+
+  def parse_size_for_svg
+    attr_name = []
+    width, height = nil, nil
+
+    attr_value = lambda do |stream|
+      stream.read(1) # "
+      value = []
+      while stream.read(1) =~ /(\d)/
+        value.push($1)
+      end
+      value.join.to_i
+    end
+    
+    while (char = @stream.read(1)) do
+      if char == "="
+        if attr_name.join == "width"
+          width = attr_value.call(@stream)
+          return [width, height] if height
+        elsif attr_name.join == "height"
+          height = attr_value.call(@stream)
+          return [width, height] if width
+        end
+      elsif char =~ /\w/
+        attr_name.push(char)
+      else
+        attr_name.clear
+      end
+    end
   end
 end
