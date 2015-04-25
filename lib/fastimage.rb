@@ -599,33 +599,65 @@ class FastImage
     @stream.read(26).unpack("x14NN").reverse
   end
 
-  def parse_size_for_svg
-    attr_name = []
-    width, height = nil, nil
+  class Svg # :nodoc:
+    def initialize(stream)
+      @stream = stream
+      parse_svg
+    end
 
-    attr_value = lambda do |stream|
-      stream.read(1) # "
-      value = []
-      while stream.read(1) =~ /(\d)/
-        value.push($1)
+    def width_and_height
+      if @width && @height
+        [@width, @height]
+      elsif @width && @ratio
+        [@width, @width / @ratio]
+      elsif @height && @ratio
+        [@height * @ratio, @height]
       end
-      value.join.to_i
     end
-    
-    while (char = @stream.read(1)) do
-      if char == "="
-        if attr_name.join == "width"
-          width = attr_value.call(@stream)
-          return [width, height] if height
-        elsif attr_name.join == "height"
-          height = attr_value.call(@stream)
-          return [width, height] if width
+
+    private
+
+    def parse_svg
+      attr_name = []
+      state = nil
+
+      while (char = @stream.read(1)) && state != :stop do
+        case char
+        when "="
+          if attr_name.join =~ /width/i
+            @width = attr_value.to_i
+            return if @height
+          elsif attr_name.join =~ /height/i
+            @height = attr_value.to_i
+            return if @width
+          elsif attr_name.join =~ /viewbox/i
+            values = attr_value.split(/\s/)
+            @ratio = values[2].to_f / values[3].to_f
+          end
+        when /\w/
+          attr_name << char
+        when ">"
+          state = :stop if state == :started
+        else
+          state = :started if attr_name.join == "svg"
+          attr_name.clear
         end
-      elsif char =~ /\w/
-        attr_name.push(char)
-      else
-        attr_name.clear
       end
     end
+
+    def attr_value
+      @stream.read(1)
+
+      value = []
+      while @stream.read(1) =~ /([^"])/
+        value << $1
+      end
+      value.join
+    end
+  end
+
+  def parse_size_for_svg
+    svg = Svg.new(@stream)
+    svg.width_and_height
   end
 end
