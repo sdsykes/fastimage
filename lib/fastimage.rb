@@ -343,6 +343,14 @@ class FastImage
     def read_int
       read(2).unpack('n')[0]
     end
+
+    def read_string_int
+      value = []
+      while read(1) =~ /(\d)/
+        value << $1
+      end
+      value.join.to_i
+    end
   end
 
   class FiberStream # :nodoc:
@@ -625,10 +633,12 @@ class FastImage
         case char
         when "="
           if attr_name.join =~ /width/i
-            @width = attr_value.to_i
+            @stream.read(1)
+            @width = @stream.read_string_int
             return if @height
           elsif attr_name.join =~ /height/i
-            @height = attr_value.to_i
+            @stream.read(1)
+            @height = @stream.read_string_int
             return if @width
           elsif attr_name.join =~ /viewbox/i
             values = attr_value.split(/\s/)
