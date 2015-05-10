@@ -51,6 +51,8 @@ FastImage.size("http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_135066
 => FastImage::ImageFetchFailure: FastImage::ImageFetchFailure
 FastImage.size("http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg", :raise_on_failure=>true, :timeout=>2.0)
 => [9545, 6623]
+FastImage.new("http://stephensykes.com/images/pngimage").content_length
+=> 432
 </code></pre>
 
 h2. Installation
