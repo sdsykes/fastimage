@@ -32,6 +32,8 @@ You can add a timeout to the request which will limit the request time by passin
 
 FastImage normally replies will nil if it encounters an error, but you can pass :raise_on_failure => true to get an exception.
 
+FastImage also provides a reader for the content length header provided in HTTP. This may be useful to assess the file size of an image, but do not rely on it exclusively - it will not be present in chunked responses for instance.
+
 h2. Security
 
 As of v1.6.7 FastImage no longer uses openuri to open files, but directly calls File.open. But take care to sanitise the strings passed to FastImage; it will try to read from whatever is passed.
@@ -146,4 +148,5 @@ Pull requests and suggestions are always welcome. Thanks to all the contributors
 * @marcandre
 * @apanzerj
 * @forresty
-
+* kikihakiem
+* lulalalalistia
