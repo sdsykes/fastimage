@@ -24,6 +24,8 @@ Gem::Specification.new do |s|
     "test/fixtures/test2.jpg",
     "test/fixtures/test3.jpg",
     "test/fixtures/test4.jpg",
+    "test/fixtures/test.svg",
+    "test/fixtures/test_partial_viewport.svg",
     "test/fixtures/test.tiff",
     "test/fixtures/test2.tiff",
     "test/fixtures/exif_orientation.jpg",

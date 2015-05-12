@@ -8,7 +8,7 @@
 # No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
-# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
+# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG and WEBP files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
 # In this case FastImage reads the file in chunks of 256 bytes until
@@ -76,7 +76,7 @@ class FastImage
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
   # :raise_on_failure => true in the options.
   #
-  # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD and WEBP files.
+  # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG and WEBP files.
   #
   # === Example
   #
@@ -343,6 +343,14 @@ class FastImage
     def read_int
       read(2).unpack('n')[0]
     end
+
+    def read_string_int
+      value = []
+      while read(1) =~ /(\d)/
+        value << $1
+      end
+      value.join.to_i
+    end
   end
 
   class FiberStream # :nodoc:
@@ -410,6 +418,8 @@ class FastImage
       else
         raise UnknownImageType
       end
+    when "<?", "<s"
+      :svg
     else
       raise UnknownImageType
     end
@@ -595,5 +605,69 @@ class FastImage
 
   def parse_size_for_psd
     @stream.read(26).unpack("x14NN").reverse
+  end
+
+  class Svg # :nodoc:
+    def initialize(stream)
+      @stream = stream
+      parse_svg
+    end
+
+    def width_and_height
+      if @width && @height
+        [@width, @height]
+      elsif @width && @ratio
+        [@width, @width / @ratio]
+      elsif @height && @ratio
+        [@height * @ratio, @height]
+      end
+    end
+
+    private
+
+    def parse_svg
+      attr_name = []
+      state = nil
+
+      while (char = @stream.read(1)) && state != :stop do
+        case char
+        when "="
+          if attr_name.join =~ /width/i
+            @stream.read(1)
+            @width = @stream.read_string_int
+            return if @height
+          elsif attr_name.join =~ /height/i
+            @stream.read(1)
+            @height = @stream.read_string_int
+            return if @width
+          elsif attr_name.join =~ /viewbox/i
+            values = attr_value.split(/\s/)
+            @ratio = values[2].to_f / values[3].to_f
+          end
+        when /\w/
+          attr_name << char
+        when ">"
+          state = :stop if state == :started
+        else
+          state = :started if attr_name.join == "svg"
+          attr_name.clear
+        end
+      end
+    end
+
+    def attr_value
+      @stream.read(1)
+
+      value = []
+      while @stream.read(1) =~ /([^"])/
+        value << $1
+      end
+      value.join
+    end
+  end
+
+  def parse_size_for_svg
+    svg = Svg.new(@stream)
+    svg.width_and_height
   end
 end
