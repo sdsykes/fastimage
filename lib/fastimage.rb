@@ -20,6 +20,10 @@
 #
 # FastImage will follow up to 4 HTTP redirects to get the image.
 #
+# FastImage also provides a reader for the content length header provided in HTTP.
+# This may be useful to assess the file size of an image, but do not rely on it exclusively -
+# it will not be present in chunked responses for instance.
+#
 # === Examples
 #   require 'fastimage'
 #
@@ -231,6 +235,8 @@ class FastImage
 
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
 
+      @content_length = res.content_length
+
       read_fiber = Fiber.new do
         res.read_body do |str|
           Fiber.yield str
@@ -251,8 +257,6 @@ class FastImage
           end
         end
       end
-
-      @content_length = res.content_length
 
       parse_packets FiberStream.new(read_fiber)
 
