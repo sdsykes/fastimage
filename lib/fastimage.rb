@@ -48,7 +48,7 @@ require 'pathname'
 require 'zlib'
 
 class FastImage
-  attr_reader :size, :type
+  attr_reader :size, :type, :content_length
 
   attr_reader :bytes_read
 
@@ -251,6 +251,8 @@ class FastImage
           end
         end
       end
+
+      @content_length = res.content_length
 
       parse_packets FiberStream.new(read_fiber)
 

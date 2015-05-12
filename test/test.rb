@@ -299,4 +299,18 @@ class FastImageTest < Test::Unit::TestCase
   ensure
     %x{rm -f shell_test}
   end
+
+  def test_content_length
+    url = "#{TestUrl}with_content_length.gif"
+    FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
+
+    assert_equal 52, FastImage.new(url).content_length
+  end
+
+  def test_content_length_not_provided
+    url = "#{TestUrl}without_content_length.gif"
+    FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"))
+
+    assert_equal nil, FastImage.new(url).content_length
+  end
 end
