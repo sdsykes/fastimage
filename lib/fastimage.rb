@@ -162,10 +162,16 @@ class FastImage
   end
 
   def initialize(uri, options={})
-    @property = options[:type_only] ? :type : :size
-    @timeout = options[:timeout] || DefaultTimeout
-    @proxy_url = options[:proxy]
     @uri = uri
+    @options = {
+      :type_only        => false,
+      :timeout          => DefaultTimeout,
+      :raise_on_failure => false,
+      :proxy            => nil,
+      :http_header      => {}
+    }.merge(options)
+
+    @property = @options[:type_only] ? :type : :size
 
     if uri.respond_to?(:read)
       fetch_using_read(uri)
@@ -185,17 +191,17 @@ class FastImage
 
     uri.rewind if uri.respond_to?(:rewind)
 
-    raise SizeNotFound if options[:raise_on_failure] && @property == :size && !@size
+    raise SizeNotFound if @options[:raise_on_failure] && @property == :size && !@size
 
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET,
     ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
-    raise ImageFetchFailure if options[:raise_on_failure]
+    raise ImageFetchFailure if @options[:raise_on_failure]
   rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
-    raise ImageFetchFailure if options[:raise_on_failure]
+    raise ImageFetchFailure if @options[:raise_on_failure]
   rescue UnknownImageType
-    raise UnknownImageType if options[:raise_on_failure]
+    raise UnknownImageType if @options[:raise_on_failure]
   rescue CannotParseImage
-    if options[:raise_on_failure]
+    if @options[:raise_on_failure]
       if @property == :size
         raise SizeNotFound
       else
@@ -214,8 +220,10 @@ class FastImage
   end
 
   def fetch_using_http_from_parsed_uri
+    http_header = {'Accept-Encoding' => 'identity'}.merge(@options[:http_header])
+
     setup_http
-    @http.request_get(@parsed_uri.request_uri, 'Accept-Encoding' => 'identity') do |res|
+    @http.request_get(@parsed_uri.request_uri, http_header) do |res|
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
@@ -266,8 +274,8 @@ class FastImage
 
   def proxy_uri
     begin
-      if @proxy_url
-        proxy = Addressable::URI.parse(@proxy_url)
+      if @options[:proxy]
+        proxy = Addressable::URI.parse(@options[:proxy])
       else
         proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
       end
@@ -287,8 +295,8 @@ class FastImage
     end
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    @http.open_timeout = @timeout
-    @http.read_timeout = @timeout
+    @http.open_timeout = @options[:timeout]
+    @http.read_timeout = @options[:timeout]
   end
 
   def fetch_using_read(readable)
