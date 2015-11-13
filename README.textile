@@ -71,6 +71,8 @@ h4. Rails
 
 Add fastimage to your Gemfile, and bundle.
 
+bc. gem 'fastimage'
+
 Then you're off - just use @FastImage.size()@ and @FastImage.type()@ in your code as in the examples.
 
 h2. Documentation
