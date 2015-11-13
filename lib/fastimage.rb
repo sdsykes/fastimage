@@ -24,6 +24,10 @@
 # This may be useful to assess the file size of an image, but do not rely on it exclusively -
 # it will not be present in chunked responses for instance.
 #
+# FastImage accepts additional HTTP headers. This can be used to set a user agent
+# or referrer which some servers require. Pass an :http_header argument to specify headers,
+# e.g., :http_header => {'User-Agent' => 'Fake Browser'}.
+#
 # === Examples
 #   require 'fastimage'
 #

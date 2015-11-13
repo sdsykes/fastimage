@@ -34,7 +34,7 @@ FastImage normally replies will nil if it encounters an error, but you can pass 
 
 FastImage also provides a reader for the content length header provided in HTTP. This may be useful to assess the file size of an image, but do not rely on it exclusively - it will not be present in chunked responses for instance.
 
-FastImage accepts additional HTTP headers. This can be used to set a user agent or referrer which some server require. Pass a :http_header argument to specify headers, e.g., :http_header => {'User-Agent' => 'Fake Browser'}.
+FastImage accepts additional HTTP headers. This can be used to set a user agent or referrer which some servers require. Pass an :http_header argument to specify headers, e.g., :http_header => {'User-Agent' => 'Fake Browser'}.
 
 h2. Security
 
