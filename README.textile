@@ -138,6 +138,7 @@ h2. FastImage in other languages
 * "Go by rubenfonseca":https://github.com/rubenfonseca/fastimage
 * "PHP by tommoor":https://github.com/tommoor/fastimage
 * "Node.js by ShogunPanda":https://github.com/ShogunPanda/fastimage
+* "Objective C by kylehickinson":https://github.com/kylehickinson/FastImage
 
 h2. Licence
 
