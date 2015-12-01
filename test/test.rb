@@ -37,7 +37,8 @@ GoodFixtures = {
 
 BadFixtures = [
   "faulty.jpg",
-  "test_rgb.ct"
+  "test_rgb.ct",
+  "test.xml"
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
@@ -119,6 +120,12 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_raise_when_asked_when_image_type_not_known
     assert_raises(FastImage::UnknownImageType) do
       FastImage.size(TestUrl + "test_rgb.ct", :raise_on_failure=>true)
+    end
+  end
+
+  def test_should_raise_unknown_image_typ_when_file_is_non_svg_xml
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.size(TestUrl + "test.xml", :raise_on_failure=>true)
     end
   end
 

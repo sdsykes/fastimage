@@ -436,8 +436,14 @@ class FastImage
       else
         raise UnknownImageType
       end
-    when "<?", "<s"
+    when "<s"
       :svg
+    when "<?"
+      if @stream.peek(100).include?("<svg")
+        :svg
+      else
+        raise UnknownImageType
+      end
     else
       raise UnknownImageType
     end
