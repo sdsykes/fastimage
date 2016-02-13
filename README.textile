@@ -36,6 +36,8 @@ FastImage also provides a reader for the content length header provided in HTTP.
 
 FastImage accepts additional HTTP headers. This can be used to set a user agent or referrer which some servers require. Pass an :http_header argument to specify headers, e.g., :http_header => {'User-Agent' => 'Fake Browser'}.
 
+FastImage can give you information about the parsed display orientation of an image with Exif data (jpeg or tiff).
+
 h2. Security
 
 As of v1.6.7 FastImage no longer uses openuri to open files, but directly calls File.open. But take care to sanitise the strings passed to FastImage; it will try to read from whatever is passed.
@@ -59,6 +61,8 @@ FastImage.new("http://stephensykes.com/images/pngimage").content_length
 => 432
 FastImage.size("http://stephensykes.com/images/ss.com_x.gif", :http_header => {'User-Agent' => 'Fake Browser'})
 => [266, 56]
+FastImage.new("http://stephensykes.com/images/ExifOrientation3.jpg").orientation
+=> 3
 </code></pre>
 
 h2. Installation

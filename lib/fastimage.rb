@@ -28,6 +28,9 @@
 # or referrer which some servers require. Pass an :http_header argument to specify headers,
 # e.g., :http_header => {'User-Agent' => 'Fake Browser'}.
 #
+# FastImage can give you information about the parsed display orientation of an image with Exif 
+# data (jpeg or tiff).
+#
 # === Examples
 #   require 'fastimage'
 #
@@ -39,6 +42,10 @@
 #   => :gif
 #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
 #   => :gif
+#   FastImage.new("http://stephensykes.com/images/pngimage").content_length
+#   => 432
+#   FastImage.new("http://stephensykes.com/images/ExifOrientation3.jpg").orientation
+#   => 3
 #
 # === References
 # * http://snippets.dzone.com/posts/show/805
@@ -56,7 +63,7 @@ require 'pathname'
 require 'zlib'
 
 class FastImage
-  attr_reader :size, :type, :content_length
+  attr_reader :size, :type, :content_length, :orientation
 
   attr_reader :bytes_read
 
@@ -339,6 +346,13 @@ class FastImage
     begin
       result = send("parse_#{@property}")
       if result
+        # extract exif orientation if it was found
+        if @property == :size && result.size == 3
+          @orientation = result.pop
+        else
+          @orientation = 1
+        end
+        
         instance_variable_set("@#{@property}", result)
       else
         raise CannotParseImage
@@ -499,7 +513,7 @@ class FastImage
         height = @stream.read_int
         width = @stream.read_int
         width, height = height, width if @exif && @exif.rotated?
-        return [width, height]
+        return [width, height, @exif ? @exif.orientation : 1]
       end
     end
   end
@@ -558,14 +572,15 @@ class FastImage
   end
 
   class Exif # :nodoc:
-    attr_reader :width, :height
+    attr_reader :width, :height, :orientation
+
     def initialize(stream)
       @stream = stream
       parse_exif
     end
 
     def rotated?
-      @orientation && @orientation >= 5
+      @orientation >= 5
     end
 
     private
@@ -614,6 +629,8 @@ class FastImage
       @stream.read(offset - 8)
 
       parse_exif_ifd
+      
+      @orientation ||= 1
     end
 
   end
@@ -621,9 +638,9 @@ class FastImage
   def parse_size_for_tiff
     exif = Exif.new(@stream)
     if exif.rotated?
-      [exif.height, exif.width]
+      [exif.height, exif.width, exif.orientation]
     else
-      [exif.width, exif.height]
+      [exif.width, exif.height, exif.orientation]
     end
   end
 

@@ -68,6 +68,14 @@ GzipTestImgTruncated = "truncated_gzipped.jpg"
 FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImgTruncated}", :body => File.join(FixturePath, GzipTestImgTruncated), :content_encoding => "gzip")
 GzipTestImgSize = [970, 450]
 
+ExifDirectories = ["jpg", "tiff-ccitt-rle", "tiff-ccitt4", "tiff-jpeg6", "tiff-jpeg7", "tiff-lzw-bw", "tiff-lzw-color", "tiff-packbits-color"]
+ExifDirectories.each do |d|
+  1.upto(8) do |n|
+    fn = "#{d}/ExifOrientation#{n}.#{d == "jpg" ? "jpg" : "tif"}"
+    FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, "exif-orientation-testimages", fn))
+  end
+end
+
 class FastImageTest < Test::Unit::TestCase
   def test_should_report_type_correctly
     GoodFixtures.each do |fn, info|
@@ -319,5 +327,22 @@ class FastImageTest < Test::Unit::TestCase
     FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"))
 
     assert_equal nil, FastImage.new(url).content_length
+  end
+
+  def test_should_return_correct_exif_orientation
+    ExifDirectories.each do |d|
+      1.upto(8) do |n|
+        fn = "#{d}/ExifOrientation#{n}.#{d == "jpg" ? "jpg" : "tif"}"
+        url = "#{TestUrl}#{fn}"
+        fi = FastImage.new(url)
+        assert_equal [1240, 1754], fi.size
+        assert_equal n, fi.orientation
+      end
+    end
+  end
+
+  def test_should_return_orientation_1_when_exif_not_present
+    url = "#{TestUrl}test.gif"
+    assert_equal 1, FastImage.new(url).orientation
   end
 end
