@@ -292,6 +292,18 @@ class FastImageTest < Test::Unit::TestCase
     end
   end
 
+  def test_should_rewind_ios
+    string = File.read(File.join(FixturePath, "test.bmp"))
+    stringio = StringIO.new(string)
+    FastImage.type(stringio)
+    assert_equal 0, stringio.pos
+
+    string = File.read(File.join(FixturePath, "test.xml"))
+    stringio = StringIO.new(string)
+    FastImage.type(stringio)
+    assert_equal 0, stringio.pos
+  end
+
   def test_gzipped_file
     url = "http://example.nowhere/#{GzipTestImg}"
     assert_equal([970, 450], FastImage.size(url))
