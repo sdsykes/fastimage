@@ -147,18 +147,3 @@ h2. FastImage in other languages
 h2. Licence
 
 MIT, see file "MIT-LICENSE":MIT-LICENSE
-
-h2. Contributors
-
-Pull requests and suggestions are always welcome. Thanks to all the contributors!
-
-* @felixbuenemann
-* @speedmax
-* @sebastianludwig
-* @benjaminjackson
-* @muffinista
-* @marcandre
-* @apanzerj
-* @forresty
-* kikihakiem
-* lulalalalistia
