@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = %q{fastimage}
-  s.version = "1.9.0"
+  s.version = "2.0.0"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.required_ruby_version = '>= 1.9.2'
   s.authors = ["Stephen Sykes"]
-  s.date = %q{2016-02-13}
+  s.date = %q{2016-03-24}
   s.description = %q{FastImage finds the size or type of an image given its uri by fetching as little as needed.}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = [
@@ -14,7 +14,6 @@ Gem::Specification.new do |s|
     "MIT-LICENSE",
     "README.textile",
     "lib/fastimage.rb",
-    "lib/fastimage/fbr.rb",
   ]
   s.homepage = %q{http://github.com/sdsykes/fastimage}
   s.rdoc_options = ["--charset=UTF-8"]

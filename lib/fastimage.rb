@@ -57,7 +57,6 @@
 
 require 'net/https'
 require 'addressable/uri'
-require 'fastimage/fbr.rb'
 require 'delegate'
 require 'pathname'
 require 'zlib'

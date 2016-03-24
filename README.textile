@@ -67,6 +67,12 @@ FastImage.new("http://stephensykes.com/images/ExifOrientation3.jpg").orientation
 
 h2. Installation
 
+h4. Required Ruby version
+
+FastImage version 2.0.0 and above work with Ruby 1.9.2 and above.
+
+FastImage version 1.9.0 was the last version that supported Ruby 1.8.7.
+
 h4. Gem
 
 bc. gem install fastimage
