@@ -48,7 +48,6 @@
 #   => 3
 #
 # === References
-# * http://snippets.dzone.com/posts/show/805
 # * http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/
 # * http://pennysmalls.wordpress.com/2008/08/19/find-jpeg-dimensions-fast-in-pure-ruby-no-ima/
 # * https://rubygems.org/gems/imagesize

@@ -136,7 +136,6 @@ Finished tests in 1.033640s, 23.2189 tests/s, 82.2337 assertions/s.
 h2. References
 
 * "Pennysmalls - Find jpeg dimensions fast in pure Ruby, no image library needed":http://pennysmalls.wordpress.com/2008/08/19/find-jpeg-dimensions-fast-in-pure-ruby-no-ima/
-* "DZone - Determine Image Size":http://snippets.dzone.com/posts/show/805
 * "Antti Kupila - Getting JPG dimensions with AS3 without loading the entire file":http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/
 * "imagesize gem":https://rubygems.org/gems/imagesize
 * "EXIF Reader":https://github.com/remvee/exifr
