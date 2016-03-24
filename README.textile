@@ -1,3 +1,4 @@
+!https://img.shields.io/gem/dt/fastimage.svg!:https://rubygems.org/gems/fastimage
 !https://travis-ci.org/sdsykes/fastimage.png?branch=master!:https://travis-ci.org/sdsykes/fastimage
 
 h1. FastImage
