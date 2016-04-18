@@ -463,7 +463,9 @@ class FastImage
   end
 
   def parse_size_for_ico
-    @stream.read(8)[6..7].unpack('CC').map{|byte| byte == 0 ? 256 : byte }
+    icons = @stream.read(6)[4..5].unpack('v').first
+    sizes = icons.times.map { @stream.read(16).unpack('C2').map { |x| x == 0 ? 256 : x } }.sort_by { |w,h| w * h }
+    sizes.last
   end
   alias_method :parse_size_for_cur, :parse_size_for_ico
 
