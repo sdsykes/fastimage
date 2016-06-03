@@ -1,0 +1,13 @@
+<smil><!--The SMIL file must start with a <smil> tag and end with the </smil> closing tag.-->
+   <head> <!-- SMIL file header, specify meta information in the multimedia presentation-->
+                <meta name="author" content="Jane Morales"/>
+                <meta name="title" content="Multimedia My Way"/>
+                <meta name="copyright" content="(c)1998 Jane Morales"/>
+   </head>
+   <body>
+                <seq> <!-- To play clips in sequence, use the <seq> ("sequence") SMIL tag.-->
+                  <audio src="audio/newsong.wav"/>
+                  <audio src="audio/oldsong.snd"/>
+                </seq>
+    </body>
+</smil>
