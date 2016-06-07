@@ -417,6 +417,24 @@ class FastImage
       @pos += n
       result
     end
+
+    def skip(n)
+      discarded = 0
+      fetched = @str[@strpos..-1].size
+      while n > fetched
+        discarded += @str[@strpos..-1].size
+        new_string = @read_fiber.resume
+        raise CannotParseImage if !new_string
+
+        new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
+
+        fetched += new_string.size
+        @str = new_string
+        @strpos = 0
+      end
+      @strpos = @strpos + n - discarded
+      @pos += n
+    end
   end
 
   class IOStream < SimpleDelegator # :nodoc:
@@ -481,7 +499,7 @@ class FastImage
     loop do
       @state = case @state
       when nil
-        @stream.read(2)
+        @stream.skip(2)
         :started
       when :started
         @stream.read_byte == 0xFF ? :sof : :started
@@ -507,10 +525,10 @@ class FastImage
         end
       when :skipframe
         skip_chars = @stream.read_int - 2
-        @stream.read(skip_chars)
+        @stream.skip(skip_chars)
         :started
       when :readsize
-        s = @stream.read(3)
+        @stream.skip(3)
         height = @stream.read_int
         width = @stream.read_int
         width, height = height, width if @exif && @exif.rotated?
@@ -554,7 +572,7 @@ class FastImage
   end
 
   def parse_size_vp8l
-    @stream.read(1) # 0x2f
+    @stream.skip(1) # 0x2f
     b1, b2, b3, b4 = @stream.read(4).bytes.to_a
     [1 + (((b2 & 0x3f) << 8) | b1), 1 + (((b4 & 0xF) << 10) | (b3 << 2) | ((b2 & 0xC0) >> 6))]
   end
@@ -627,7 +645,11 @@ class FastImage
       @stream.read(2) # 42
 
       offset = @stream.read(4).unpack(@long)[0]
-      @stream.read(offset - 8)
+      if @stream.respond_to?(:skip)
+        @stream.skip(offset - 8)
+      else
+        @stream.read(offset - 8)
+      end
 
       parse_exif_ifd
       
