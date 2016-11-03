@@ -358,4 +358,11 @@ class FastImageTest < Test::Unit::TestCase
     url = "#{TestUrl}test.gif"
     assert_equal 1, FastImage.new(url).orientation
   end
+  
+  def test_should_raise_when_handling_invalid_ico_files
+    stringio = StringIO.new("\x00\x00003")
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.type(stringio, :raise_on_failure => true)
+    end
+  end
 end
