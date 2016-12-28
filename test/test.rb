@@ -56,6 +56,9 @@ LargeImageFetchLimit = 2  # seconds
 HTTPSImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
 HTTPSImageInfo = [:jpeg, [9545, 6623]]
 
+DataUriImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAD0lEQVR42mNk+M9QzwAEAAmGAYCF+yOnAAAAAElFTkSuQmCC"
+DataUriImageInfo = [:png, [2, 1]]
+
 GoodFixtures.each do |fn, info|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
 end
@@ -358,11 +361,19 @@ class FastImageTest < Test::Unit::TestCase
     url = "#{TestUrl}test.gif"
     assert_equal 1, FastImage.new(url).orientation
   end
-  
+
   def test_should_raise_when_handling_invalid_ico_files
     stringio = StringIO.new("\x00\x00003")
     assert_raises(FastImage::UnknownImageType) do
       FastImage.type(stringio, :raise_on_failure => true)
+    end
+  end
+
+  def test_should_support_data_uri_scheme_images
+    assert_equal DataUriImageInfo[0], FastImage.type(DataUriImage)
+    assert_equal DataUriImageInfo[1], FastImage.size(DataUriImage)
+    assert_raises(FastImage::ImageFetchFailure) do
+      FastImage.type("data:", :raise_on_failure => true)
     end
   end
 end
