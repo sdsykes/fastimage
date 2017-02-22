@@ -55,10 +55,17 @@
 #
 
 require 'net/https'
-require 'addressable/uri'
 require 'delegate'
 require 'pathname'
 require 'zlib'
+require 'uri'
+
+# see http://stackoverflow.com/questions/5208851/i/41048816#41048816
+if RUBY_VERSION < "2.2"
+  module URI
+    DEFAULT_PARSER = Parser.new(:HOSTNAME => "(?:(?:[a-zA-Z\\d](?:[-\\_a-zA-Z\\d]*[a-zA-Z\\d])?)\\.)*(?:[a-zA-Z](?:[-\\_a-zA-Z\\d]*[a-zA-Z\\d])?)\\.?")
+  end
+end
 
 class FastImage
   attr_reader :size, :type, :content_length, :orientation
@@ -186,8 +193,8 @@ class FastImage
       fetch_using_read(uri)
     else
       begin
-        @parsed_uri = Addressable::URI.parse(uri)
-      rescue Addressable::URI::InvalidURIError
+        @parsed_uri = URI.parse(uri)
+      rescue URI::InvalidURIError
         fetch_using_file_open
       else
         if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
@@ -237,14 +244,14 @@ class FastImage
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          newly_parsed_uri = Addressable::URI.parse(res['Location'])
+          newly_parsed_uri = URI.parse(res['Location'])
           # The new location may be relative - check for that
           if newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
             @parsed_uri.path = res['Location']
           else
             @parsed_uri = newly_parsed_uri
           end
-        rescue Addressable::URI::InvalidURIError
+        rescue URI::InvalidURIError
         else
           fetch_using_http_from_parsed_uri
           break
@@ -285,11 +292,11 @@ class FastImage
   def proxy_uri
     begin
       if @options[:proxy]
-        proxy = Addressable::URI.parse(@options[:proxy])
+        proxy = URI.parse(@options[:proxy])
       else
-        proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? Addressable::URI.parse(ENV['http_proxy']) : nil
+        proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? URI.parse(ENV['http_proxy']) : nil
       end
-    rescue Addressable::URI::InvalidURIError
+    rescue URI::InvalidURIError
       proxy = nil
     end
     proxy
@@ -299,9 +306,9 @@ class FastImage
     proxy = proxy_uri
 
     if proxy
-      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.inferred_port)
+      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.port)
     else
-      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.inferred_port)
+      @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.port)
     end
     @http.use_ssl = (@parsed_uri.scheme == "https")
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE

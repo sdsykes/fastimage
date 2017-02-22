@@ -365,4 +365,8 @@ class FastImageTest < Test::Unit::TestCase
       FastImage.type(stringio, :raise_on_failure => true)
     end
   end
+  
+  def test_should_work_with_domains_with_underscores
+    assert_equal :gif, FastImage.type("http://foo_bar.inbro.net/images/p.gif")
+  end
 end
