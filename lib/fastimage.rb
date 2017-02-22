@@ -249,7 +249,9 @@ class FastImage
         begin
           newly_parsed_uri = URI.parse(res['Location'])
           # The new location may be relative - check for that
-          if newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
+          if protocol_relative_url?(res['Location'])
+            @parsed_uri = newly_parsed_uri.tap { |obj| obj.scheme = @parsed_uri.scheme }
+          elsif newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
             @parsed_uri.path = res['Location']
           else
             @parsed_uri = newly_parsed_uri
@@ -290,6 +292,10 @@ class FastImage
 
       break  # needed to actively quit out of the fetch
     end
+  end
+
+  def protocol_relative_url?(url)
+    url.start_with?("//")
   end
 
   def proxy_uri
