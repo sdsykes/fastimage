@@ -375,5 +375,8 @@ class FastImageTest < Test::Unit::TestCase
     assert_raises(FastImage::ImageFetchFailure) do
       FastImage.type("data:", :raise_on_failure => true)
     end
+  
+  def test_should_work_with_domains_with_underscores
+    assert_equal :gif, FastImage.type("http://foo_bar.inbro.net/images/p.gif")
   end
 end
