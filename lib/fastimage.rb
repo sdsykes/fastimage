@@ -60,7 +60,6 @@ require 'pathname'
 require 'zlib'
 require 'base64'
 require 'uri'
-require 'fiber'
 
 # see http://stackoverflow.com/questions/5208851/i/41048816#41048816
 if RUBY_VERSION < "2.2"
