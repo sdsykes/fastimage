@@ -466,7 +466,7 @@ class FastImage
     when "<s"
       :svg
     when "<?"
-      :svg if @stream.peek(200).include?("<svg")
+      :svg if @stream.peek(143).include?("<svg")
     end
     
     parsed_type or raise UnknownImageType
