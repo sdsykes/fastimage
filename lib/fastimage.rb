@@ -250,7 +250,7 @@ class FastImage
           newly_parsed_uri = URI.parse(res['Location'])
           # The new location may be relative - check for that
           if protocol_relative_url?(res['Location'])
-            @parsed_uri = newly_parsed_uri.tap { |obj| obj.scheme = @parsed_uri.scheme }
+            @parsed_uri = URI.parse("#{@parsed_uri.scheme}:#{res['Location']}")
           elsif newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
             @parsed_uri.path = res['Location']
           else
