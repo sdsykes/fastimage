@@ -37,6 +37,8 @@ FastImage accepts additional HTTP headers. This can be used to set a user agent 
 
 FastImage can give you information about the parsed display orientation of an image with Exif data (jpeg or tiff).
 
+FastImage also handles "Data URIs":https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs correctly.
+
 h2. Security
 
 As of v1.6.7 FastImage no longer uses @openuri@ to open files, but directly calls @File.open@. Take care to sanitise the strings passed to FastImage; it will try to read from whatever is passed.
@@ -62,6 +64,8 @@ FastImage.size("http://stephensykes.com/images/ss.com_x.gif", :http_header => {'
 => [266, 56]
 FastImage.new("http://stephensykes.com/images/ExifOrientation3.jpg").orientation
 => 3
+FastImage.size("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==")
+=> [1, 1]
 </code></pre>
 
 h2. Installation
@@ -97,7 +101,7 @@ irb> uri = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_13
 irb> puts Benchmark.measure {open(uri, 'rb') {|fh| p ImageSize.new(fh).size}}
 [9545, 6623]
   0.680000   0.250000   0.930000 (  7.571887)
-  
+
 irb> puts Benchmark.measure {p FastImage.size(uri)}
 [9545, 6623]
   0.010000   0.000000   0.010000 (  0.090640)
@@ -114,7 +118,7 @@ irb> uri = "http://upload.wikimedia.org/wikipedia/commons/1/11/Shinbutsureijoush
 irb> puts Benchmark.measure {open(uri, 'rb') {|fh| p ImageSize.new(fh).size}}
 [1120, 1559]
   1.080000   0.370000   1.450000 ( 13.766962)
-  
+
 irb> puts Benchmark.measure {p FastImage.size(uri)}
 [1120, 1559]
   3.490000   3.810000   7.300000 ( 11.754315)
@@ -124,8 +128,8 @@ h2. Tests
 
 You'll need to @gem install fakeweb@ and possibly also  @gem install test-unit@ to be able to run the tests.
 
-bc.. $ ruby test.rb 
-Run options: 
+bc.. $ ruby test.rb
+Run options:
 
 # Running tests:
 

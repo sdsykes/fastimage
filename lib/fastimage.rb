@@ -28,7 +28,7 @@
 # or referrer which some servers require. Pass an :http_header argument to specify headers,
 # e.g., :http_header => {'User-Agent' => 'Fake Browser'}.
 #
-# FastImage can give you information about the parsed display orientation of an image with Exif 
+# FastImage can give you information about the parsed display orientation of an image with Exif
 # data (jpeg or tiff).
 #
 # === Examples
@@ -58,6 +58,7 @@ require 'net/https'
 require 'delegate'
 require 'pathname'
 require 'zlib'
+require 'base64'
 require 'uri'
 
 # see http://stackoverflow.com/questions/5208851/i/41048816#41048816
@@ -191,6 +192,8 @@ class FastImage
 
     if uri.respond_to?(:read)
       fetch_using_read(uri)
+    elsif uri.start_with?('data:')
+      fetch_using_base64(uri)
     else
       begin
         @parsed_uri = URI.parse(uri)
@@ -358,7 +361,7 @@ class FastImage
         else
           @orientation = 1
         end
-        
+
         instance_variable_set("@#{@property}", result)
       else
         raise CannotParseImage
@@ -371,6 +374,11 @@ class FastImage
   def parse_size
     @type = parse_type unless @type
     send("parse_size_for_#{@type}")
+  end
+
+  def fetch_using_base64(uri)
+    data = uri.split(',')[1]
+    fetch_using_read StringIO.new(Base64.decode64(data))
   end
 
   module StreamUtil # :nodoc:
@@ -475,7 +483,7 @@ class FastImage
     when "<?"
       :svg if @stream.peek(100).include?("<svg")
     end
-    
+
     parsed_type or raise UnknownImageType
   end
 
@@ -651,7 +659,7 @@ class FastImage
       end
 
       parse_exif_ifd
-      
+
       @orientation ||= 1
     end
 
