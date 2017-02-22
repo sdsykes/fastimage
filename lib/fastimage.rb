@@ -466,7 +466,7 @@ class FastImage
     when "<s"
       :svg
     when "<?"
-      :svg if @stream.peek(100).include?("<svg")
+      :svg if @stream.peek(200).include?("<svg")
     end
     
     parsed_type or raise UnknownImageType
@@ -704,10 +704,17 @@ class FastImage
           attr_name << char
         when ">"
           state = :stop if state == :started
+        when '!'
+          skip_to_end_of_tag
         else
           state = :started if attr_name.join == "svg"
           attr_name.clear
         end
+      end
+    end
+
+    def skip_to_end_of_tag
+      while @stream.read(1) != '>' do
       end
     end
 
