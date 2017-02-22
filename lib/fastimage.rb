@@ -60,6 +60,7 @@ require 'pathname'
 require 'zlib'
 require 'base64'
 require 'uri'
+require 'fiber'
 
 # see http://stackoverflow.com/questions/5208851/i/41048816#41048816
 if RUBY_VERSION < "2.2"
@@ -417,6 +418,7 @@ class FastImage
       @str = ''
     end
 
+    # Peeking beyond the end of the input will raise
     def peek(n)
       while @strpos + n - 1 >= @str.size
         unused_str = @str[@strpos..-1]
@@ -488,7 +490,14 @@ class FastImage
     when "<s"
       :svg
     when "<?"
-      :svg if @stream.peek(100).include?("<svg")
+      # Peek 10 more chars each time, and if end of file is reached just raise
+      # unknown. We assume the <svg tag cannot be within 10 chars of the end of
+      # the file, and is within the first 250 chars.
+      begin
+        :svg if (1..25).detect {|n| @stream.peek(10 * n).include?("<svg")}
+      rescue FiberError
+        nil
+      end
     end
 
     parsed_type or raise UnknownImageType
@@ -724,10 +733,12 @@ class FastImage
           end
         when /\w/
           attr_name << char
+        when "<"
+          attr_name = [char]
         when ">"
           state = :stop if state == :started
         else
-          state = :started if attr_name.join == "svg"
+          state = :started if attr_name.join == "<svg"
           attr_name.clear
         end
       end
