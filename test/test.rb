@@ -152,6 +152,10 @@ class FastImageTest < Test::Unit::TestCase
       assert_equal info[1], FastImage.size(File.join(FixturePath, fn))
     end
   end
+  
+  def test_should_report_content_length_correctly_for_local_files
+    assert_equal 3296, FastImage.new(File.join(FixturePath, "test.bmp")).content_length
+  end
 
   def test_should_report_type_correctly_for_ios
     GoodFixtures.each do |fn, info|

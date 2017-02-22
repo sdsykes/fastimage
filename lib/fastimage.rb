@@ -350,6 +350,7 @@ class FastImage
   end
 
   def fetch_using_file_open
+    @content_length = File.size?(@uri)
     File.open(@uri) do |s|
       fetch_using_read(s)
     end
