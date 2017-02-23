@@ -22,14 +22,30 @@ GoodFixtures = {
   "test.tiff"=>[:tiff, [85, 67]],
   "test2.tiff"=>[:tiff, [333, 225]],
   "test.psd"=>[:psd, [17, 32]],
-  "exif_orientation.jpg"=>[:jpeg, [2448, 3264]],
-  "infinite.jpg"=>[:jpeg, [160,240]]
-  }
+  "exif_orientation.jpg"=>[:jpeg, [600, 450]],
+  "infinite.jpg"=>[:jpeg, [160,240]],
+  "orient_2.jpg"=>[:jpeg, [230,408]],
+  "favicon.ico" => [:ico, [16, 16]],
+  "favicon2.ico" => [:ico, [32, 32]],
+  "man.ico" => [:ico, [256, 256]],
+  "test.cur" => [:cur, [32, 32]],
+  "webp_vp8x.webp" => [:webp, [386, 395]],
+  "webp_vp8l.webp" => [:webp, [386, 395]],
+  "webp_vp8.webp" => [:webp, [550, 368]],
+  "test.svg" => [:svg, [200, 300]],
+  "test_partial_viewport.svg" => [:svg, [860, 400]],
+  "test2.svg" => [:svg, [366, 271]],
+  "test3.svg" => [:svg, [255, 48]]
+}
 
 BadFixtures = [
   "faulty.jpg",
-  "test.ico"
+  "test_rgb.ct",
+  "test.xml"
 ]
+# man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
+# test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
+# test.cur courtesy of http://mimidestino.deviantart.com/art/Clash-Of-Clans-Dragon-Cursor-s-Punteros-489070897
 
 TestUrl = "http://example.nowhere/"
 
@@ -42,11 +58,28 @@ LargeImageFetchLimit = 2  # seconds
 HTTPSImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
 HTTPSImageInfo = [:jpeg, [9545, 6623]]
 
+DataUriImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAD0lEQVR42mNk+M9QzwAEAAmGAYCF+yOnAAAAAElFTkSuQmCC"
+DataUriImageInfo = [:png, [2, 1]]
+
 GoodFixtures.each do |fn, info|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
 end
 BadFixtures.each do |fn|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
+end
+
+GzipTestImg = "gzipped.jpg"
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImg}", :body => File.join(FixturePath, GzipTestImg), :content_encoding => "gzip")
+GzipTestImgTruncated = "truncated_gzipped.jpg"
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImgTruncated}", :body => File.join(FixturePath, GzipTestImgTruncated), :content_encoding => "gzip")
+GzipTestImgSize = [970, 450]
+
+ExifDirectories = ["jpg", "tiff-ccitt-rle", "tiff-ccitt4", "tiff-jpeg6", "tiff-jpeg7", "tiff-lzw-bw", "tiff-lzw-color", "tiff-packbits-color"]
+ExifDirectories.each do |d|
+  1.upto(8) do |n|
+    fn = "#{d}/ExifOrientation#{n}.#{d == "jpg" ? "jpg" : "tif"}"
+    FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, "exif-orientation-testimages", fn))
+  end
 end
 
 class FastImageTest < Test::Unit::TestCase
@@ -73,7 +106,7 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_return_nil_when_image_type_not_known
-    assert_nil FastImage.size(TestUrl + "test.ico")
+    assert_nil FastImage.size(TestUrl + "test_rgb.ct")
   end
 
   def test_should_return_nil_if_timeout_occurs
@@ -100,7 +133,13 @@ class FastImageTest < Test::Unit::TestCase
 
   def test_should_raise_when_asked_when_image_type_not_known
     assert_raises(FastImage::UnknownImageType) do
-      FastImage.size(TestUrl + "test.ico", :raise_on_failure=>true)
+      FastImage.size(TestUrl + "test_rgb.ct", :raise_on_failure=>true)
+    end
+  end
+
+  def test_should_raise_unknown_image_typ_when_file_is_non_svg_xml
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.size(TestUrl + "test.xml", :raise_on_failure=>true)
     end
   end
 
@@ -114,6 +153,10 @@ class FastImageTest < Test::Unit::TestCase
     GoodFixtures.each do |fn, info|
       assert_equal info[1], FastImage.size(File.join(FixturePath, fn))
     end
+  end
+  
+  def test_should_report_content_length_correctly_for_local_files
+    assert_equal 3296, FastImage.new(File.join(FixturePath, "test.bmp")).content_length
   end
 
   def test_should_report_type_correctly_for_ios
@@ -156,7 +199,7 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_return_nil_when_image_type_not_known_for_local_file
-    assert_nil FastImage.size(File.join(FixturePath, "test.ico"))
+    assert_nil FastImage.size(File.join(FixturePath, "test_rgb.ct"))
   end
 
   def test_should_raise_when_asked_to_when_size_cannot_be_found_for_local_file
@@ -198,6 +241,12 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
   end
 
+  def test_should_handle_permanent_redirect_with_protocol_relative_url
+    url = "http://example.nowhere/foo.jpeg"
+    register_redirect(url, "//example.nowhere/" + GoodFixtures.keys.first)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
+  end
+
   def register_redirect(from, to)
     resp = Net::HTTPMovedPermanently.new(1.0, 302, "Moved")
     resp['Location'] = to
@@ -229,8 +278,118 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal actual_size, size
   end
 
+  def test_should_fetch_via_proxy_option
+    file = "test.gif"
+    actual_size = GoodFixtures[file][1]
+    size = FastImage.size(TestUrl + file, :proxy => "http://my.proxy.host:8080")
+    assert_equal actual_size, size
+  end
+
   def test_should_handle_https_image
     size = FastImage.size(HTTPSImage)
     assert_equal HTTPSImageInfo[1], size
+  end
+
+  require 'pathname'
+  def test_should_handle_pathname
+    # bad.jpg does not have the size info in the first 256 bytes
+    # so this tests if we are able to read past that using a
+    # Pathname (which has a different API from an IO).
+    path = Pathname.new(File.join(FixturePath, "bad.jpg"))
+    assert_equal([500,500], FastImage.size(path))
+  end
+
+  def test_should_report_type_and_size_correctly_for_stringios
+    GoodFixtures.each do |fn, info|
+      string = File.read(File.join(FixturePath, fn))
+      stringio = StringIO.new(string)
+      assert_equal info[0], FastImage.type(stringio)
+      assert_equal info[1], FastImage.size(stringio)
+    end
+  end
+
+  def test_should_rewind_ios
+    string = File.read(File.join(FixturePath, "test.bmp"))
+    stringio = StringIO.new(string)
+    FastImage.type(stringio)
+    assert_equal 0, stringio.pos
+
+    string = File.read(File.join(FixturePath, "test.xml"))
+    stringio = StringIO.new(string)
+    FastImage.type(stringio)
+    assert_equal 0, stringio.pos
+  end
+
+  def test_gzipped_file
+    url = "http://example.nowhere/#{GzipTestImg}"
+    assert_equal([970, 450], FastImage.size(url))
+  end
+
+  def test_truncated_gzipped_file
+    url = "http://example.nowhere/#{GzipTestImgTruncated}"
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(url, :raise_on_failure => true)
+    end
+  end
+
+  def test_cant_access_shell
+    url = "|echo>shell_test"
+    %x{rm -f shell_test}
+    FastImage.size(url)
+    assert_raises(Errno::ENOENT) do
+      File.open("shell_test")
+    end
+  ensure
+    %x{rm -f shell_test}
+  end
+
+  def test_content_length
+    url = "#{TestUrl}with_content_length.gif"
+    FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
+
+    assert_equal 52, FastImage.new(url).content_length
+  end
+
+  def test_content_length_not_provided
+    url = "#{TestUrl}without_content_length.gif"
+    FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"))
+
+    assert_equal nil, FastImage.new(url).content_length
+  end
+
+  def test_should_return_correct_exif_orientation
+    ExifDirectories.each do |d|
+      1.upto(8) do |n|
+        fn = "#{d}/ExifOrientation#{n}.#{d == "jpg" ? "jpg" : "tif"}"
+        url = "#{TestUrl}#{fn}"
+        fi = FastImage.new(url)
+        assert_equal [1240, 1754], fi.size
+        assert_equal n, fi.orientation
+      end
+    end
+  end
+
+  def test_should_return_orientation_1_when_exif_not_present
+    url = "#{TestUrl}test.gif"
+    assert_equal 1, FastImage.new(url).orientation
+  end
+
+  def test_should_raise_when_handling_invalid_ico_files
+    stringio = StringIO.new("\x00\x00003")
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.type(stringio, :raise_on_failure => true)
+    end
+  end
+
+  def test_should_support_data_uri_scheme_images
+    assert_equal DataUriImageInfo[0], FastImage.type(DataUriImage)
+    assert_equal DataUriImageInfo[1], FastImage.size(DataUriImage)
+    assert_raises(FastImage::ImageFetchFailure) do
+      FastImage.type("data:", :raise_on_failure => true)
+    end
+  end
+  
+  def test_should_work_with_domains_with_underscores
+    assert_equal :gif, FastImage.type("http://foo_bar.inbro.net/images/p.gif")
   end
 end
