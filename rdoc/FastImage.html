@@ -2,76 +2,73 @@
 
 <html>
 <head>
-<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+<meta charset="UTF-8">
 
 <title>class FastImage - RDoc Documentation</title>
-
-<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
 </script>
 
-<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
-<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
 
 
-<body id="top" class="class">
-<nav id="metadata">
-  <nav id="home-section" class="section">
-  <h3 class="section-header">
-    <a href="./index.html">Home</a>
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
     <a href="./table_of_contents.html#classes">Classes</a>
     <a href="./table_of_contents.html#methods">Methods</a>
-  </h3>
-</nav>
+  </div>
+</div>
 
-
-  <nav id="search-section" class="section project-section" class="initially-hidden">
+    <div id="search-section" role="search" class="project-section initially-hidden">
   <form action="#" method="get" accept-charset="utf-8">
-    <h3 class="section-header">
-      <input type="text" name="search" placeholder="Search" id="search-field"
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
-    </h3>
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
   </form>
+</div>
 
-  <ul id="search-results" class="initially-hidden"></ul>
-</nav>
-
+  </div>
 
   
-
-  <div id="file-metadata">
-    <nav id="file-list-section" class="section">
-  <h3 class="section-header">Defined In</h3>
-  <ul>
-    <li>lib/fastimage.rb
-  </ul>
-</nav>
-
-    
-  </div>
 
   <div id="class-metadata">
     
-    <nav id="parent-class-section" class="section">
-  <h3 class="section-header">Parent</h3>
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
   
   <p class="link">Object
   
-</nav>
+</div>
 
     
     
     <!-- Method Quickref -->
-<nav id="method-list-section" class="section">
-  <h3 class="section-header">Methods</h3>
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
 
-  <ul class="link-list">
+  <ul class="link-list" role="directory">
     
     <li ><a href="#method-c-new">::new</a>
     
@@ -80,31 +77,19 @@
     <li ><a href="#method-c-type">::type</a>
     
   </ul>
-</nav>
-
-  </div>
-
-  <div id="project-metadata">
-    
-    <nav id="classindex-section" class="section project-section">
-  <h3 class="section-header">Class and Module Index</h3>
-
-  <ul class="link-list">
-  
-    <li><a href="./FastImage.html">FastImage</a>
-  
-  </ul>
-</nav>
+</div>
 
   </div>
 </nav>
 
-<div id="documentation">
-  <h1 class="class">class FastImage</h1>
+<main role="main" aria-labelledby="class-FastImage">
+  <h1 id="class-FastImage" class="class">
+    class FastImage
+  </h1>
 
-  <div id="description" class="description">
+  <section class="description">
     
-  </div><!-- description -->
+  </section>
 
   
   
@@ -115,19 +100,20 @@
     
 
     
-    <!-- Constants -->
-    <section id="constants-list" class="section">
-      <h3 class="section-header">Constants</h3>
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
       <dl>
       
         <dt id="DefaultTimeout">DefaultTimeout
         
-        <dd class="description">
+        <dd>
         
       
         <dt id="LocalFileChunkSize">LocalFileChunkSize
         
-        <dd class="description">
+        <dd>
         
       
       </dl>
@@ -135,14 +121,41 @@
     
 
     
-    <!-- Attributes -->
-    <section id="attribute-method-details" class="method-section section">
-      <h3 class="section-header">Attributes</h3>
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
 
       
       <div id="attribute-i-bytes_read" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">bytes_read</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-content_length" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">content_length</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-orientation" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">orientation</span><span
             class="attribute-access-type">[R]</span>
         </div>
 
@@ -179,13 +192,14 @@
         </div>
       </div>
       
-    </section><!-- attribute-method-details -->
+    </section>
     
 
-    <!-- Methods -->
     
-     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
-      <h3 class="section-header">Public Class Methods</h3>
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
 
     
       <div id="method-c-new" class="method-detail ">
@@ -207,41 +221,48 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 157</span>
+            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 180</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>={})
-  <span class="ruby-ivar">@property</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:type_only</span>] <span class="ruby-operator">?</span> <span class="ruby-value">:type</span> <span class="ruby-operator">:</span> <span class="ruby-value">:size</span>
-  <span class="ruby-ivar">@timeout</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:timeout</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">DefaultTimeout</span>
   <span class="ruby-ivar">@uri</span> = <span class="ruby-identifier">uri</span>
+  <span class="ruby-ivar">@options</span> = {
+    <span class="ruby-value">:type_only</span>        =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>,
+    <span class="ruby-value">:timeout</span>          =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">DefaultTimeout</span>,
+    <span class="ruby-value">:raise_on_failure</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>,
+    <span class="ruby-value">:proxy</span>            =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+    <span class="ruby-value">:http_header</span>      =<span class="ruby-operator">&gt;</span> {}
+  }.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">options</span>)
+
+  <span class="ruby-ivar">@property</span> = <span class="ruby-ivar">@options</span>[<span class="ruby-value">:type_only</span>] <span class="ruby-operator">?</span> <span class="ruby-value">:type</span> <span class="ruby-operator">:</span> <span class="ruby-value">:size</span>
 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:read</span>)
     <span class="ruby-identifier">fetch_using_read</span>(<span class="ruby-identifier">uri</span>)
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">start_with?</span>(<span class="ruby-string">&#39;data:&#39;</span>)
+    <span class="ruby-identifier">fetch_using_base64</span>(<span class="ruby-identifier">uri</span>)
   <span class="ruby-keyword">else</span>
     <span class="ruby-keyword">begin</span>
-      <span class="ruby-ivar">@parsed_uri</span> = <span class="ruby-constant">Addressable</span><span class="ruby-operator">::</span><span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">uri</span>)
-    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Addressable</span><span class="ruby-operator">::</span><span class="ruby-constant">URI</span><span class="ruby-operator">::</span><span class="ruby-constant">InvalidURIError</span>
-      <span class="ruby-identifier">fetch_using_open_uri</span>
+      <span class="ruby-ivar">@parsed_uri</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">uri</span>)
+    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">URI</span><span class="ruby-operator">::</span><span class="ruby-constant">InvalidURIError</span>
+      <span class="ruby-identifier">fetch_using_file_open</span>
     <span class="ruby-keyword">else</span>
       <span class="ruby-keyword">if</span> <span class="ruby-ivar">@parsed_uri</span>.<span class="ruby-identifier">scheme</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;http&quot;</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@parsed_uri</span>.<span class="ruby-identifier">scheme</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;https&quot;</span>
         <span class="ruby-identifier">fetch_using_http</span>
       <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">fetch_using_open_uri</span>
+        <span class="ruby-identifier">fetch_using_file_open</span>
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 
-  <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">rewind</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:rewind</span>)
-
-  <span class="ruby-identifier">raise</span> <span class="ruby-constant">SizeNotFound</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@property</span> <span class="ruby-operator">==</span> <span class="ruby-value">:size</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@size</span>
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">SizeNotFound</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@options</span>[<span class="ruby-value">:raise_on_failure</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@property</span> <span class="ruby-operator">==</span> <span class="ruby-value">:size</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@size</span>
 
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Timeout</span><span class="ruby-operator">::</span><span class="ruby-constant">Error</span>, <span class="ruby-constant">SocketError</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ECONNREFUSED</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">EHOSTUNREACH</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ECONNRESET</span>,
   <span class="ruby-constant">ImageFetchFailure</span>, <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTPBadResponse</span>, <span class="ruby-constant">EOFError</span>, <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ENOENT</span>
-  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ImageFetchFailure</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ImageFetchFailure</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@options</span>[<span class="ruby-value">:raise_on_failure</span>]
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">NoMethodError</span>  <span class="ruby-comment"># 1.8.7p248 can raise this due to a net/http bug</span>
-  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ImageFetchFailure</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ImageFetchFailure</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@options</span>[<span class="ruby-value">:raise_on_failure</span>]
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">UnknownImageType</span>
-  <span class="ruby-identifier">raise</span> <span class="ruby-constant">UnknownImageType</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">UnknownImageType</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@options</span>[<span class="ruby-value">:raise_on_failure</span>]
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">CannotParseImage</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:raise_on_failure</span>]
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@options</span>[<span class="ruby-value">:raise_on_failure</span>]
     <span class="ruby-keyword">if</span> <span class="ruby-ivar">@property</span> <span class="ruby-operator">==</span> <span class="ruby-value">:size</span>
       <span class="ruby-identifier">raise</span> <span class="ruby-constant">SizeNotFound</span>
     <span class="ruby-keyword">else</span>
@@ -249,15 +270,18 @@
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 
+<span class="ruby-keyword">ensure</span>
+  <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">rewind</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:rewind</span>)
+
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- new-source -->
+          </div>
           
         </div>
 
         
 
         
-      </div><!-- new-method -->
+      </div>
 
     
       <div id="method-c-size" class="method-detail ">
@@ -286,35 +310,36 @@ size the image for any reason, then pass :raise_on_failure =&gt; true in
 the options.</p>
 
 <p><a href="FastImage.html">FastImage</a> knows about GIF, JPEG, BMP, TIFF,
-PNG and PSD files.</p>
+ICO, CUR, PNG, PSD, SVG and WEBP files.</p>
 
-<h3 id="method-c-size-label-Example">Example<span><a href="#method-c-size-label-Example">&para;</a> <a href="#documentation">&uarr;</a></span></h3>
+<h3 id="method-c-size-label-Example">Example<span><a href="#method-c-size-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;fastimage&#39;</span>
+<pre>require &#39;fastimage&#39;
 
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://stephensykes.com/images/ss.com_x.gif&quot;</span>)
-=<span class="ruby-operator">&gt;</span> [<span class="ruby-value">266</span>, <span class="ruby-value">56</span>]
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://stephensykes.com/images/pngimage&quot;</span>)
-=<span class="ruby-operator">&gt;</span> [<span class="ruby-value">16</span>, <span class="ruby-value">16</span>]
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg&quot;</span>)
-=<span class="ruby-operator">&gt;</span> [<span class="ruby-value">500</span>, <span class="ruby-value">375</span>]
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://www-ece.rice.edu/~wakin/images/lena512.bmp&quot;</span>)
-=<span class="ruby-operator">&gt;</span> [<span class="ruby-value">512</span>, <span class="ruby-value">512</span>]
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;test/fixtures/test.jpg&quot;</span>)
-=<span class="ruby-operator">&gt;</span> [<span class="ruby-value">882</span>, <span class="ruby-value">470</span>]
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://pennysmalls.com/does_not_exist&quot;</span>)
-=<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://pennysmalls.com/does_not_exist&quot;</span>, :<span class="ruby-identifier">raise_on_failure=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">true</span>)
-=<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">raises</span> <span class="ruby-constant">FastImage</span><span class="ruby-operator">::</span><span class="ruby-constant">ImageFetchFailure</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://stephensykes.com/favicon.ico&quot;</span>, :<span class="ruby-identifier">raise_on_failure=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">true</span>)
-=<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">raises</span> <span class="ruby-constant">FastImage</span><span class="ruby-operator">::</span><span class="ruby-constant">UnknownImageType</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://stephensykes.com/favicon.ico&quot;</span>, :<span class="ruby-identifier">raise_on_failure=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">true</span>, :<span class="ruby-identifier">timeout=</span><span class="ruby-operator">&gt;</span><span class="ruby-value">0.01</span>)
-=<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">raises</span> <span class="ruby-constant">FastImage</span><span class="ruby-operator">::</span><span class="ruby-constant">ImageFetchFailure</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">size</span>(<span class="ruby-string">&quot;http://stephensykes.com/images/faulty.jpg&quot;</span>, :<span class="ruby-identifier">raise_on_failure=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">true</span>)
-=<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">raises</span> <span class="ruby-constant">FastImage</span><span class="ruby-operator">::</span><span class="ruby-constant">SizeNotFound</span>
-</pre>
+FastImage.size(&quot;http://stephensykes.com/images/ss.com_x.gif&quot;)
+=&gt; [266, 56]
+FastImage.size(&quot;http://stephensykes.com/images/pngimage&quot;)
+=&gt; [16, 16]
+FastImage.size(&quot;http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg&quot;)
+=&gt; [500, 375]
+FastImage.size(&quot;http://www-ece.rice.edu/~wakin/images/lena512.bmp&quot;)
+=&gt; [512, 512]
+FastImage.size(&quot;test/fixtures/test.jpg&quot;)
+=&gt; [882, 470]
+FastImage.size(&quot;http://pennysmalls.com/does_not_exist&quot;)
+=&gt; nil
+FastImage.size(&quot;http://pennysmalls.com/does_not_exist&quot;, :raise_on_failure=&gt;true)
+=&gt; raises FastImage::ImageFetchFailure
+FastImage.size(&quot;http://stephensykes.com/favicon.ico&quot;, :raise_on_failure=&gt;true)
+=&gt; [16, 16]
+FastImage.size(&quot;http://stephensykes.com/images/squareBlue.icns&quot;, :raise_on_failure=&gt;true)
+=&gt; raises FastImage::UnknownImageType
+FastImage.size(&quot;http://stephensykes.com/favicon.ico&quot;, :raise_on_failure=&gt;true, :timeout=&gt;0.01)
+=&gt; raises FastImage::ImageFetchFailure
+FastImage.size(&quot;http://stephensykes.com/images/faulty.jpg&quot;, :raise_on_failure=&gt;true)
+=&gt; raises FastImage::SizeNotFound</pre>
 
-<h3 id="method-c-size-label-Supported+options">Supported options<span><a href="#method-c-size-label-Supported+options">&para;</a> <a href="#documentation">&uarr;</a></span></h3>
+<h3 id="method-c-size-label-Supported+options">Supported options<span><a href="#method-c-size-label-Supported+options">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list label-list"><dt>:timeout
 <dd>
 <p>Overrides the default timeout of 2 seconds.  Applies both to reading from
@@ -329,18 +354,18 @@ found for any reason.</p>
 
           
           <div class="method-source-code" id="size-source">
-            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 111</span>
+            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 134</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">size</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>={})
   <span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>).<span class="ruby-identifier">size</span>
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- size-source -->
+          </div>
           
         </div>
 
         
 
         
-      </div><!-- size-method -->
+      </div>
 
     
       <div id="method-c-type" class="method-detail ">
@@ -368,31 +393,30 @@ number_of_seconds in the options.</p>
 find the type of the image for any reason, then pass :raise_on_failure
 =&gt; true in the options.</p>
 
-<h3 id="method-c-type-label-Example">Example<span><a href="#method-c-type-label-Example">&para;</a> <a href="#documentation">&uarr;</a></span></h3>
+<h3 id="method-c-type-label-Example">Example<span><a href="#method-c-type-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;fastimage&#39;</span>
+<pre>require &#39;fastimage&#39;
 
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;http://stephensykes.com/images/ss.com_x.gif&quot;</span>)
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">gif</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;http://stephensykes.com/images/pngimage&quot;</span>)
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">png</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg&quot;</span>)
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">jpeg</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;http://www-ece.rice.edu/~wakin/images/lena512.bmp&quot;</span>)
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">bmp</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;test/fixtures/test.jpg&quot;</span>)
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">jpeg</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;http://pennysmalls.com/does_not_exist&quot;</span>)
-=<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>
-<span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&quot;/some/local/file.gif&quot;</span>, <span class="ruby-string">&quot;r&quot;</span>) {<span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span> <span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-identifier">io</span>)}
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">gif</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;test/fixtures/test.tiff&quot;</span>)
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">tiff</span>
-<span class="ruby-constant">FastImage</span>.<span class="ruby-identifier">type</span>(<span class="ruby-string">&quot;test/fixtures/test.psd&quot;</span>)
-=<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">psd</span>
-</pre>
+FastImage.type(&quot;http://stephensykes.com/images/ss.com_x.gif&quot;)
+=&gt; :gif
+FastImage.type(&quot;http://stephensykes.com/images/pngimage&quot;)
+=&gt; :png
+FastImage.type(&quot;http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg&quot;)
+=&gt; :jpeg
+FastImage.type(&quot;http://www-ece.rice.edu/~wakin/images/lena512.bmp&quot;)
+=&gt; :bmp
+FastImage.type(&quot;test/fixtures/test.jpg&quot;)
+=&gt; :jpeg
+FastImage.type(&quot;http://stephensykes.com/does_not_exist&quot;)
+=&gt; nil
+File.open(&quot;/some/local/file.gif&quot;, &quot;r&quot;) {|io| FastImage.type(io)}
+=&gt; :gif
+FastImage.type(&quot;test/fixtures/test.tiff&quot;)
+=&gt; :tiff
+FastImage.type(&quot;test/fixtures/test.psd&quot;)
+=&gt; :psd</pre>
 
-<h3 id="method-c-type-label-Supported+options">Supported options<span><a href="#method-c-type-label-Supported+options">&para;</a> <a href="#documentation">&uarr;</a></span></h3>
+<h3 id="method-c-type-label-Supported+options">Supported options<span><a href="#method-c-type-label-Supported+options">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list label-list"><dt>:timeout
 <dd>
 <p>Overrides the default timeout of 2 seconds.  Applies both to reading from
@@ -407,30 +431,29 @@ found for any reason.</p>
 
           
           <div class="method-source-code" id="type-source">
-            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 153</span>
+            <pre><span class="ruby-comment"># File lib/fastimage.rb, line 176</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">type</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>={})
   <span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-value">:type_only=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">true</span>)).<span class="ruby-identifier">type</span>
 <span class="ruby-keyword">end</span></pre>
-          </div><!-- type-source -->
+          </div>
           
         </div>
 
         
 
         
-      </div><!-- type-method -->
+      </div>
 
     
-    </section><!-- public-class-method-details -->
+    </section>
   
-  </section><!-- 5Buntitled-5D -->
+  </section>
+</main>
 
-</div><!-- documentation -->
 
-
-<footer id="validator-badges">
-  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
-  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 4.0.0.
-  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.3.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
