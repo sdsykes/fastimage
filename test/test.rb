@@ -33,6 +33,7 @@ GoodFixtures = {
   "webp_vp8l.webp" => [:webp, [386, 395]],
   "webp_vp8.webp" => [:webp, [550, 368]],
   "test.svg" => [:svg, [200, 300]],
+  "test2.svg" => [:svg, [366, 271]],
   "test_partial_viewport.svg" => [:svg, [860, 400]]
 }
 
