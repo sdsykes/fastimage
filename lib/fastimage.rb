@@ -190,6 +190,8 @@ class FastImage
 
     @property = @options[:type_only] ? :type : :size
 
+    @type, @state = nil
+
     if uri.respond_to?(:read)
       fetch_using_read(uri)
     elsif uri.start_with?('data:')
@@ -431,7 +433,7 @@ class FastImage
         @strpos = 0
       end
 
-      result = @str[@strpos..(@strpos + n - 1)]
+      @str[@strpos..(@strpos + n - 1)]
     end
 
     def read(n)
@@ -518,6 +520,7 @@ class FastImage
   end
 
   def parse_size_for_jpeg
+    exif = nil
     loop do
       @state = case @state
       when nil
@@ -533,7 +536,7 @@ class FastImage
           io = StringIO.new(data)
           if io.read(4) == "Exif"
             io.read(2)
-            @exif = Exif.new(IOStream.new(io)) rescue nil
+            exif = Exif.new(IOStream.new(io)) rescue nil
           end
           :started
         when 0xe0..0xef
@@ -553,8 +556,8 @@ class FastImage
         @stream.skip(3)
         height = @stream.read_int
         width = @stream.read_int
-        width, height = height, width if @exif && @exif.rotated?
-        return [width, height, @exif ? @exif.orientation : 1]
+        width, height = height, width if exif && exif.rotated?
+        return [width, height, exif ? exif.orientation : 1]
       end
     end
   end
@@ -575,7 +578,7 @@ class FastImage
 
   def parse_size_for_webp
     vp8 = @stream.read(16)[12..15]
-    len = @stream.read(4).unpack("V")
+    _len = @stream.read(4).unpack("V")
     case vp8
     when "VP8 "
       parse_size_vp8
@@ -617,6 +620,7 @@ class FastImage
 
     def initialize(stream)
       @stream = stream
+      @width, @height, @orientation = nil
       parse_exif
     end
 
@@ -696,6 +700,7 @@ class FastImage
   class Svg # :nodoc:
     def initialize(stream)
       @stream = stream
+      @width, @height, @ratio, @viewbox_width, @viewbox_height = nil
       parse_svg
     end
 
@@ -732,7 +737,7 @@ class FastImage
             return if @width
           elsif attr_name.join =~ /viewbox/i
             values = attr_value.split(/\s/)
-            if values[2].to_f > 0 && values[3].to_f > 0 
+            if values[2].to_f > 0 && values[3].to_f > 0
               @ratio = values[2].to_f / values[3].to_f
               @viewbox_width = values[2].to_i
               @viewbox_height = values[3].to_i
