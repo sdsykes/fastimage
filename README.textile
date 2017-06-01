@@ -92,6 +92,10 @@ h2. Documentation
 
 "http://sdsykes.github.io/fastimage/rdoc/FastImage.html":http://sdsykes.github.io/fastimage/rdoc/FastImage.html
 
+h2. Maintainer
+
+FastImage is maintained by Stephen Sykes (@sdsykes). Support this project by using "LibPixel":https://libpixel.com cloud based image resizing and processing service.
+
 h2. Benchmark
 
 It's way faster than conventional methods (for example the image_size gem) for most types of file when fetching over the wire.
