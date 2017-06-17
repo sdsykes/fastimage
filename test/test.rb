@@ -1,5 +1,3 @@
-require 'rubygems'
-
 require 'test/unit'
 
 PathHere = File.dirname(__FILE__)
