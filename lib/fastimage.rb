@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # coding: ASCII-8BIT
 
 # FastImage finds the size or type of an image given its uri.
