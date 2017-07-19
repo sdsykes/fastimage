@@ -1,28 +1,28 @@
-require 'test/unit'
+require "test/unit"
 
 PathHere = File.dirname(__FILE__)
 $LOAD_PATH.unshift File.join(PathHere, "..", "lib")
 
-require 'fastimage'
-require 'fakeweb'
+require "fastimage"
+require "fakeweb"
 
 FixturePath = File.join(PathHere, "fixtures")
 
 GoodFixtures = {
-  "test.bmp"=>[:bmp, [40, 27]],
-  "test2.bmp"=>[:bmp, [1920, 1080]],
-  "test.gif"=>[:gif, [17, 32]],
-  "test.jpg"=>[:jpeg, [882, 470]],
-  "test.png"=>[:png, [30, 20]],
-  "test2.jpg"=>[:jpeg, [250, 188]],
-  "test3.jpg"=>[:jpeg, [630, 367]],
-  "test4.jpg"=>[:jpeg, [1485, 1299]],
-  "test.tiff"=>[:tiff, [85, 67]],
-  "test2.tiff"=>[:tiff, [333, 225]],
-  "test.psd"=>[:psd, [17, 32]],
-  "exif_orientation.jpg"=>[:jpeg, [600, 450]],
-  "infinite.jpg"=>[:jpeg, [160,240]],
-  "orient_2.jpg"=>[:jpeg, [230,408]],
+  "test.bmp" => [:bmp, [40, 27]],
+  "test2.bmp" => [:bmp, [1920, 1080]],
+  "test.gif" => [:gif, [17, 32]],
+  "test.jpg" => [:jpeg, [882, 470]],
+  "test.png" => [:png, [30, 20]],
+  "test2.jpg" => [:jpeg, [250, 188]],
+  "test3.jpg" => [:jpeg, [630, 367]],
+  "test4.jpg" => [:jpeg, [1485, 1299]],
+  "test.tiff" => [:tiff, [85, 67]],
+  "test2.tiff" => [:tiff, [333, 225]],
+  "test.psd" => [:psd, [17, 32]],
+  "exif_orientation.jpg" => [:jpeg, [600, 450]],
+  "infinite.jpg" => [:jpeg, [160, 240]],
+  "orient_2.jpg" => [:jpeg, [230, 408]],
   "favicon.ico" => [:ico, [16, 16]],
   "favicon2.ico" => [:ico, [32, 32]],
   "man.ico" => [:ico, [256, 256]],
@@ -34,49 +34,49 @@ GoodFixtures = {
   "test_partial_viewport.svg" => [:svg, [860, 400]],
   "test2.svg" => [:svg, [366, 271]],
   "test3.svg" => [:svg, [255, 48]]
-}
+}.freeze
 
 BadFixtures = [
   "faulty.jpg",
   "test_rgb.ct",
   "test.xml"
-]
+].freeze
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
 # test.cur courtesy of http://mimidestino.deviantart.com/art/Clash-Of-Clans-Dragon-Cursor-s-Punteros-489070897
 
-TestUrl = "http://example.nowhere/"
+TestUrl = "http://example.nowhere/".freeze
 
 # this image fetch allows me to really test that fastimage is truly fast
 # but it's not ideal relying on external resources and connectivity speed
-LargeImage = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
-LargeImageInfo = [:jpeg, [9545, 6623]]
-LargeImageFetchLimit = 2  # seconds
+LargeImage = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg".freeze
+LargeImageInfo = [:jpeg, [9545, 6623]].freeze
+LargeImageFetchLimit = 2 # seconds
 
-HTTPSImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
-HTTPSImageInfo = [:jpeg, [9545, 6623]]
+HTTPSImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg".freeze
+HTTPSImageInfo = [:jpeg, [9545, 6623]].freeze
 
-DataUriImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAD0lEQVR42mNk+M9QzwAEAAmGAYCF+yOnAAAAAElFTkSuQmCC"
-DataUriImageInfo = [:png, [2, 1]]
+DataUriImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAD0lEQVR42mNk+M9QzwAEAAmGAYCF+yOnAAAAAElFTkSuQmCC".freeze
+DataUriImageInfo = [:png, [2, 1]].freeze
 
-GoodFixtures.each do |fn, info|
-  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
+GoodFixtures.each do |fn, _info|
+  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", body: File.join(FixturePath, fn))
 end
 BadFixtures.each do |fn|
-  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
+  FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", body: File.join(FixturePath, fn))
 end
 
-GzipTestImg = "gzipped.jpg"
-FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImg}", :body => File.join(FixturePath, GzipTestImg), :content_encoding => "gzip")
-GzipTestImgTruncated = "truncated_gzipped.jpg"
-FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImgTruncated}", :body => File.join(FixturePath, GzipTestImgTruncated), :content_encoding => "gzip")
-GzipTestImgSize = [970, 450]
+GzipTestImg = "gzipped.jpg".freeze
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImg}", body: File.join(FixturePath, GzipTestImg), content_encoding: "gzip")
+GzipTestImgTruncated = "truncated_gzipped.jpg".freeze
+FakeWeb.register_uri(:get, "#{TestUrl}#{GzipTestImgTruncated}", body: File.join(FixturePath, GzipTestImgTruncated), content_encoding: "gzip")
+GzipTestImgSize = [970, 450].freeze
 
-ExifDirectories = ["jpg", "tiff-ccitt-rle", "tiff-ccitt4", "tiff-jpeg6", "tiff-jpeg7", "tiff-lzw-bw", "tiff-lzw-color", "tiff-packbits-color"]
+ExifDirectories = ["jpg", "tiff-ccitt-rle", "tiff-ccitt4", "tiff-jpeg6", "tiff-jpeg7", "tiff-lzw-bw", "tiff-lzw-color", "tiff-packbits-color"].freeze
 ExifDirectories.each do |d|
   1.upto(8) do |n|
-    fn = "#{d}/ExifOrientation#{n}.#{d == "jpg" ? "jpg" : "tif"}"
-    FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, "exif-orientation-testimages", fn))
+    fn = "#{d}/ExifOrientation#{n}.#{d == 'jpg' ? 'jpg' : 'tif'}"
+    FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", body: File.join(FixturePath, "exif-orientation-testimages", fn))
   end
 end
 
@@ -84,14 +84,14 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_report_type_correctly
     GoodFixtures.each do |fn, info|
       assert_equal info[0], FastImage.type(TestUrl + fn)
-      assert_equal info[0], FastImage.type(TestUrl + fn, :raise_on_failure=>true)
+      assert_equal info[0], FastImage.type(TestUrl + fn, raise_on_failure: true)
     end
   end
 
   def test_should_report_size_correctly
     GoodFixtures.each do |fn, info|
       assert_equal info[1], FastImage.size(TestUrl + fn)
-      assert_equal info[1], FastImage.size(TestUrl + fn, :raise_on_failure=>true)
+      assert_equal info[1], FastImage.size(TestUrl + fn, raise_on_failure: true)
     end
   end
 
@@ -108,36 +108,36 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_return_nil_if_timeout_occurs
-    assert_nil FastImage.size("http://example.com/does_not_exist", :timeout=>0.001)
+    assert_nil FastImage.size("http://example.com/does_not_exist", timeout: 0.001)
   end
 
   def test_should_raise_when_asked_to_when_size_cannot_be_found
     assert_raises(FastImage::SizeNotFound) do
-      FastImage.size(TestUrl + "faulty.jpg", :raise_on_failure=>true)
+      FastImage.size(TestUrl + "faulty.jpg", raise_on_failure: true)
     end
   end
 
   def test_should_raise_when_asked_to_when_timeout_occurs
     assert_raises(FastImage::ImageFetchFailure) do
-      FastImage.size("http://example.com/does_not_exist", :timeout=>0.001, :raise_on_failure=>true)
+      FastImage.size("http://example.com/does_not_exist", timeout: 0.001, raise_on_failure: true)
     end
   end
 
   def test_should_raise_when_asked_to_when_file_does_not_exist
     assert_raises(FastImage::ImageFetchFailure) do
-      FastImage.size("http://www.google.com/does_not_exist_at_all", :raise_on_failure=>true)
+      FastImage.size("http://www.google.com/does_not_exist_at_all", raise_on_failure: true)
     end
   end
 
   def test_should_raise_when_asked_when_image_type_not_known
     assert_raises(FastImage::UnknownImageType) do
-      FastImage.size(TestUrl + "test_rgb.ct", :raise_on_failure=>true)
+      FastImage.size(TestUrl + "test_rgb.ct", raise_on_failure: true)
     end
   end
 
   def test_should_raise_unknown_image_typ_when_file_is_non_svg_xml
     assert_raises(FastImage::UnknownImageType) do
-      FastImage.size(TestUrl + "test.xml", :raise_on_failure=>true)
+      FastImage.size(TestUrl + "test.xml", raise_on_failure: true)
     end
   end
 
@@ -152,7 +152,7 @@ class FastImageTest < Test::Unit::TestCase
       assert_equal info[1], FastImage.size(File.join(FixturePath, fn))
     end
   end
-  
+
   def test_should_report_content_length_correctly_for_local_files
     assert_equal 3296, FastImage.new(File.join(FixturePath, "test.bmp")).content_length
   end
@@ -202,14 +202,14 @@ class FastImageTest < Test::Unit::TestCase
 
   def test_should_raise_when_asked_to_when_size_cannot_be_found_for_local_file
     assert_raises(FastImage::SizeNotFound) do
-      FastImage.size(File.join(FixturePath, "faulty.jpg"), :raise_on_failure=>true)
+      FastImage.size(File.join(FixturePath, "faulty.jpg"), raise_on_failure: true)
     end
   end
 
   def test_should_handle_permanent_redirect
     url = "http://example.com/foo.jpeg"
     register_redirect(url, TestUrl + GoodFixtures.keys.first)
-    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, raise_on_failure: true)
   end
 
   def test_should_handle_permanent_redirect_4_times
@@ -218,7 +218,7 @@ class FastImageTest < Test::Unit::TestCase
     register_redirect("http://example.com/foo2.jpeg", "http://example.com/foo3.jpeg")
     register_redirect("http://example.com/foo3.jpeg", "http://example.com/foo4.jpeg")
     register_redirect("http://example.com/foo4.jpeg", TestUrl + GoodFixtures.keys.first)
-    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(first_url, :raise_on_failure=>true)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(first_url, raise_on_failure: true)
   end
 
   def test_should_raise_on_permanent_redirect_5_times
@@ -229,26 +229,26 @@ class FastImageTest < Test::Unit::TestCase
     register_redirect("http://example.com/foo4.jpeg", "http://example.com/foo5.jpeg")
     register_redirect("http://example.com/foo5.jpeg", TestUrl + GoodFixtures.keys.first)
     assert_raises(FastImage::ImageFetchFailure) do
-      FastImage.size(first_url, :raise_on_failure=>true)
+      FastImage.size(first_url, raise_on_failure: true)
     end
   end
 
   def test_should_handle_permanent_redirect_with_relative_url
     url = "http://example.nowhere/foo.jpeg"
     register_redirect(url, "/" + GoodFixtures.keys.first)
-    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, raise_on_failure: true)
   end
 
   def test_should_handle_permanent_redirect_with_protocol_relative_url
     url = "http://example.nowhere/foo.jpeg"
     register_redirect(url, "//example.nowhere/" + GoodFixtures.keys.first)
-    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, raise_on_failure: true)
   end
 
   def register_redirect(from, to)
     resp = Net::HTTPMovedPermanently.new(1.0, 302, "Moved")
-    resp['Location'] = to
-    FakeWeb.register_uri(:get, from, :response=>resp)
+    resp["Location"] = to
+    FakeWeb.register_uri(:get, from, response: resp)
   end
 
   def test_should_fetch_info_of_large_image_faster_than_downloading_the_whole_thing
@@ -270,31 +270,31 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_fetch_via_proxy
     file = "test.gif"
     actual_size = GoodFixtures[file][1]
-    ENV['http_proxy'] = "http://my.proxy.host:8080"
+    ENV["http_proxy"] = "http://my.proxy.host:8080"
     size = FastImage.size(TestUrl + file)
-    ENV['http_proxy'] = nil
+    ENV["http_proxy"] = nil
     assert_equal actual_size, size
   end
 
   def test_should_fetch_via_proxy_option
     file = "test.gif"
     actual_size = GoodFixtures[file][1]
-    size = FastImage.size(TestUrl + file, :proxy => "http://my.proxy.host:8080")
+    size = FastImage.size(TestUrl + file, proxy: "http://my.proxy.host:8080")
     assert_equal actual_size, size
   end
 
   def test_should_handle_https_image
-    size = FastImage.size(HTTPSImage)
+    size = FastImage.size(HTTPSImage, raise_on_failure: true)
     assert_equal HTTPSImageInfo[1], size
   end
 
-  require 'pathname'
+  require "pathname"
   def test_should_handle_pathname
     # bad.jpg does not have the size info in the first 256 bytes
     # so this tests if we are able to read past that using a
     # Pathname (which has a different API from an IO).
     path = Pathname.new(File.join(FixturePath, "bad.jpg"))
-    assert_equal([500,500], FastImage.size(path))
+    assert_equal([500, 500], FastImage.size(path))
   end
 
   def test_should_report_type_and_size_correctly_for_stringios
@@ -326,31 +326,31 @@ class FastImageTest < Test::Unit::TestCase
   def test_truncated_gzipped_file
     url = "http://example.nowhere/#{GzipTestImgTruncated}"
     assert_raises(FastImage::SizeNotFound) do
-      FastImage.size(url, :raise_on_failure => true)
+      FastImage.size(url, raise_on_failure: true)
     end
   end
 
   def test_cant_access_shell
     url = "|echo>shell_test"
-    %x{rm -f shell_test}
+    `rm -f shell_test`
     FastImage.size(url)
     assert_raises(Errno::ENOENT) do
       File.open("shell_test")
     end
   ensure
-    %x{rm -f shell_test}
+    `rm -f shell_test`
   end
 
   def test_content_length
     url = "#{TestUrl}with_content_length.gif"
-    FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
+    FakeWeb.register_uri(:get, url, body: File.join(FixturePath, "test.jpg"), content_length: 52)
 
     assert_equal 52, FastImage.new(url).content_length
   end
 
   def test_content_length_not_provided
     url = "#{TestUrl}without_content_length.gif"
-    FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"))
+    FakeWeb.register_uri(:get, url, body: File.join(FixturePath, "test.jpg"))
 
     assert_equal nil, FastImage.new(url).content_length
   end
@@ -358,7 +358,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_return_correct_exif_orientation
     ExifDirectories.each do |d|
       1.upto(8) do |n|
-        fn = "#{d}/ExifOrientation#{n}.#{d == "jpg" ? "jpg" : "tif"}"
+        fn = "#{d}/ExifOrientation#{n}.#{d == 'jpg' ? 'jpg' : 'tif'}"
         url = "#{TestUrl}#{fn}"
         fi = FastImage.new(url)
         assert_equal [1240, 1754], fi.size
@@ -375,7 +375,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_raise_when_handling_invalid_ico_files
     stringio = StringIO.new("\x00\x00003")
     assert_raises(FastImage::UnknownImageType) do
-      FastImage.type(stringio, :raise_on_failure => true)
+      FastImage.type(stringio, raise_on_failure: true)
     end
   end
 
@@ -383,10 +383,10 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal DataUriImageInfo[0], FastImage.type(DataUriImage)
     assert_equal DataUriImageInfo[1], FastImage.size(DataUriImage)
     assert_raises(FastImage::ImageFetchFailure) do
-      FastImage.type("data:", :raise_on_failure => true)
+      FastImage.type("data:", raise_on_failure: true)
     end
   end
-  
+
   def test_should_work_with_domains_with_underscores
     assert_equal :gif, FastImage.type("http://foo_bar.inbro.net/images/p.gif")
   end
