@@ -55,17 +55,17 @@
 # * https://github.com/remvee/exifr
 #
 
-require 'net/https'
-require 'delegate'
-require 'pathname'
-require 'zlib'
-require 'base64'
-require 'uri'
+require "net/https"
+require "delegate"
+require "pathname"
+require "zlib"
+require "base64"
+require "uri"
 
 # see http://stackoverflow.com/questions/5208851/i/41048816#41048816
 if RUBY_VERSION < "2.2"
   module URI
-    DEFAULT_PARSER = Parser.new(:HOSTNAME => "(?:(?:[a-zA-Z\\d](?:[-\\_a-zA-Z\\d]*[a-zA-Z\\d])?)\\.)*(?:[a-zA-Z](?:[-\\_a-zA-Z\\d]*[a-zA-Z\\d])?)\\.?")
+    DEFAULT_PARSER = Parser.new(HOSTNAME: '(?:(?:[a-zA-Z\\d](?:[-\\_a-zA-Z\\d]*[a-zA-Z\\d])?)\\.)*(?:[a-zA-Z](?:[-\\_a-zA-Z\\d]*[a-zA-Z\\d])?)\\.?')
   end
 end
 
@@ -133,7 +133,7 @@ class FastImage
   # [:raise_on_failure]
   #   If set to true causes an exception to be raised if the image size cannot be found for any reason.
   #
-  def self.size(uri, options={})
+  def self.size(uri, options = {})
     new(uri, options).size
   end
 
@@ -175,18 +175,18 @@ class FastImage
   # [:raise_on_failure]
   #   If set to true causes an exception to be raised if the image type cannot be found for any reason.
   #
-  def self.type(uri, options={})
-    new(uri, options.merge(:type_only=>true)).type
+  def self.type(uri, options = {})
+    new(uri, options.merge(type_only: true)).type
   end
 
-  def initialize(uri, options={})
+  def initialize(uri, options = {})
     @uri = uri
     @options = {
-      :type_only        => false,
-      :timeout          => DefaultTimeout,
-      :raise_on_failure => false,
-      :proxy            => nil,
-      :http_header      => {}
+      type_only: false,
+      timeout: DefaultTimeout,
+      raise_on_failure: false,
+      proxy: nil,
+      http_header: {}
     }.merge(options)
 
     @property = @options[:type_only] ? :type : :size
@@ -195,7 +195,7 @@ class FastImage
 
     if uri.respond_to?(:read)
       fetch_using_read(uri)
-    elsif uri.start_with?('data:')
+    elsif uri.start_with?("data:")
       fetch_using_base64(uri)
     else
       begin
@@ -212,11 +212,10 @@ class FastImage
     end
 
     raise SizeNotFound if @options[:raise_on_failure] && @property == :size && !@size
-
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET,
-    ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
+         ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
     raise ImageFetchFailure if @options[:raise_on_failure]
-  rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
+  rescue NoMethodError # 1.8.7p248 can raise this due to a net/http bug
     raise ImageFetchFailure if @options[:raise_on_failure]
   rescue UnknownImageType
     raise UnknownImageType if @options[:raise_on_failure]
@@ -228,10 +227,8 @@ class FastImage
         raise ImageFetchFailure
       end
     end
-
   ensure
     uri.rewind if uri.respond_to?(:rewind)
-
   end
 
   private
@@ -243,19 +240,19 @@ class FastImage
   end
 
   def fetch_using_http_from_parsed_uri
-    http_header = {'Accept-Encoding' => 'identity'}.merge(@options[:http_header])
+    http_header = { "Accept-Encoding" => "identity" }.merge(@options[:http_header])
 
     setup_http
     @http.request_get(@parsed_uri.request_uri, http_header) do |res|
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          newly_parsed_uri = URI.parse(res['Location'])
+          newly_parsed_uri = URI.parse(res["Location"])
           # The new location may be relative - check for that
-          if protocol_relative_url?(res['Location'])
+          if protocol_relative_url?(res["Location"])
             @parsed_uri = URI.parse("#{@parsed_uri.scheme}:#{res['Location']}")
           elsif newly_parsed_uri.scheme != "http" && newly_parsed_uri.scheme != "https"
-            @parsed_uri.path = res['Location']
+            @parsed_uri.path = res["Location"]
           else
             @parsed_uri = newly_parsed_uri
           end
@@ -276,8 +273,8 @@ class FastImage
         end
       end
 
-      case res['content-encoding']
-      when 'deflate', 'gzip', 'x-gzip'
+      case res["content-encoding"]
+      when "deflate", "gzip", "x-gzip"
         begin
           gzip = Zlib::GzipReader.new(FiberStream.new(read_fiber))
         rescue FiberError, Zlib::GzipFile::Error
@@ -293,7 +290,7 @@ class FastImage
 
       parse_packets FiberStream.new(read_fiber)
 
-      break  # needed to actively quit out of the fetch
+      break # needed to actively quit out of the fetch
     end
   end
 
@@ -306,7 +303,7 @@ class FastImage
       if @options[:proxy]
         proxy = URI.parse(@options[:proxy])
       else
-        proxy = ENV['http_proxy'] && ENV['http_proxy'] != "" ? URI.parse(ENV['http_proxy']) : nil
+        proxy = ENV["http_proxy"] && ENV["http_proxy"] != "" ? URI.parse(ENV["http_proxy"]) : nil
       end
     rescue URI::InvalidURIError
       proxy = nil
@@ -333,21 +330,21 @@ class FastImage
     # chunk of the file unlike an IO (even though the
     # docuementation for it refers to IO). Need to supply
     # an offset in this case.
-    if readable.is_a?(Pathname)
-      read_fiber = Fiber.new do
-        offset = 0
-        while str = readable.read(LocalFileChunkSize, offset)
-          Fiber.yield str
-          offset += LocalFileChunkSize
-        end
-      end
-    else
-      read_fiber = Fiber.new do
-        while str = readable.read(LocalFileChunkSize)
-          Fiber.yield str
-        end
-      end
-    end
+    read_fiber = if readable.is_a?(Pathname)
+                   Fiber.new do
+                     offset = 0
+                     while str = readable.read(LocalFileChunkSize, offset)
+                       Fiber.yield str
+                       offset += LocalFileChunkSize
+                     end
+                   end
+                 else
+                   Fiber.new do
+                     while str = readable.read(LocalFileChunkSize)
+                       Fiber.yield str
+                     end
+                   end
+                 end
 
     parse_packets FiberStream.new(read_fiber)
   end
@@ -366,11 +363,11 @@ class FastImage
       result = send("parse_#{@property}")
       if result
         # extract exif orientation if it was found
-        if @property == :size && result.size == 3
-          @orientation = result.pop
-        else
-          @orientation = 1
-        end
+        @orientation = if @property == :size && result.size == 3
+                         result.pop
+                       else
+                         1
+                       end
 
         instance_variable_set("@#{@property}", result)
       else
@@ -387,7 +384,7 @@ class FastImage
   end
 
   def fetch_using_base64(uri)
-    data = uri.split(',')[1]
+    data = uri.split(",")[1]
     fetch_using_read StringIO.new(Base64.decode64(data))
   end
 
@@ -397,14 +394,12 @@ class FastImage
     end
 
     def read_int
-      read(2).unpack('n')[0]
+      read(2).unpack("n")[0]
     end
 
     def read_string_int
       value = []
-      while read(1) =~ /(\d)/
-        value << $1
-      end
+      value << Regexp.last_match(1) while read(1) =~ /(\d)/
       value.join.to_i
     end
   end
@@ -417,7 +412,7 @@ class FastImage
       @read_fiber = read_fiber
       @pos = 0
       @strpos = 0
-      @str = ''
+      @str = ""
     end
 
     # Peeking beyond the end of the input will raise
@@ -425,7 +420,7 @@ class FastImage
       while @strpos + n - 1 >= @str.size
         unused_str = @str[@strpos..-1]
         new_string = @read_fiber.resume
-        raise CannotParseImage if !new_string
+        raise CannotParseImage unless new_string
 
         # we are dealing with bytes here, so force the encoding
         new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
@@ -450,7 +445,7 @@ class FastImage
       while n > fetched
         discarded += @str[@strpos..-1].size
         new_string = @read_fiber.resume
-        raise CannotParseImage if !new_string
+        raise CannotParseImage unless new_string
 
         new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
 
@@ -469,96 +464,100 @@ class FastImage
 
   def parse_type
     parsed_type = case @stream.peek(2)
-    when "BM"
-      :bmp
-    when "GI"
-      :gif
-    when 0xff.chr + 0xd8.chr
-      :jpeg
-    when 0x89.chr + "P"
-      :png
-    when "II", "MM"
-      :tiff
-    when '8B'
-      :psd
-    when "\0\0"
-      # ico has either a 1 (for ico format) or 2 (for cursor) at offset 3
-      case @stream.peek(3).bytes.to_a.last
-      when 1 then :ico
-      when 2 then :cur
-      end
-    when "RI"
-      :webp if @stream.peek(12)[8..11] == "WEBP"
-    when "<s"
-      :svg
-    when "<?"
-      # Peek 10 more chars each time, and if end of file is reached just raise
-      # unknown. We assume the <svg tag cannot be within 10 chars of the end of
-      # the file, and is within the first 250 chars.
-      begin
-        :svg if (1..25).detect {|n| @stream.peek(10 * n).include?("<svg")}
-      rescue FiberError
-        nil
-      end
+                  when "BM"
+                    :bmp
+                  when "GI"
+                    :gif
+                  when 0xff.chr + 0xd8.chr
+                    :jpeg
+                  when 0x89.chr + "P"
+                    :png
+                  when "II", "MM"
+                    :tiff
+                  when "8B"
+                    :psd
+                  when "\0\0"
+                    # ico has either a 1 (for ico format) or 2 (for cursor) at offset 3
+                    case @stream.peek(3).bytes.to_a.last
+                    when 1 then :ico
+                    when 2 then :cur
+                    end
+                  when "RI"
+                    :webp if @stream.peek(12)[8..11] == "WEBP"
+                  when "<s"
+                    :svg
+                  when "<?"
+                    # Peek 10 more chars each time, and if end of file is reached just raise
+                    # unknown. We assume the <svg tag cannot be within 10 chars of the end of
+                    # the file, and is within the first 250 chars.
+                    begin
+                      :svg if (1..25).detect { |n| @stream.peek(10 * n).include?("<svg") }
+                    rescue FiberError
+                      nil
+                    end
     end
 
-    parsed_type or raise UnknownImageType
+    parsed_type || raise(UnknownImageType)
   end
 
   def parse_size_for_ico
-    icons = @stream.read(6)[4..5].unpack('v').first
-    sizes = icons.times.map { @stream.read(16).unpack('C2').map { |x| x == 0 ? 256 : x } }.sort_by { |w,h| w * h }
+    icons = @stream.read(6)[4..5].unpack("v").first
+    sizes = Array.new(icons) { @stream.read(16).unpack("C2").map { |x| x == 0 ? 256 : x } }.sort_by { |w, h| w * h }
     sizes.last
   end
-  alias_method :parse_size_for_cur, :parse_size_for_ico
+  alias parse_size_for_cur parse_size_for_ico
 
   def parse_size_for_gif
-    @stream.read(11)[6..10].unpack('SS')
+    @stream.read(11)[6..10].unpack("SS")
   end
 
   def parse_size_for_png
-    @stream.read(25)[16..24].unpack('NN')
+    @stream.read(25)[16..24].unpack("NN")
   end
 
   def parse_size_for_jpeg
     exif = nil
     loop do
       @state = case @state
-      when nil
-        @stream.skip(2)
-        :started
-      when :started
-        @stream.read_byte == 0xFF ? :sof : :started
-      when :sof
-        case @stream.read_byte
-        when 0xe1 # APP1
-          skip_chars = @stream.read_int - 2
-          data = @stream.read(skip_chars)
-          io = StringIO.new(data)
-          if io.read(4) == "Exif"
-            io.read(2)
-            exif = Exif.new(IOStream.new(io)) rescue nil
-          end
-          :started
-        when 0xe0..0xef
-          :skipframe
-        when 0xC0..0xC3, 0xC5..0xC7, 0xC9..0xCB, 0xCD..0xCF
-          :readsize
-        when 0xFF
-          :sof
-        else
-          :skipframe
-        end
-      when :skipframe
-        skip_chars = @stream.read_int - 2
-        @stream.skip(skip_chars)
-        :started
-      when :readsize
-        @stream.skip(3)
-        height = @stream.read_int
-        width = @stream.read_int
-        width, height = height, width if exif && exif.rotated?
-        return [width, height, exif ? exif.orientation : 1]
+               when nil
+                 @stream.skip(2)
+                 :started
+               when :started
+                 @stream.read_byte == 0xFF ? :sof : :started
+               when :sof
+                 case @stream.read_byte
+                 when 0xe1 # APP1
+                   skip_chars = @stream.read_int - 2
+                   data = @stream.read(skip_chars)
+                   io = StringIO.new(data)
+                   if io.read(4) == "Exif"
+                     io.read(2)
+                     exif = begin
+                              Exif.new(IOStream.new(io))
+                            rescue
+                              nil
+                            end
+                   end
+                   :started
+                 when 0xe0..0xef
+                   :skipframe
+                 when 0xC0..0xC3, 0xC5..0xC7, 0xC9..0xCB, 0xCD..0xCF
+                   :readsize
+                 when 0xFF
+                   :sof
+                 else
+                   :skipframe
+                 end
+               when :skipframe
+                 skip_chars = @stream.read_int - 2
+                 @stream.skip(skip_chars)
+                 :started
+               when :readsize
+                 @stream.skip(3)
+                 height = @stream.read_int
+                 width = @stream.read_int
+                 width, height = height, width if exif && exif.rotated?
+                 return [width, height, exif ? exif.orientation : 1]
       end
     end
   end
@@ -568,9 +567,9 @@ class FastImage
     header = d.unpack("C")[0]
 
     result = if header == 40
-               d[4..-1].unpack('l<l<')
+               d[4..-1].unpack("l<l<")
              else
-               d[4..8].unpack('SS')
+               d[4..8].unpack("SS")
              end
 
     # ImageHeight is expressed in pixels. The absolute value is necessary because ImageHeight can be negative
@@ -587,8 +586,6 @@ class FastImage
       parse_size_vp8l
     when "VP8X"
       parse_size_vp8x
-    else
-      nil
     end
   end
 
@@ -606,14 +603,15 @@ class FastImage
   def parse_size_vp8x
     flags = @stream.read(4).unpack("C")[0]
     b1, b2, b3, b4, b5, b6 = @stream.read(6).unpack("CCCCCC")
-    width, height = 1 + b1 + (b2 << 8) + (b3 << 16), 1 + b4 + (b5 << 8) + (b6 << 16)
+    width = 1 + b1 + (b2 << 8) + (b3 << 16)
+    height = 1 + b4 + (b5 << 8) + (b6 << 16)
 
     if flags & 8 > 0 # exif
       # parse exif for orientation
       # TODO: find or create test images for this
     end
 
-    return [width, height]
+    [width, height]
   end
 
   class Exif # :nodoc:
@@ -634,10 +632,12 @@ class FastImage
     def get_exif_byte_order
       byte_order = @stream.read(2)
       case byte_order
-      when 'II'
-        @short, @long = 'v', 'V'
-      when 'MM'
-        @short, @long = 'n', 'N'
+      when "II"
+        @short = "v"
+        @long = "V"
+      when "MM"
+        @short = "n"
+        @long = "N"
       else
         raise CannotParseImage
       end
@@ -682,7 +682,6 @@ class FastImage
 
       @orientation ||= 1
     end
-
   end
 
   def parse_size_for_tiff
@@ -714,8 +713,6 @@ class FastImage
         [@height * @ratio, @height]
       elsif @viewbox_width && @viewbox_height
         [@viewbox_width, @viewbox_height]
-      else
-        nil
       end
     end
 
@@ -725,7 +722,7 @@ class FastImage
       attr_name = []
       state = nil
 
-      while (char = @stream.read(1)) && state != :stop do
+      while (char = @stream.read(1)) && state != :stop
         case char
         when "="
           if attr_name.join =~ /width/i
@@ -761,9 +758,7 @@ class FastImage
       @stream.read(1)
 
       value = []
-      while @stream.read(1) =~ /([^"])/
-        value << $1
-      end
+      value << Regexp.last_match(1) while @stream.read(1) =~ /([^"])/
       value.join
     end
   end
