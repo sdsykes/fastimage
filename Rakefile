@@ -1,6 +1,6 @@
 require "rdoc/task"
 require "rake/testtask"
-require "rubocop/rake_task" if RUBY_VERSION >= '2.1.0'
+require "rubocop/rake_task" if RUBY_VERSION >= "2.1.0"
 
 # Generate documentation
 Rake::RDocTask.new do |rd|
@@ -18,9 +18,9 @@ Rake::TestTask.new do |t|
   t.verbose = true
 end
 
-RuboCop::RakeTask.new
-
-if RUBY_VERSION >= '2.1.0'
+if RUBY_VERSION >= "2.1.0"
+  RuboCop::RakeTask.new
+  
   task default: %w[test rubocop]
 else
   task default: "test"
