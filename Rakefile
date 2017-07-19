@@ -20,4 +20,4 @@ end
 
 RuboCop::RakeTask.new
 
-task default: %w[test rubocop]
+task default: "test"
