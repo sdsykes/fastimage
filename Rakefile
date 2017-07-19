@@ -20,7 +20,7 @@ end
 
 if RUBY_VERSION >= "2.1.0"
   RuboCop::RakeTask.new
-  
+
   task default: %w[test rubocop]
 else
   task default: "test"
