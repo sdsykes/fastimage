@@ -5,6 +5,9 @@ rvm:
   - 2.1.8
   - 2.2.4
   - 2.3.0
+  - 2.4.0
+  - 2.4.1
+after_script: if [ $TRAVIS_RUBY_VERSION -gt "2.1.0" ] then; bundle exec rake rubocop; fi
 
 sudo: false
 # uncomment this line if your project needs to run something other than `rake`:
