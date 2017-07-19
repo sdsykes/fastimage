@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   # Note rake 11 drops support for ruby 1.9.2
   s.add_development_dependency('rake', '~> 10.5')
   s.add_development_dependency('rdoc')
+  s.add_development_dependency('rubocop')
   s.add_development_dependency('test-unit')
 
   s.licenses = ['MIT']
