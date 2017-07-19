@@ -1,5 +1,6 @@
-require "rdoc/task"
+require 'rdoc/task'
 require 'rake/testtask'
+require 'rubocop/rake_task'
 
 # Generate documentation
 Rake::RDocTask.new do |rd|
@@ -17,4 +18,6 @@ Rake::TestTask.new do |t|
   t.verbose = true
 end
 
-task :default => :test
+RuboCop::RakeTask.new
+
+task default: %w[test rubocop]
