@@ -284,7 +284,7 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_handle_https_image
-    size = FastImage.size(HTTPSImage)
+    size = FastImage.size(HTTPSImage, raise_on_failure: true)
     assert_equal HTTPSImageInfo[1], size
   end
 
