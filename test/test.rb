@@ -33,7 +33,8 @@ GoodFixtures = {
   "test.svg" => [:svg, [200, 300]],
   "test_partial_viewport.svg" => [:svg, [860, 400]],
   "test2.svg" => [:svg, [366, 271]],
-  "test3.svg" => [:svg, [255, 48]]
+  "test3.svg" => [:svg, [255, 48]],
+  "test4.svg" => [:svg, [271, 271]]
 }
 
 BadFixtures = [
@@ -152,7 +153,7 @@ class FastImageTest < Test::Unit::TestCase
       assert_equal info[1], FastImage.size(File.join(FixturePath, fn))
     end
   end
-  
+
   def test_should_report_content_length_correctly_for_local_files
     assert_equal 3296, FastImage.new(File.join(FixturePath, "test.bmp")).content_length
   end
@@ -386,7 +387,7 @@ class FastImageTest < Test::Unit::TestCase
       FastImage.type("data:", :raise_on_failure => true)
     end
   end
-  
+
   def test_should_work_with_domains_with_underscores
     assert_equal :gif, FastImage.type("http://foo_bar.inbro.net/images/p.gif")
   end
