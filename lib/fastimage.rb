@@ -388,7 +388,9 @@ class FastImage
 
   def fetch_using_base64(uri)
     data = uri.split(',')[1]
-    fetch_using_read StringIO.new(Base64.decode64(data))
+    decoded = Base64.decode64(data)
+    @content_length = decoded.size
+    fetch_using_read StringIO.new(decoded)
   end
 
   module StreamUtil # :nodoc:
