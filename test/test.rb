@@ -389,6 +389,6 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_work_with_domains_with_underscores
-    assert_equal :gif, FastImage.type("http://foo_bar.inbro.net/images/p.gif")
+    assert_equal :gif, FastImage.type("http://foo_bar.switchstep.com/images/p.gif")
   end
 end
