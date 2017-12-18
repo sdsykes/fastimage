@@ -59,6 +59,7 @@ HTTPSImageInfo = [:jpeg, [9545, 6623]]
 
 DataUriImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAD0lEQVR42mNk+M9QzwAEAAmGAYCF+yOnAAAAAElFTkSuQmCC"
 DataUriImageInfo = [:png, [2, 1]]
+DataUriImageContentLength = 72
 
 GoodFixtures.each do |fn, info|
   FakeWeb.register_uri(:get, "#{TestUrl}#{fn}", :body => File.join(FixturePath, fn))
@@ -390,5 +391,9 @@ class FastImageTest < Test::Unit::TestCase
 
   def test_should_work_with_domains_with_underscores
     assert_equal :gif, FastImage.type("http://foo_bar.switchstep.com/images/p.gif")
+  end
+
+  def test_should_return_content_length_for_data_uri_images
+    assert_equal DataUriImageContentLength, FastImage.new(DataUriImage).content_length
   end
 end
