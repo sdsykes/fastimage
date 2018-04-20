@@ -247,6 +247,12 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(url, :raise_on_failure=>true)
   end
 
+  def test_should_handle_permanent_redirect_with_complex_relative_url
+    register_redirect(TestUrl, "/photo.gne?rb=1&short=Vv4Und")
+    register_redirect("#{TestUrl}photo.gne?rb=1&short=Vv4Und", "/" + GoodFixtures.keys.first)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(TestUrl, :raise_on_failure=>true)
+  end
+
   def register_redirect(from, to)
     resp = Net::HTTPMovedPermanently.new(1.0, 302, "Moved")
     resp['Location'] = to
