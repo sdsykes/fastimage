@@ -214,7 +214,7 @@ class FastImage
     raise SizeNotFound if @options[:raise_on_failure] && @property == :size && !@size
 
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET,
-    ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT
+    ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT, OpenSSL::SSL::SSLError
     raise ImageFetchFailure if @options[:raise_on_failure]
   rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
     raise ImageFetchFailure if @options[:raise_on_failure]
