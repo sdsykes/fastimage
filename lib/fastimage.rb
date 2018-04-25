@@ -250,7 +250,7 @@ class FastImage
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          @parsed_uri = URI.join(@parsed_uri, res['Location'])
+          @parsed_uri = URI.join(@parsed_uri, URI.escape(res['Location']))
         rescue URI::InvalidURIError
         else
           fetch_using_http_from_parsed_uri

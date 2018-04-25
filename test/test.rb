@@ -248,8 +248,8 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_handle_permanent_redirect_with_complex_relative_url
-    register_redirect(TestUrl, "/photo.gne?rb=1&short=Vv4Und")
-    register_redirect("#{TestUrl}photo.gne?rb=1&short=Vv4Und", "/" + GoodFixtures.keys.first)
+    register_redirect(TestUrl, "/pho to.gne?rb=1&short=Vv4Und")
+    register_redirect("#{TestUrl}pho%20to.gne?rb=1&short=Vv4Und", "/" + GoodFixtures.keys.first)
     assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(TestUrl, :raise_on_failure=>true)
   end
 
