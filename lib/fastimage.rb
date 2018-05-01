@@ -531,7 +531,8 @@ class FastImage
           io = StringIO.new(data)
           if io.read(4) == "Exif"
             io.read(2)
-            exif = Exif.new(IOStream.new(io)) rescue nil
+            new_exif = Exif.new(IOStream.new(io)) rescue nil
+            exif ||= new_exif # only use the first APP1 segment
           end
           :started
         when 0xe0..0xef

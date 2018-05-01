@@ -34,7 +34,8 @@ GoodFixtures = {
   "test_partial_viewport.svg" => [:svg, [860, 400]],
   "test2.svg" => [:svg, [366, 271]],
   "test3.svg" => [:svg, [255, 48]],
-  "test4.svg" => [:svg, [271, 271]]
+  "test4.svg" => [:svg, [271, 271]],
+  "orient_6.jpg"=>[:jpeg, [1250,2500]]
 }
 
 BadFixtures = [
