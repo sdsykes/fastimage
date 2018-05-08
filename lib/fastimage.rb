@@ -242,6 +242,17 @@ class FastImage
     fetch_using_http_from_parsed_uri
   end
 
+  # Some invalid locations need escaping
+  def escaped_location(location)
+    begin
+      URI(location)
+    rescue URI::InvalidURIError
+      URI.escape(location)
+    else
+      location
+    end
+  end
+
   def fetch_using_http_from_parsed_uri
     http_header = {'Accept-Encoding' => 'identity'}.merge(@options[:http_header])
 
@@ -250,7 +261,7 @@ class FastImage
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          @parsed_uri = URI.join(@parsed_uri, URI.escape(res['Location']))
+          @parsed_uri = URI.join(@parsed_uri, escaped_location(res['Location']))
         rescue URI::InvalidURIError
         else
           fetch_using_http_from_parsed_uri

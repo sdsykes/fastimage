@@ -254,6 +254,12 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(TestUrl, :raise_on_failure=>true)
   end
 
+  def test_should_handle_permanent_redirect_with_encoded_url
+    register_redirect(TestUrl, "/pho%20to.gne")
+    register_redirect("#{TestUrl}pho%20to.gne", "/" + GoodFixtures.keys.first)
+    assert_equal GoodFixtures[GoodFixtures.keys.first][1], FastImage.size(TestUrl, :raise_on_failure=>true)
+  end
+
   def register_redirect(from, to)
     resp = Net::HTTPMovedPermanently.new(1.0, 302, "Moved")
     resp['Location'] = to
