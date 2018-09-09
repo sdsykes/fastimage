@@ -483,7 +483,12 @@ class FastImage
     when 0x89.chr + "P"
       :png
     when "II", "MM"
-      :tiff
+      case @stream.peek(11)[8..10]
+      when "APC", "CR\002"
+        nil  # do not recognise CRW or CR2 as tiff
+      else
+        :tiff
+      end
     when '8B'
       :psd
     when "\0\0"

@@ -41,7 +41,9 @@ GoodFixtures = {
 BadFixtures = [
   "faulty.jpg",
   "test_rgb.ct",
-  "test.xml"
+  "test.xml",
+  "a.CR2",
+  "a.CRW"
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
@@ -408,5 +410,14 @@ class FastImageTest < Test::Unit::TestCase
 
   def test_should_return_content_length_for_data_uri_images
     assert_equal DataUriImageContentLength, FastImage.new(DataUriImage).content_length
+  end
+  
+  def test_canon_raw_formats_are_not_recognised_as_tiff
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.size(TestUrl + "a.CR2", :raise_on_failure=>true)
+    end
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.size(TestUrl + "a.CRW", :raise_on_failure=>true)
+    end
   end
 end
