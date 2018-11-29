@@ -178,6 +178,24 @@ class FastImageTest < Test::Unit::TestCase
     end
   end
 
+  def test_should_report_type_correctly_for_ios_that_have_been_read
+    GoodFixtures.each do |fn, info|
+      File.open(File.join(FixturePath, fn), "r") do |io|
+        io.read
+        assert_equal info[0], FastImage.type(io)
+      end
+    end
+  end
+
+  def test_should_report_size_correctly_for_ios_that_have_been_read
+    GoodFixtures.each do |fn, info|
+      File.open(File.join(FixturePath, fn), "r") do |io|
+        io.read
+        assert_equal info[1], FastImage.size(io)
+      end
+    end
+  end
+
   def test_should_report_size_correctly_on_io_object_twice
     GoodFixtures.each do |fn, info|
       File.open(File.join(FixturePath, fn), "r") do |io|

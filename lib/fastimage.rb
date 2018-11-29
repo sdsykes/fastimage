@@ -332,6 +332,7 @@ class FastImage
   end
 
   def fetch_using_read(readable)
+    readable.rewind if readable.respond_to?(:rewind)
     # Pathnames respond to read, but always return the first
     # chunk of the file unlike an IO (even though the
     # docuementation for it refers to IO). Need to supply
