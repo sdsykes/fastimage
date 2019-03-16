@@ -140,6 +140,14 @@ class FastImageTest < Test::Unit::TestCase
     end
   end
 
+  def test_should_raise_image_fetch_failure_error_if_net_unreach_exception_happens
+    FakeWeb.register_uri(:get, "http://example.com", :exception => Errno::ENETUNREACH)
+
+    assert_raises(FastImage::ImageFetchFailure) do
+      FastImage.size("http://example.com", :raise_on_failure=>true)
+    end
+  end
+
   def test_should_raise_unknown_image_typ_when_file_is_non_svg_xml
     assert_raises(FastImage::UnknownImageType) do
       FastImage.size(TestUrl + "test.xml", :raise_on_failure=>true)
@@ -429,7 +437,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_return_content_length_for_data_uri_images
     assert_equal DataUriImageContentLength, FastImage.new(DataUriImage).content_length
   end
-  
+
   def test_canon_raw_formats_are_not_recognised_as_tiff
     assert_raises(FastImage::UnknownImageType) do
       FastImage.size(TestUrl + "a.CR2", :raise_on_failure=>true)
