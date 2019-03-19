@@ -322,7 +322,7 @@ class FastImage
     proxy = proxy_uri
 
     if proxy
-      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.port)
+      @http = Net::HTTP::Proxy(proxy.host, proxy.port, proxy.user, proxy.password).new(@parsed_uri.host, @parsed_uri.port)
     else
       @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.port)
     end
