@@ -580,10 +580,10 @@ class FastImage
     d = @stream.read(32)[14..28]
     header = d.unpack("C")[0]
 
-    result = if header == 40
-               d[4..-1].unpack('l<l<')
-             else
+    result = if header == 12
                d[4..8].unpack('SS')
+             else
+               d[4..-1].unpack('l<l<')
              end
 
     # ImageHeight is expressed in pixels. The absolute value is necessary because ImageHeight can be negative
