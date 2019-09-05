@@ -214,7 +214,8 @@ class FastImage
     raise SizeNotFound if @options[:raise_on_failure] && @property == :size && !@size
 
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET,
-    ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT, OpenSSL::SSL::SSLError
+    Errno::ENETUNREACH, ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT,
+    OpenSSL::SSL::SSLError
     raise ImageFetchFailure if @options[:raise_on_failure]
   rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
     raise ImageFetchFailure if @options[:raise_on_failure]
@@ -321,7 +322,7 @@ class FastImage
     proxy = proxy_uri
 
     if proxy
-      @http = Net::HTTP::Proxy(proxy.host, proxy.port).new(@parsed_uri.host, @parsed_uri.port)
+      @http = Net::HTTP::Proxy(proxy.host, proxy.port, proxy.user, proxy.password).new(@parsed_uri.host, @parsed_uri.port)
     else
       @http = Net::HTTP.new(@parsed_uri.host, @parsed_uri.port)
     end
@@ -579,10 +580,10 @@ class FastImage
     d = @stream.read(32)[14..28]
     header = d.unpack("C")[0]
 
-    result = if header == 40
-               d[4..-1].unpack('l<l<')
-             else
+    result = if header == 12
                d[4..8].unpack('SS')
+             else
+               d[4..-1].unpack('l<l<')
              end
 
     # ImageHeight is expressed in pixels. The absolute value is necessary because ImageHeight can be negative

@@ -11,6 +11,8 @@ FixturePath = File.join(PathHere, "fixtures")
 GoodFixtures = {
   "test.bmp"=>[:bmp, [40, 27]],
   "test2.bmp"=>[:bmp, [1920, 1080]],
+  "test_coreheader.bmp"=>[:bmp, [40, 27]],
+  "test_v5header.bmp"=>[:bmp, [40, 27]],
   "test.gif"=>[:gif, [17, 32]],
   "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]],
@@ -137,6 +139,14 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_raise_when_asked_when_image_type_not_known
     assert_raises(FastImage::UnknownImageType) do
       FastImage.size(TestUrl + "test_rgb.ct", :raise_on_failure=>true)
+    end
+  end
+
+  def test_should_raise_image_fetch_failure_error_if_net_unreach_exception_happens
+    FakeWeb.register_uri(:get, "http://example.com", :exception => Errno::ENETUNREACH)
+
+    assert_raises(FastImage::ImageFetchFailure) do
+      FastImage.size("http://example.com", :raise_on_failure=>true)
     end
   end
 
@@ -429,7 +439,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_return_content_length_for_data_uri_images
     assert_equal DataUriImageContentLength, FastImage.new(DataUriImage).content_length
   end
-  
+
   def test_canon_raw_formats_are_not_recognised_as_tiff
     assert_raises(FastImage::UnknownImageType) do
       FastImage.size(TestUrl + "a.CR2", :raise_on_failure=>true)
