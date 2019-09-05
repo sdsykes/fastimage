@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = %q{fastimage}
-  s.version = "2.1.6"
+  s.version = "2.1.7"
 
   s.required_ruby_version = '>= 1.9.2'
   s.authors = ["Stephen Sykes"]
