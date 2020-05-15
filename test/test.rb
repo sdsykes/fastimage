@@ -14,6 +14,7 @@ GoodFixtures = {
   "test_coreheader.bmp"=>[:bmp, [40, 27]],
   "test_v5header.bmp"=>[:bmp, [40, 27]],
   "test.gif"=>[:gif, [17, 32]],
+  "animated.gif"=>[:gif, [400, 400]],
   "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]],
   "test2.jpg"=>[:jpeg, [250, 188]],
@@ -100,6 +101,12 @@ class FastImageTest < Test::Unit::TestCase
       assert_equal info[1], FastImage.size(TestUrl + fn)
       assert_equal info[1], FastImage.size(TestUrl + fn, :raise_on_failure=>true)
     end
+  end
+
+  def test_should_report_animated_correctly
+    assert_equal nil, FastImage.animated?(TestUrl + "test.png")
+    assert_equal false, FastImage.animated?(TestUrl + "test.gif")
+    assert_equal true, FastImage.animated?(TestUrl + "animated.gif")
   end
 
   def test_should_return_nil_on_fetch_failure
