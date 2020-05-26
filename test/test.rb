@@ -44,6 +44,7 @@ BadFixtures = [
   "faulty.jpg",
   "test_rgb.ct",
   "test.xml",
+  "test2.xml",
   "a.CR2",
   "a.CRW"
 ]
@@ -150,9 +151,11 @@ class FastImageTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_raise_unknown_image_typ_when_file_is_non_svg_xml
-    assert_raises(FastImage::UnknownImageType) do
-      FastImage.size(TestUrl + "test.xml", :raise_on_failure=>true)
+  def test_should_raise_unknown_image_type_when_file_is_non_svg_xml
+    ["test.xml", "test2.xml"].each do |fn|
+      assert_raises(FastImage::UnknownImageType) do
+        FastImage.size(TestUrl + fn, :raise_on_failure=>true)
+      end
     end
   end
 
