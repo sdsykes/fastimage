@@ -502,7 +502,7 @@ class FastImage
     when "RI"
       :webp if @stream.peek(12)[8..11] == "WEBP"
     when "<s"
-      :svg
+      :svg if @stream.peek(4) == "<svg"
     when /<[?!]/
       # Peek 10 more chars each time, and if end of file is reached just raise
       # unknown. We assume the <svg tag cannot be within 10 chars of the end of
