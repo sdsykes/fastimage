@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.summary = %q{FastImage - Image info fast}
   s.add_development_dependency 'fakeweb-fi', '~> 1.3'
   # Note rake 11 drops support for ruby 1.9.2
-  s.add_development_dependency('rake', ">= 12.3.3")
+  s.add_development_dependency('rake', ">= 10.5")
   s.add_development_dependency('rdoc')
   s.add_development_dependency('test-unit')
 
