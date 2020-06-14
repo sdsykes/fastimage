@@ -427,9 +427,7 @@ class FastImage
 
   def parse_animated
     @type = parse_type unless @type
-    return nil if @type == nil
-
-    @type == :gif ? send("parse_animated_for_#{@type}") : false
+    @type == :gif ? send("parse_animated_for_#{@type}") : nil
   end
 
   def fetch_using_base64(uri)
