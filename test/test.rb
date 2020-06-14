@@ -57,7 +57,7 @@ TestUrl = "http://example.nowhere/"
 
 # this image fetch allows me to really test that fastimage is truly fast
 # but it's not ideal relying on external resources and connectivity speed
-LargeImage = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
+LargeImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
 LargeImageInfo = [:jpeg, [9545, 6623]]
 LargeImageFetchLimit = 2  # seconds
 
