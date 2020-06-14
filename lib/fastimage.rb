@@ -70,7 +70,7 @@ if RUBY_VERSION < "2.2"
 end
 
 class FastImage
-  attr_reader :size, :type, :content_length, :orientation
+  attr_reader :size, :type, :content_length, :orientation, :animated
 
   attr_reader :bytes_read
 
@@ -179,6 +179,34 @@ class FastImage
     new(uri, options.merge(:type_only=>true)).type
   end
 
+  # Returns a boolean value indicating the image is animated.
+  # It will return nil if the image could not be fetched, or if the image type was not recognised.
+  #
+  # By default there is a timeout of 2 seconds for opening and reading from a remote server.
+  # This can be changed by passing a :timeout => number_of_seconds in the options.
+  #
+  # If you wish FastImage to raise if it cannot find the type of the image for any reason, then pass
+  # :raise_on_failure => true in the options.
+  #
+  # === Example
+  #
+  #   require 'fastimage'
+  #
+  #   FastImage.animated?("test/fixtures/test.gif")
+  #   => false
+  #   FastImage.animated?("test/fixtures/animated.gif")
+  #   => true
+  #
+  # === Supported options
+  # [:timeout]
+  #   Overrides the default timeout of 2 seconds.  Applies both to reading from and opening the http connection.
+  # [:raise_on_failure]
+  #   If set to true causes an exception to be raised if the image type cannot be found for any reason.
+  #
+  def self.animated?(uri, options={})
+    new(uri, options.merge(:animated_only=>true)).animated
+  end
+
   def initialize(uri, options={})
     @uri = uri
     @options = {
@@ -189,7 +217,13 @@ class FastImage
       :http_header      => {}
     }.merge(options)
 
-    @property = @options[:type_only] ? :type : :size
+    @property = if @options[:animated_only]
+      :animated
+    elsif @options[:type_only]
+      :type
+    else
+      :size
+    end
 
     @type, @state = nil
 
@@ -369,7 +403,7 @@ class FastImage
 
     begin
       result = send("parse_#{@property}")
-      if result
+      if result != nil
         # extract exif orientation if it was found
         if @property == :size && result.size == 3
           @orientation = result.pop
@@ -389,6 +423,13 @@ class FastImage
   def parse_size
     @type = parse_type unless @type
     send("parse_size_for_#{@type}")
+  end
+
+  def parse_animated
+    @type = parse_type unless @type
+    return nil if @type == nil
+
+    @type == :gif ? send("parse_animated_for_#{@type}") : false
   end
 
   def fetch_using_base64(uri)
@@ -524,8 +565,69 @@ class FastImage
   end
   alias_method :parse_size_for_cur, :parse_size_for_ico
 
+  class Gif # :nodoc:
+    def initialize(stream)
+      @stream = stream
+    end
+
+    def width_and_height
+      @stream.read(11)[6..10].unpack('SS')
+    end
+
+    # Checks if a delay between frames exists and if it does, then the GIFs is
+    # animated
+    def animated?
+      delay = 0
+
+      @stream.read(10) # "GIF" + version (3) + width (2) + height (2)
+
+      fields = @stream.read(3).unpack("C")[0] # fields (1) + bg color (1) + pixel ratio (1)
+
+      # Skip Global Color Table if it exists
+      if fields & 0x80
+        # 2 * (depth + 1) colors, each occupying 3 bytes (RGB)
+        @stream.skip(3 * 2 ** ((fields & 0x7) + 1))
+      end
+
+      loop do
+        block_type = @stream.read(1).unpack("C")[0]
+        if block_type == 0x21
+          extension_type = @stream.read(1).unpack("C")[0]
+          size = @stream.read(1).unpack("C")[0]
+          if extension_type == 0xF9
+            delay = @stream.read(4).unpack("CSC")[1] # fields (1) + delay (2) + transparent index (1)
+            break
+          elsif extension_type == 0xFF
+            @stream.skip(size) # application ID (8) + version (3)
+          else
+            return # unrecognized extension
+          end
+          skip_sub_blocks
+        else
+          return # unrecognized block
+        end
+      end
+
+      delay > 0
+    end
+
+    private
+
+    def skip_sub_blocks
+      loop do
+        size = @stream.read(1).unpack("C")[0]
+        if size == 0
+          break
+        else
+          @stream.skip(size)
+        end
+      end
+    end
+  end
+
   def parse_size_for_gif
-    @stream.read(11)[6..10].unpack('SS')
+    gif = Gif.new(@stream)
+    gif.width_and_height
   end
 
   def parse_size_for_png
@@ -784,5 +886,10 @@ class FastImage
   def parse_size_for_svg
     svg = Svg.new(@stream)
     svg.width_and_height
+  end
+
+  def parse_animated_for_gif
+    gif = Gif.new(@stream)
+    gif.animated?
   end
 end
