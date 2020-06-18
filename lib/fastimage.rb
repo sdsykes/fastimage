@@ -282,7 +282,7 @@ class FastImage
     begin
       URI(location)
     rescue URI::InvalidURIError
-      URI.escape(location)
+      ::URI::DEFAULT_PARSER.escape(location)
     else
       location
     end
