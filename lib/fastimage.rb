@@ -296,7 +296,10 @@ class FastImage
       if res.is_a?(Net::HTTPRedirection) && @redirect_count < 4
         @redirect_count += 1
         begin
-          @parsed_uri = URI.join(@parsed_uri, escaped_location(res['Location']))
+          location = res['Location']
+          raise ImageFetchFailure if location.nil? || location.empty?
+
+          @parsed_uri = URI.join(@parsed_uri, escaped_location(location))
         rescue URI::InvalidURIError
         else
           fetch_using_http_from_parsed_uri
