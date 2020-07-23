@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = %q{fastimage}
-  s.version = "2.1.7"
+  s.version = "2.2.0"
 
   s.required_ruby_version = '>= 1.9.2'
   s.authors = ["Stephen Sykes"]
-  s.date = %q{2019-09-05}
+  s.date = %q{2020-07-23}
   s.description = %q{FastImage finds the size or type of an image given its uri by fetching as little as needed.}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = [
