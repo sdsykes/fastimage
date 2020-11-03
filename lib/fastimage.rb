@@ -578,38 +578,45 @@ class FastImage
     # Checks if a delay between frames exists and if it does, then the GIFs is
     # animated
     def animated?
-      delay = 0
+      frames = 0
 
-      @stream.read(10) # "GIF" + version (3) + width (2) + height (2)
+      # "GIF" + version (3) + width (2) + height (2)
+      @stream.skip(10)
 
-      fields = @stream.read(3).unpack("C")[0] # fields (1) + bg color (1) + pixel ratio (1)
-
-      # Skip Global Color Table if it exists
-      if fields & 0x80
+      # fields (1) + bg color (1) + pixel ratio (1)
+      fields = @stream.read(3).unpack("CCC")[0]
+      if fields & 0x80 # Global Color Table
         # 2 * (depth + 1) colors, each occupying 3 bytes (RGB)
         @stream.skip(3 * 2 ** ((fields & 0x7) + 1))
       end
 
       loop do
         block_type = @stream.read(1).unpack("C")[0]
-        if block_type == 0x21
-          extension_type = @stream.read(1).unpack("C")[0]
-          size = @stream.read(1).unpack("C")[0]
-          if extension_type == 0xF9
-            delay = @stream.read(4).unpack("CSC")[1] # fields (1) + delay (2) + transparent index (1)
-            break
-          elsif extension_type == 0xFF
-            @stream.skip(size) # application ID (8) + version (3)
-          else
-            return # unrecognized extension
+
+        if block_type == 0x21 # Graphic Control Extension
+          # extension type (1) + size (1)
+          size = @stream.read(2).unpack("CC")[1]
+          @stream.skip(size)
+          skip_sub_blocks
+        elsif block_type == 0x2C # Image Descriptor
+          frames += 1
+          return true if frames > 1
+
+          # left position (2) + top position (2) + width (2) + height (2) + fields (1)
+          fields = @stream.read(9).unpack("SSSSC")[4]
+          if fields & 0x80 != 0 # Local Color Table
+            # 2 * (depth + 1) colors, each occupying 3 bytes (RGB)
+            @stream.skip(3 * 2 ** ((fields & 0x7) + 1))
           end
+
+          @stream.skip(1) # LZW min code size (1)
           skip_sub_blocks
         else
-          return # unrecognized block
+          break # unrecognized block
         end
       end
 
-      delay > 0
+      false
     end
 
     private
