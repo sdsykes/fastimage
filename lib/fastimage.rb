@@ -251,10 +251,8 @@ class FastImage
     Errno::ENETUNREACH, ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT,
     OpenSSL::SSL::SSLError
     raise ImageFetchFailure if @options[:raise_on_failure]
-  rescue NoMethodError  # 1.8.7p248 can raise this due to a net/http bug
-    raise ImageFetchFailure if @options[:raise_on_failure]
   rescue UnknownImageType
-    raise UnknownImageType if @options[:raise_on_failure]
+    raise if @options[:raise_on_failure]
   rescue CannotParseImage
     if @options[:raise_on_failure]
       if @property == :size
@@ -434,8 +432,11 @@ class FastImage
   end
 
   def fetch_using_base64(uri)
-    data = uri.split(',')[1]
-    decoded = Base64.decode64(data)
+    decoded = begin
+      Base64.decode64(uri.split(',')[1])
+    rescue
+      raise CannotParseImage
+    end
     @content_length = decoded.size
     fetch_using_read StringIO.new(decoded)
   end
@@ -471,19 +472,20 @@ class FastImage
 
     # Peeking beyond the end of the input will raise
     def peek(n)
-      while @strpos + n - 1 >= @str.size
+      while @strpos + n > @str.size
         unused_str = @str[@strpos..-1]
-        new_string = @read_fiber.resume
-        raise CannotParseImage if !new_string
 
+        new_string = @read_fiber.resume
+        new_string = @read_fiber.resume if new_string.is_a? Net::ReadAdapter
+        raise CannotParseImage if !new_string
         # we are dealing with bytes here, so force the encoding
-        new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
+        new_string.force_encoding("ASCII-8BIT") if new_string.respond_to? :force_encoding
 
         @str = unused_str + new_string
         @strpos = 0
       end
 
-      @str[@strpos..(@strpos + n - 1)]
+      @str[@strpos, n]
     end
 
     def read(n)
@@ -501,7 +503,7 @@ class FastImage
         new_string = @read_fiber.resume
         raise CannotParseImage if !new_string
 
-        new_string.force_encoding("ASCII-8BIT") if String.method_defined? :force_encoding
+        new_string.force_encoding("ASCII-8BIT") if new_string.respond_to? :force_encoding
 
         fetched += new_string.size
         @str = new_string

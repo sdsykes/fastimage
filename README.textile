@@ -132,7 +132,7 @@ h2. Tests
 
 You'll need to @gem install fakeweb@ and possibly also  @gem install test-unit@ to be able to run the tests.
 
-bc.. $ ruby test.rb
+bc.. $ ruby test/test.rb
 Run options:
 
 # Running tests:
