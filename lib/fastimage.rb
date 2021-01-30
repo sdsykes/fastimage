@@ -585,7 +585,7 @@ class FastImage
 
       # fields (1) + bg color (1) + pixel ratio (1)
       fields = @stream.read(3).unpack("CCC")[0]
-      if fields & 0x80 # Global Color Table
+      if fields & 0x80 != 0 # Global Color Table
         # 2 * (depth + 1) colors, each occupying 3 bytes (RGB)
         @stream.skip(3 * 2 ** ((fields & 0x7) + 1))
       end
