@@ -538,8 +538,21 @@ class FastImage
     when '8B'
       :psd
     when "\0\0"
-      # ico has either a 1 (for ico format) or 2 (for cursor) at offset 3
       case @stream.peek(3).bytes.to_a.last
+      when 0
+        # http://www.ftyps.com/what.html
+        # HEIC is composed of nested "boxes". Each box has a header composed of
+        # - Size (32 bit integer)
+        # - Box type (4 chars)
+        # - Extended size: only if size === 1, the type field is followed by 64 bit integer of extended size
+        # - Payload: Type-dependent
+        case @stream.peek(12)[4..-1]
+        when "ftypheic"
+          :heic
+        when "ftypmif1"
+          :heif
+        end
+      # ico has either a 1 (for ico format) or 2 (for cursor) at offset 3
       when 1 then :ico
       when 2 then :cur
       end
@@ -567,6 +580,153 @@ class FastImage
     sizes.last
   end
   alias_method :parse_size_for_cur, :parse_size_for_ico
+
+  class Heic # :nodoc:
+    def initialize(stream)
+      @stream = stream
+    end
+
+    def width_and_height
+      @max_size = nil
+      @primary_box = nil
+      @ipma_boxes = []
+      @ispe_boxes = []
+      @final_size = nil
+
+      catch :finish do
+        read_boxes!
+      end
+
+      @final_size
+    end
+
+    private
+
+    def read_boxes!(max_read_bytes = nil)
+      end_pos = max_read_bytes.nil? ? nil : @stream.pos + max_read_bytes
+      index = 0
+
+      loop do
+        end_pos.nil? || @stream.pos < end_pos or
+          return
+
+        box_type, box_size = read_box_header!
+
+        case box_type
+        when "meta"
+          handle_meta_box(box_size)
+        when "pitm"
+          handle_pitm_box(box_size)
+        when "ipma"
+          handle_ipma_box(box_size)
+        when "hdlr"
+          handle_hdlr_box(box_size)
+        when "iprp", "ipco"
+          read_boxes!(box_size)
+        when "ispe"
+          handle_ispe_box(box_size, index)
+        when "mdat"
+          throw :finish
+        else
+          @stream.read(box_size)
+        end
+
+        index += 1
+      end
+    end
+
+    def handle_ispe_box(box_size, index)
+      box_size >= 12 or throw :finish
+
+      data = @stream.read(box_size)
+      width, height = data[4...12].unpack("N2")
+      @ispe_boxes << { index: index, size: [width, height] }
+    end
+
+    def handle_hdlr_box(box_size)
+      box_size >= 12 or throw :finish
+
+      data = @stream.read(box_size)
+      data[8...12] == "pict" or throw :finish
+    end
+
+    def handle_ipma_box(box_size)
+      @stream.read(3)
+      flags3 = read_uint8!
+      entries_count = read_uint32!
+
+      entries_count.times do
+        id = read_uint16!
+        essen_count = read_uint8!
+
+        essen_count.times do
+          property_index = read_uint8! & 0x7F
+
+          if flags3 & 1 == 1
+            property_index = (property_index << 7) + read_uint8!
+          end
+
+          @ipma_boxes << { id: id, property_index: property_index - 1 }
+        end
+      end
+    end
+
+    def handle_pitm_box(box_size)
+      data = @stream.read(box_size)
+      @primary_box = data[4...6].unpack1("S>")
+    end
+
+    def handle_meta_box(box_size)
+      box_size >= 4 or throw :finish
+
+      @stream.read(4)
+      read_boxes!(box_size - 4)
+
+      @primary_box or throw :finish
+
+      primary_indices = @ipma_boxes
+                        .select { |box| box[:id] == @primary_box }
+                        .map { |box| box[:property_index] }
+
+      ispe_box = @ispe_boxes.find do |box|
+        primary_indices.include?(box[:index])
+      end
+
+      if ispe_box
+        @final_size = ispe_box[:size]
+      end
+
+      throw :finish
+    end
+
+    def read_box_header!
+      size = read_uint32!
+      type = @stream.read(4)
+      [type, size - 8]
+    end
+
+    def read_uint8!
+      @stream.read(1).unpack1("C")
+    end
+
+    def read_uint16!
+      @stream.read(2).unpack1("S>")
+    end
+
+    def read_uint32!
+      @stream.read(4).unpack1("N")
+    end
+  end
+
+  def parse_size_for_heic
+    heic = Heic.new(@stream)
+    heic.width_and_height
+  end
+
+  def parse_size_for_heif
+    heic = Heic.new(@stream)
+    heic.width_and_height
+  end
 
   class Gif # :nodoc:
     def initialize(stream)
