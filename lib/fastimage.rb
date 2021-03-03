@@ -675,7 +675,7 @@ class FastImage
 
     def handle_pitm_box(box_size)
       data = @stream.read(box_size)
-      @primary_box = data[4...6].unpack1("S>")
+      @primary_box = data[4...6].unpack("S>")[0]
     end
 
     def handle_meta_box(box_size)
@@ -708,15 +708,15 @@ class FastImage
     end
 
     def read_uint8!
-      @stream.read(1).unpack1("C")
+      @stream.read(1).unpack("C")[0]
     end
 
     def read_uint16!
-      @stream.read(2).unpack1("S>")
+      @stream.read(2).unpack("S>")[0]
     end
 
     def read_uint32!
-      @stream.read(4).unpack1("N")
+      @stream.read(4).unpack("N")[0]
     end
   end
 
