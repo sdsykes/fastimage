@@ -609,8 +609,7 @@ class FastImage
       index = 0
 
       loop do
-        end_pos.nil? || @stream.pos < end_pos or
-          return
+        return if end_pos && @stream.pos >= end_pos
 
         box_type, box_size = read_box_header!
 
@@ -638,7 +637,7 @@ class FastImage
     end
 
     def handle_ispe_box(box_size, index)
-      box_size >= 12 or throw :finish
+      throw :finish if box_size < 12
 
       data = @stream.read(box_size)
       width, height = data[4...12].unpack("N2")
@@ -646,10 +645,10 @@ class FastImage
     end
 
     def handle_hdlr_box(box_size)
-      box_size >= 12 or throw :finish
+      throw :finish if box_size < 12
 
       data = @stream.read(box_size)
-      data[8...12] == "pict" or throw :finish
+      throw :finish if data[8...12] != "pict"
     end
 
     def handle_ipma_box(box_size)
@@ -679,12 +678,12 @@ class FastImage
     end
 
     def handle_meta_box(box_size)
-      box_size >= 4 or throw :finish
+      throw :finish if box_size < 4
 
       @stream.read(4)
       read_boxes!(box_size - 4)
 
-      @primary_box or throw :finish
+      throw :finish if !@primary_box
 
       primary_indices = @ipma_boxes
                         .select { |box| box[:id] == @primary_box }
