@@ -40,7 +40,14 @@ GoodFixtures = {
   "test3.svg" => [:svg, [255, 48]],
   "test4.svg" => [:svg, [271, 271]],
   "test5.svg" => [:svg, [255, 48]],
-  "orient_6.jpg"=>[:jpeg, [1250,2500]]
+  "orient_6.jpg"=>[:jpeg, [1250,2500]],
+  "heic/test.heic"=>[:heic, [700,476]],
+  "heic/heic-empty.heic"=>[:heic, [3992,2992]],
+  "heic/heic-iphone.heic"=>[:heic,[4032,3024]],
+  "heic/heic-iphone7.heic"=>[:heic,[4032,3024]],
+  "heic/heic-maybebroken.HEIC"=>[:heic,[4032,3024]],
+  "heic/heic-single.heic"=>[:heif,[1440,960]],
+  "heic/heic-collection.heic"=>[:heif,[1440,960]],
 }
 
 BadFixtures = [
@@ -49,7 +56,7 @@ BadFixtures = [
   "test.xml",
   "test2.xml",
   "a.CR2",
-  "a.CRW"
+  "a.CRW",
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
@@ -94,15 +101,15 @@ end
 class FastImageTest < Test::Unit::TestCase
   def test_should_report_type_correctly
     GoodFixtures.each do |fn, info|
-      assert_equal info[0], FastImage.type(TestUrl + fn)
-      assert_equal info[0], FastImage.type(TestUrl + fn, :raise_on_failure=>true)
+      assert_equal info[0], FastImage.type(TestUrl + fn), "type of image #{fn} must be #{info[0]}"
+      assert_equal info[0], FastImage.type(TestUrl + fn, :raise_on_failure=>true), "type of image #{fn} must be #{info[0]}"
     end
   end
 
   def test_should_report_size_correctly
     GoodFixtures.each do |fn, info|
-      assert_equal info[1], FastImage.size(TestUrl + fn)
-      assert_equal info[1], FastImage.size(TestUrl + fn, :raise_on_failure=>true)
+      assert_equal info[1], FastImage.size(TestUrl + fn), "size for #{fn} must be #{info[1]}"
+      assert_equal info[1], FastImage.size(TestUrl + fn, :raise_on_failure=>true), "size for #{fn} must be #{info[1]}"
     end
   end
 
@@ -171,13 +178,13 @@ class FastImageTest < Test::Unit::TestCase
 
   def test_should_report_type_correctly_for_local_files
     GoodFixtures.each do |fn, info|
-      assert_equal info[0], FastImage.type(File.join(FixturePath, fn))
+      assert_equal info[0], FastImage.type(File.join(FixturePath, fn)), "type of image #{fn} must be #{info[0]}"
     end
   end
 
   def test_should_report_size_correctly_for_local_files
     GoodFixtures.each do |fn, info|
-      assert_equal info[1], FastImage.size(File.join(FixturePath, fn))
+      assert_equal info[1], FastImage.size(File.join(FixturePath, fn)), "size for #{fn} must be #{info[1]}"
     end
   end
 
@@ -188,7 +195,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_report_type_correctly_for_ios
     GoodFixtures.each do |fn, info|
       File.open(File.join(FixturePath, fn), "r") do |io|
-        assert_equal info[0], FastImage.type(io)
+        assert_equal info[0], FastImage.type(io), "type of image #{fn} must be #{info[0]}"
       end
     end
   end
@@ -196,7 +203,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_report_size_correctly_for_ios
     GoodFixtures.each do |fn, info|
       File.open(File.join(FixturePath, fn), "r") do |io|
-        assert_equal info[1], FastImage.size(io)
+        assert_equal info[1], FastImage.size(io), "size for #{fn} must be #{info[1]}"
       end
     end
   end
@@ -205,7 +212,7 @@ class FastImageTest < Test::Unit::TestCase
     GoodFixtures.each do |fn, info|
       File.open(File.join(FixturePath, fn), "r") do |io|
         io.read
-        assert_equal info[0], FastImage.type(io)
+        assert_equal info[0], FastImage.type(io), "type of image #{fn} must be #{info[0]}"
       end
     end
   end
@@ -214,7 +221,7 @@ class FastImageTest < Test::Unit::TestCase
     GoodFixtures.each do |fn, info|
       File.open(File.join(FixturePath, fn), "r") do |io|
         io.read
-        assert_equal info[1], FastImage.size(io)
+        assert_equal info[1], FastImage.size(io), "size for #{fn} must be #{info[1]}"
       end
     end
   end
