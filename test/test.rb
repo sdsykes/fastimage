@@ -48,6 +48,7 @@ GoodFixtures = {
   "heic/heic-maybebroken.HEIC"=>[:heic,[4032,3024]],
   "heic/heic-single.heic"=>[:heif,[1440,960]],
   "heic/heic-collection.heic"=>[:heif,[1440,960]],
+  "test6.svg" => [:svg, [450, 450]]
 }
 
 BadFixtures = [
