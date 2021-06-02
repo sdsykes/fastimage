@@ -1,0 +1,6 @@
+Version 2.2.4
+
+02-June-2021
+
+- FEATURE: Added support for HEIC format
+- FIX: Support SVG files that start with a BOM character

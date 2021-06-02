@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require "rdoc/task"
-require 'rake/testtask'
+require "rake/testtask"
+require "bundler/gem_tasks"
 
 # Generate documentation
 Rake::RDocTask.new do |rd|
