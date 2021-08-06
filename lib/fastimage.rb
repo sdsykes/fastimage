@@ -589,6 +589,7 @@ class FastImage
     end
 
     def width_and_height
+      @rotation = 0
       @max_size = nil
       @primary_box = nil
       @ipma_boxes = []
@@ -599,11 +600,19 @@ class FastImage
         read_boxes!
       end
 
-      @final_size
+      if [90, 270].include?(@rotation)
+        @final_size.reverse
+      else
+        @final_size
+      end
     end
 
     private
 
+    # Format specs: https://www.loc.gov/preservation/digital/formats/fdd/fdd000525.shtml
+
+    # If you need to inspect a heic/heif file, use
+    # https://gpac.github.io/mp4box.js/test/filereader.html
     def read_boxes!(max_read_bytes = nil)
       end_pos = max_read_bytes.nil? ? nil : @stream.pos + max_read_bytes
       index = 0
@@ -624,6 +633,8 @@ class FastImage
           handle_hdlr_box(box_size)
         when "iprp", "ipco"
           read_boxes!(box_size)
+        when "irot"
+          handle_irot_box
         when "ispe"
           handle_ispe_box(box_size, index)
         when "mdat"
@@ -634,6 +645,10 @@ class FastImage
 
         index += 1
       end
+    end
+
+    def handle_irot_box
+      @rotation = (read_uint8! & 0x3) * 90
     end
 
     def handle_ispe_box(box_size, index)
