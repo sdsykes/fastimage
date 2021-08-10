@@ -1,6 +1,8 @@
+require_relative "lib/fastimage/version"
+
 Gem::Specification.new do |s|
   s.name = %q{fastimage}
-  s.version = "2.2.4"
+  s.version = FastImage::VERSION
 
   s.required_ruby_version = '>= 1.9.2'
   s.authors = ["Stephen Sykes"]
@@ -14,6 +16,7 @@ Gem::Specification.new do |s|
     "MIT-LICENSE",
     "README.textile",
     "lib/fastimage.rb",
+    "lib/fastimage/version.rb",
   ]
   s.homepage = %q{http://github.com/sdsykes/fastimage}
   s.rdoc_options = ["--charset=UTF-8"]
