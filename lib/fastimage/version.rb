@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class FastImage
-  VERSION = "2.2.5"
+  VERSION = '2.2.6'
 end
