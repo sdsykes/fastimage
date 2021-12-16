@@ -544,12 +544,9 @@ class FastImage
       case @stream.peek(3).bytes.to_a.last
       when 0
         # http://www.ftyps.com/what.html
-        # HEIC is composed of nested "boxes". Each box has a header composed of
-        # - Size (32 bit integer)
-        # - Box type (4 chars)
-        # - Extended size: only if size === 1, the type field is followed by 64 bit integer of extended size
-        # - Payload: Type-dependent
         case @stream.peek(12)[4..-1]
+        when "ftypavif"
+          :avif
         when "ftypheic"
           :heic
         when "ftypmif1"
@@ -584,7 +581,14 @@ class FastImage
   end
   alias_method :parse_size_for_cur, :parse_size_for_ico
 
-  class Heic # :nodoc:
+  # HEIC/AVIF are a special case of the general ISO_BMFF format, in which all data is encapsulated in typed boxes,
+  # with a mandatory ftyp box that is used to indicate particular file types. Is composed of nested "boxes". Each
+  # box has a header composed of
+  # - Size (32 bit integer)
+  # - Box type (4 chars)
+  # - Extended size: only if size === 1, the type field is followed by 64 bit integer of extended size
+  # - Payload: Type-dependent
+  class IsoBmff # :nodoc:
     def initialize(stream)
       @stream = stream
     end
@@ -735,14 +739,19 @@ class FastImage
     end
   end
 
+  def parse_size_for_avif
+    bmff = IsoBmff.new(@stream)
+    bmff.width_and_height
+  end
+
   def parse_size_for_heic
-    heic = Heic.new(@stream)
-    heic.width_and_height
+    bmff = IsoBmff.new(@stream)
+    bmff.width_and_height
   end
 
   def parse_size_for_heif
-    heic = Heic.new(@stream)
-    heic.width_and_height
+    bmff = IsoBmff.new(@stream)
+    bmff.width_and_height
   end
 
   class Gif # :nodoc:

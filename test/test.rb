@@ -49,7 +49,10 @@ GoodFixtures = {
   "heic/heic-single.heic"=>[:heif,[1440,960]],
   "heic/heic-collection.heic"=>[:heif,[1440,960]],
   "heic/inverted.heic"=>[:heic,[3024, 4032]],
-  "test6.svg" => [:svg, [450, 450]]
+  "test6.svg" => [:svg, [450, 450]],
+  "avif/hato.avif" => [:avif, [3082, 2048]],
+  "avif/fox.avif" => [:avif, [1204, 799]],
+  "avif/kimono.avif" => [:avif, [722, 1024]],
 }
 
 BadFixtures = [
@@ -59,6 +62,7 @@ BadFixtures = [
   "test2.xml",
   "a.CR2",
   "a.CRW",
+  "avif/star.avifs",
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
