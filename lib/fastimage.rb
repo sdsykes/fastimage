@@ -85,6 +85,8 @@ class FastImage
   end
   class CannotParseImage < FastImageException # :nodoc:
   end
+  class BadImageURI < FastImageException # :nodoc:
+  end
 
   DefaultTimeout = 2 unless const_defined?(:DefaultTimeout)
 
@@ -228,6 +230,8 @@ class FastImage
       :size
     end
 
+    raise BadImageURI if uri.nil?
+
     @type, @state = nil
 
     if uri.respond_to?(:read)
@@ -254,7 +258,7 @@ class FastImage
     Errno::ENETUNREACH, ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT,
     OpenSSL::SSL::SSLError
     raise ImageFetchFailure if @options[:raise_on_failure]
-  rescue UnknownImageType
+  rescue UnknownImageType, BadImageURI
     raise if @options[:raise_on_failure]
   rescue CannotParseImage
     if @options[:raise_on_failure]
