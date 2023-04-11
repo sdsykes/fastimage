@@ -481,4 +481,14 @@ class FastImageTest < Test::Unit::TestCase
       FastImage.size(TestUrl + "a.CRW", :raise_on_failure=>true)
     end
   end
+  
+  def test_returns_nil_when_uri_is_nil
+    assert_equal nil, FastImage.size(nil)
+  end
+  
+  def test_raises_when_uri_is_nil_and_raise_on_failure_is_set
+    assert_raises(FastImage::BadImageURI) do
+      FastImage.size(nil, :raise_on_failure => true)
+    end
+  end
 end
