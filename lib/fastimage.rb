@@ -567,9 +567,9 @@ class FastImage
     when /\s\s|\s<|<[?!]/, 0xef.chr + 0xbb.chr
       # Peek 10 more chars each time, and if end of file is reached just raise
       # unknown. We assume the <svg tag cannot be within 10 chars of the end of
-      # the file, and is within the first 250 chars.
+      # the file, and is within the first 1000 chars.
       begin
-        :svg if (1..25).detect {|n| @stream.peek(10 * n).include?("<svg")}
+        :svg if (1..100).detect {|n| @stream.peek(10 * n).include?("<svg")}
       rescue FiberError
         nil
       end
