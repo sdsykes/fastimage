@@ -435,7 +435,7 @@ class FastImage
 
   def parse_animated
     @type = parse_type unless @type
-    @type == :gif ? send("parse_animated_for_#{@type}") : nil
+    %i(gif webp avif).include?(@type) ? send("parse_animated_for_#{@type}") : nil
   end
 
   def fetch_using_base64(uri)
@@ -550,6 +550,8 @@ class FastImage
         # http://www.ftyps.com/what.html
         case @stream.peek(12)[4..-1]
         when "ftypavif"
+          :avif
+        when "ftypavis"
           :avif
         when "ftypheic"
           :heic
@@ -1091,5 +1093,25 @@ class FastImage
   def parse_animated_for_gif
     gif = Gif.new(@stream)
     gif.animated?
+  end
+
+  def parse_animated_for_webp
+    vp8 = @stream.read(16)[12..15]
+    _len = @stream.read(4).unpack("V")
+    case vp8
+    when "VP8 "
+      false
+    when "VP8L"
+      false
+    when "VP8X"
+      flags = @stream.read(4).unpack("C")[0]
+      flags & 2 > 0
+    else
+      nil
+    end
+  end
+
+  def parse_animated_for_avif
+    @stream.peek(12)[4..-1] == "ftypavis"
   end
 end

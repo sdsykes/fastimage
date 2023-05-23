@@ -34,6 +34,7 @@ GoodFixtures = {
   "webp_vp8x.webp" => [:webp, [386, 395]],
   "webp_vp8l.webp" => [:webp, [386, 395]],
   "webp_vp8.webp" => [:webp, [550, 368]],
+  "webp_animated.webp" => [:webp, [400, 400]],
   "test.svg" => [:svg, [200, 300]],
   "test_partial_viewport.svg" => [:svg, [860, 400]],
   "test2.svg" => [:svg, [366, 271]],
@@ -53,6 +54,7 @@ GoodFixtures = {
   "avif/hato.avif" => [:avif, [3082, 2048]],
   "avif/fox.avif" => [:avif, [1204, 799]],
   "avif/kimono.avif" => [:avif, [722, 1024]],
+  "avif/red_green_flash.avif" => [:avif, [256, 256]],
 }
 
 BadFixtures = [
@@ -124,6 +126,10 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal false, FastImage.animated?(TestUrl + "test.gif")
     assert_equal true, FastImage.animated?(TestUrl + "animated.gif")
     assert_equal true, FastImage.animated?(TestUrl + "animated_without_gct.gif")
+    assert_equal false, FastImage.animated?(TestUrl + "webp_vp8x.webp")
+    assert_equal true, FastImage.animated?(TestUrl + "webp_animated.webp")
+    assert_equal false, FastImage.animated?(TestUrl + "avif/hato.avif")
+    assert_equal true, FastImage.animated?(TestUrl + "avif/red_green_flash.avif")
   end
 
   def test_should_return_nil_on_fetch_failure
