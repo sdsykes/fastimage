@@ -132,6 +132,14 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal true, FastImage.animated?(TestUrl + "avif/red_green_flash.avif")
   end
 
+  def test_should_report_multiple_properties
+    fi = FastImage.new(File.join(FixturePath, "animated.gif"))
+    assert_equal :gif, fi.type
+    assert_equal [400, 400], fi.size
+    assert_equal true, fi.animated
+    assert_equal 1001718, fi.content_length
+  end
+
   def test_should_return_nil_on_fetch_failure
     assert_nil FastImage.size(TestUrl + "does_not_exist")
   end

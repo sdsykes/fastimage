@@ -139,7 +139,7 @@ class FastImage
   #   If set to true causes an exception to be raised if the image size cannot be found for any reason.
   #
   def self.size(uri, options={})
-    new(uri, options).size
+    new(uri, options.merge(:lazy=>true)).size
   end
 
   # Returns an symbol indicating the image type fetched from a uri.
@@ -181,7 +181,7 @@ class FastImage
   #   If set to true causes an exception to be raised if the image type cannot be found for any reason.
   #
   def self.type(uri, options={})
-    new(uri, options.merge(:type_only=>true)).type
+    new(uri, options.merge(:lazy=>true)).type
   end
 
   # Returns a boolean value indicating the image is animated.
@@ -209,12 +209,13 @@ class FastImage
   #   If set to true causes an exception to be raised if the image type cannot be found for any reason.
   #
   def self.animated?(uri, options={})
-    new(uri, options.merge(:animated_only=>true)).animated
+    new(uri, options.merge(:lazy=>true)).animated
   end
 
   def initialize(uri, options={})
     @uri = uri
     @options = {
+      :lazy             => false,
       :type_only        => false,
       :timeout          => DefaultTimeout,
       :raise_on_failure => false,
@@ -222,7 +223,7 @@ class FastImage
       :http_header      => {}
     }.merge(options)
 
-    @property = if @options[:animated_only]
+    property = if @options[:animated_only]
       :animated
     elsif @options[:type_only]
       :type
@@ -230,56 +231,88 @@ class FastImage
       :size
     end
 
-    raise BadImageURI if uri.nil?
+    @state = nil
 
-    @type, @state = nil
+    send(property) if !options[:lazy] && options[:raise_on_failure]
+  end
 
-    if uri.respond_to?(:read)
-      fetch_using_read(uri)
-    elsif uri.start_with?('data:')
-      fetch_using_base64(uri)
+  def type
+    fetch(:type) unless defined?(@type)
+
+    raise UnknownImageType if @options[:raise_on_failure] && !@type
+
+    @type
+  end
+
+  def size
+    begin
+      fetch(:size) unless defined?(@size)
+    rescue CannotParseImage
+    end
+
+    raise SizeNotFound if @options[:raise_on_failure] && !@size
+
+    @size
+  end
+
+  def orientation
+    fetch(:size) unless defined?(@orientation)
+
+    @orientation ||= 1
+  end
+
+  def animated
+    fetch(:animated) unless defined?(@animated)
+
+    @animated
+  end
+
+  def content_length
+    fetch(:content_length) unless defined?(@content_length)
+
+    @content_length
+  end
+
+  def fetch(property)
+    raise BadImageURI if @uri.nil?
+
+    if @uri.respond_to?(:read)
+      fetch_using_read(@uri, property)
+    elsif @uri.start_with?('data:')
+      fetch_using_base64(@uri, property)
     else
       begin
-        @parsed_uri = URI.parse(uri)
+        @parsed_uri = URI.parse(@uri)
       rescue URI::InvalidURIError
-        fetch_using_file_open
+        fetch_using_file_open(property)
       else
         if @parsed_uri.scheme == "http" || @parsed_uri.scheme == "https"
-          fetch_using_http
+          fetch_using_http(property)
         else
-          fetch_using_file_open
+          fetch_using_file_open(property)
         end
       end
     end
-
-    raise SizeNotFound if @options[:raise_on_failure] && @property == :size && !@size
 
   rescue Timeout::Error, SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ECONNRESET,
     Errno::ENETUNREACH, ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT,
     OpenSSL::SSL::SSLError
     raise ImageFetchFailure if @options[:raise_on_failure]
-  rescue UnknownImageType, BadImageURI
+
+  rescue UnknownImageType, BadImageURI, CannotParseImage
     raise if @options[:raise_on_failure]
-  rescue CannotParseImage
-    if @options[:raise_on_failure]
-      if @property == :size
-        raise SizeNotFound
-      else
-        raise ImageFetchFailure
-      end
-    end
 
   ensure
-    uri.rewind if uri.respond_to?(:rewind)
+    @uri.rewind if @uri.respond_to?(:rewind)
 
   end
 
   private
 
-  def fetch_using_http
+  def fetch_using_http(property)
     @redirect_count = 0
 
-    fetch_using_http_from_parsed_uri
+    fetch_using_http_from_parsed_uri(property)
   end
 
   # Some invalid locations need escaping
@@ -293,7 +326,7 @@ class FastImage
     end
   end
 
-  def fetch_using_http_from_parsed_uri
+  def fetch_using_http_from_parsed_uri(property)
     http_header = {'Accept-Encoding' => 'identity'}.merge(@options[:http_header])
 
     setup_http
@@ -307,7 +340,7 @@ class FastImage
           @parsed_uri = URI.join(@parsed_uri, escaped_location(location))
         rescue URI::InvalidURIError
         else
-          fetch_using_http_from_parsed_uri
+          fetch_using_http_from_parsed_uri(property)
           break
         end
       end
@@ -337,7 +370,7 @@ class FastImage
         end
       end
 
-      parse_packets FiberStream.new(read_fiber)
+      parse_packets FiberStream.new(read_fiber), property
 
       break  # needed to actively quit out of the fetch
     end
@@ -374,7 +407,7 @@ class FastImage
     @http.read_timeout = @options[:timeout]
   end
 
-  def fetch_using_read(readable)
+  def fetch_using_read(readable, property)
     readable.rewind if readable.respond_to?(:rewind)
     # Pathnames respond to read, but always return the first
     # chunk of the file unlike an IO (even though the
@@ -396,56 +429,49 @@ class FastImage
       end
     end
 
-    parse_packets FiberStream.new(read_fiber)
+    parse_packets FiberStream.new(read_fiber), property
   end
 
-  def fetch_using_file_open
-    @content_length = File.size?(@uri)
+  def fetch_using_file_open(property)
+    return @content_length = File.size?(@uri) if property == :content_length
+
     File.open(@uri) do |s|
-      fetch_using_read(s)
+      fetch_using_read(s, property)
     end
   end
 
-  def parse_packets(stream)
+  def parse_packets(stream, property)
+    return if property == :content_length
+
     @stream = stream
 
     begin
-      result = send("parse_#{@property}")
-      if result != nil
-        # extract exif orientation if it was found
-        if @property == :size && result.size == 3
-          @orientation = result.pop
-        else
-          @orientation = 1
-        end
-
-        instance_variable_set("@#{@property}", result)
-      else
-        raise CannotParseImage
-      end
+      send("parse_#{property}")
     rescue FiberError
       raise CannotParseImage
     end
   end
 
+  def type!
+    @type || parse_type
+  end
+
   def parse_size
-    @type = parse_type unless @type
-    send("parse_size_for_#{@type}")
+    send("parse_size_for_#{type!}")
   end
 
   def parse_animated
-    @type = parse_type unless @type
-    %i(gif webp avif).include?(@type) ? send("parse_animated_for_#{@type}") : nil
+    %i(gif webp avif).include?(type!) ? send("parse_animated_for_#{type!}") : nil
   end
 
-  def fetch_using_base64(uri)
+  def fetch_using_base64(uri, property)
     decoded = begin
       Base64.decode64(uri.split(',')[1])
     rescue
-      raise CannotParseImage
+      raise ImageFetchFailure
     end
     @content_length = decoded.size
-    fetch_using_read StringIO.new(decoded)
+    fetch_using_read StringIO.new(decoded), property
   end
 
   module StreamUtil # :nodoc:
@@ -526,7 +552,7 @@ class FastImage
   end
 
   def parse_type
-    parsed_type = case @stream.peek(2)
+    @type = case @stream.peek(2)
     when "BM"
       :bmp
     when "GI"
@@ -577,13 +603,13 @@ class FastImage
       end
     end
 
-    parsed_type or raise UnknownImageType
+    @type or raise UnknownImageType
   end
 
   def parse_size_for_ico
     icons = @stream.read(6)[4..5].unpack('v').first
     sizes = icons.times.map { @stream.read(16).unpack('C2').map { |x| x == 0 ? 256 : x } }.sort_by { |w,h| w * h }
-    sizes.last
+    @size = sizes.last
   end
   alias_method :parse_size_for_cur, :parse_size_for_ico
 
@@ -747,17 +773,17 @@ class FastImage
 
   def parse_size_for_avif
     bmff = IsoBmff.new(@stream)
-    bmff.width_and_height
+    @size = bmff.width_and_height
   end
 
   def parse_size_for_heic
     bmff = IsoBmff.new(@stream)
-    bmff.width_and_height
+    @size = bmff.width_and_height
   end
 
   def parse_size_for_heif
     bmff = IsoBmff.new(@stream)
-    bmff.width_and_height
+    @size = bmff.width_and_height
   end
 
   class Gif # :nodoc:
@@ -829,11 +855,11 @@ class FastImage
 
   def parse_size_for_gif
     gif = Gif.new(@stream)
-    gif.width_and_height
+    @size = gif.width_and_height
   end
 
   def parse_size_for_png
-    @stream.read(25)[16..24].unpack('NN')
+    @size = @stream.read(25)[16..24].unpack('NN')
   end
 
   def parse_size_for_jpeg
@@ -875,7 +901,9 @@ class FastImage
         height = @stream.read_int
         width = @stream.read_int
         width, height = height, width if exif && exif.rotated?
-        return [width, height, exif ? exif.orientation : 1]
+        @size = [width, height]
+        @orientation = exif ? exif.orientation : 1
+        return
       end
     end
   end
@@ -891,7 +919,7 @@ class FastImage
              end
 
     # ImageHeight is expressed in pixels. The absolute value is necessary because ImageHeight can be negative
-    [result.first, result.last.abs]
+    @size = [result.first, result.last.abs]
   end
 
   def parse_size_for_webp
@@ -911,13 +939,13 @@ class FastImage
 
   def parse_size_vp8
     w, h = @stream.read(10).unpack("@6vv")
-    [w & 0x3fff, h & 0x3fff]
+    @size = [w & 0x3fff, h & 0x3fff]
   end
 
   def parse_size_vp8l
     @stream.skip(1) # 0x2f
     b1, b2, b3, b4 = @stream.read(4).bytes.to_a
-    [1 + (((b2 & 0x3f) << 8) | b1), 1 + (((b4 & 0xF) << 10) | (b3 << 2) | ((b2 & 0xC0) >> 6))]
+    @size = [1 + (((b2 & 0x3f) << 8) | b1), 1 + (((b4 & 0xF) << 10) | (b3 << 2) | ((b2 & 0xC0) >> 6))]
   end
 
   def parse_size_vp8x
@@ -930,7 +958,7 @@ class FastImage
       # TODO: find or create test images for this
     end
 
-    return [width, height]
+    @size = [width, height]
   end
 
   class Exif # :nodoc:
@@ -1004,15 +1032,18 @@ class FastImage
 
   def parse_size_for_tiff
     exif = Exif.new(@stream)
+    @orientation = exif.orientation
     if exif.rotated?
+      @size = [exif.height, exif.width]
       [exif.height, exif.width, exif.orientation]
     else
+      @size = [exif.width, exif.height]
       [exif.width, exif.height, exif.orientation]
     end
   end
 
   def parse_size_for_psd
-    @stream.read(26).unpack("x14NN").reverse
+    @size = @stream.read(26).unpack("x14NN").reverse
   end
 
   class Svg # :nodoc:
@@ -1087,18 +1118,19 @@ class FastImage
 
   def parse_size_for_svg
     svg = Svg.new(@stream)
-    svg.width_and_height
+    @size = svg.width_and_height
   end
 
   def parse_animated_for_gif
     gif = Gif.new(@stream)
-    gif.animated?
+    @animated = gif.animated?
   end
 
   def parse_animated_for_webp
     vp8 = @stream.read(16)[12..15]
     _len = @stream.read(4).unpack("V")
-    case vp8
+
+    @animated = case vp8
     when "VP8 "
       false
     when "VP8L"
@@ -1112,6 +1144,6 @@ class FastImage
   end
 
   def parse_animated_for_avif
-    @stream.peek(12)[4..-1] == "ftypavis"
+    @animated = @stream.peek(12)[4..-1] == "ftypavis"
   end
 end
