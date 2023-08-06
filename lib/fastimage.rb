@@ -1100,7 +1100,7 @@ class FastImage
     @stream.read(33)
 
     loop do
-      length = @stream.read(4).unpack1("L>")
+      length = @stream.read(4).unpack("L>")[0]
       type = @stream.read(4)
 
       case type
