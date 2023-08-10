@@ -255,6 +255,14 @@ class FastImage
     @size
   end
 
+  def width
+    size && size.first
+  end
+
+  def height
+    size && size.second
+  end
+
   def orientation
     fetch(:size) unless defined?(@orientation)
 

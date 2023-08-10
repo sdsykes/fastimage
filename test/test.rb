@@ -433,6 +433,16 @@ class FastImageTest < Test::Unit::TestCase
     %x{rm -f shell_test}
   end
 
+  def test_width
+    assert_equal 30, FastImage.new(TestUrl + "test.png").width
+    assert_equal nil, FastImage.new(TestUrl + "does_not_exist").width
+  end
+
+  def test_height
+    assert_equal 30, FastImage.new(TestUrl + "test.png").height
+    assert_equal nil, FastImage.new(TestUrl + "does_not_exist").height
+  end
+
   def test_content_length
     url = "#{TestUrl}with_content_length.gif"
     FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
