@@ -18,6 +18,7 @@ GoodFixtures = {
   "animated_without_gct.gif"=>[:gif, [859, 478]],
   "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]],
+  "animated.png"=>[:png, [480, 400]],
   "test2.jpg"=>[:jpeg, [250, 188]],
   "test3.jpg"=>[:jpeg, [630, 367]],
   "test4.jpg"=>[:jpeg, [1485, 1299]],
@@ -122,7 +123,8 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_report_animated_correctly
-    assert_equal nil, FastImage.animated?(TestUrl + "test.png")
+    assert_equal false, FastImage.animated?(TestUrl + "test.png")
+    assert_equal true, FastImage.animated?(TestUrl + "animated.png")
     assert_equal false, FastImage.animated?(TestUrl + "test.gif")
     assert_equal true, FastImage.animated?(TestUrl + "animated.gif")
     assert_equal true, FastImage.animated?(TestUrl + "animated_without_gct.gif")

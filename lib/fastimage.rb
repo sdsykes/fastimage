@@ -435,7 +435,7 @@ class FastImage
 
   def parse_animated
     @type = parse_type unless @type
-    %i(gif webp avif).include?(@type) ? send("parse_animated_for_#{@type}") : nil
+    %i(gif webp avif png).include?(@type) ? send("parse_animated_for_#{@type}") : nil
   end
 
   def fetch_using_base64(uri)
@@ -1113,5 +1113,20 @@ class FastImage
 
   def parse_animated_for_avif
     @stream.peek(12)[4..-1] == "ftypavis"
+  end
+
+  def parse_animated_for_png
+    actl = nil
+    idat = nil
+    data = +""
+    while data << @stream.read(128)
+      actl = data.index('acTL') if actl.nil?
+      idat = data.index('IDAT') if idat.nil?
+
+      break unless idat.nil?
+    end
+    
+    return false if actl.nil? || idat.nil?
+    return actl < idat
   end
 end
