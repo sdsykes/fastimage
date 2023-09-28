@@ -436,7 +436,7 @@ class FastImage
 
   def parse_animated
     @type = parse_type unless @type
-    %i(gif webp avif).include?(@type) ? send("parse_animated_for_#{@type}") : nil
+    %i(gif png webp avif).include?(@type) ? send("parse_animated_for_#{@type}") : nil
   end
 
   def fetch_using_base64(uri)
@@ -1094,6 +1094,25 @@ class FastImage
   def parse_animated_for_gif
     gif = Gif.new(@stream)
     gif.animated?
+  end
+
+  def parse_animated_for_png
+    # Signature (8) + IHDR chunk (4 + 4 + 13 + 4)
+    @stream.read(33)
+
+    loop do
+      length = @stream.read(4).unpack("L>")[0]
+      type = @stream.read(4)
+
+      case type
+      when "acTL"
+        return true
+      when "IDAT"
+        return false
+      end
+
+      @stream.skip(length + 4)
+    end
   end
 
   def parse_animated_for_webp

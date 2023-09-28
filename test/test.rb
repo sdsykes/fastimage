@@ -15,6 +15,7 @@ GoodFixtures = {
   "test_v5header.bmp"=>[:bmp, [40, 27]],
   "test.gif"=>[:gif, [17, 32]],
   "animated.gif"=>[:gif, [400, 400]],
+  "animated.png"=>[:png, [100, 100]],
   "animated_without_gct.gif"=>[:gif, [859, 478]],
   "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]],
@@ -123,9 +124,11 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_report_animated_correctly
-    assert_equal nil, FastImage.animated?(TestUrl + "test.png")
+    assert_equal nil, FastImage.animated?(TestUrl + "test.jpg")
+    assert_equal false, FastImage.animated?(TestUrl + "test.png")
     assert_equal false, FastImage.animated?(TestUrl + "test.gif")
     assert_equal true, FastImage.animated?(TestUrl + "animated.gif")
+    assert_equal true, FastImage.animated?(TestUrl + "animated.png")
     assert_equal true, FastImage.animated?(TestUrl + "animated_without_gct.gif")
     assert_equal false, FastImage.animated?(TestUrl + "webp_vp8x.webp")
     assert_equal true, FastImage.animated?(TestUrl + "webp_animated.webp")
