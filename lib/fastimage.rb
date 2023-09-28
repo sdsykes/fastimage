@@ -464,7 +464,7 @@ class FastImage
   end
 
   def type!
-    @type || parse_type
+    @type ||= parse_type
   end
 
   def parse_size
