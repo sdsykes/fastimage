@@ -35,17 +35,17 @@
 # === Examples
 #   require 'fastimage'
 #
-#   FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
-#   => [266, 56]
-#   FastImage.type("http://stephensykes.com/images/pngimage")
+#   FastImage.size("https://switchstep.com/images/ios.gif")
+#   => [196, 283]
+#   FastImage.type("http://switchstep.com/images/ss_logo.png")
 #   => :png
 #   FastImage.type("/some/local/file.gif")
 #   => :gif
 #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
 #   => :gif
-#   FastImage.new("http://stephensykes.com/images/pngimage").content_length
-#   => 432
-#   FastImage.new("http://stephensykes.com/images/ExifOrientation3.jpg").orientation
+#   FastImage.new("http://switchstep.com/images/ss_logo.png").content_length
+#   => 4679
+#   FastImage.new("http://switchstep.com/images/ExifOrientation3.jpg").orientation
 #   => 3
 #
 # === References
@@ -61,6 +61,7 @@ require 'pathname'
 require 'zlib'
 require 'base64'
 require 'uri'
+require 'stringio'
 require_relative 'fastimage/version'
 
 # see http://stackoverflow.com/questions/5208851/i/41048816#41048816
@@ -109,27 +110,27 @@ class FastImage
   #
   #   require 'fastimage'
   #
-  #   FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
-  #   => [266, 56]
-  #   FastImage.size("http://stephensykes.com/images/pngimage")
-  #   => [16, 16]
-  #   FastImage.size("http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg")
-  #   => [500, 375]
-  #   FastImage.size("http://www-ece.rice.edu/~wakin/images/lena512.bmp")
+  #   FastImage.size("https://switchstep.com/images/ios.gif")
+  #   => [196, 283]
+  #   FastImage.size("http://switchstep.com/images/ss_logo.png")
+  #   => [300, 300]
+  #   FastImage.size("https://upload.wikimedia.org/wikipedia/commons/0/09/Jpeg_thumb_artifacts_test.jpg")
+  #   => [1280, 800]
+  #   FastImage.size("https://eeweb.engineering.nyu.edu/~yao/EL5123/image/lena_gray.bmp")
   #   => [512, 512]
   #   FastImage.size("test/fixtures/test.jpg")
   #   => [882, 470]
-  #   FastImage.size("http://pennysmalls.com/does_not_exist")
+  #   FastImage.size("http://switchstep.com/does_not_exist")
   #   => nil
-  #   FastImage.size("http://pennysmalls.com/does_not_exist", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/does_not_exist", :raise_on_failure=>true)
   #   => raises FastImage::ImageFetchFailure
-  #   FastImage.size("http://stephensykes.com/favicon.ico", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/images/favicon.ico", :raise_on_failure=>true)
   #   => [16, 16]
-  #   FastImage.size("http://stephensykes.com/images/squareBlue.icns", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/foo.ics", :raise_on_failure=>true)
   #   => raises FastImage::UnknownImageType
-  #   FastImage.size("http://stephensykes.com/favicon.ico", :raise_on_failure=>true, :timeout=>0.01)
+  #   FastImage.size("http://switchstep.com/images/favicon.ico", :raise_on_failure=>true, :timeout=>0.01)
   #   => raises FastImage::ImageFetchFailure
-  #   FastImage.size("http://stephensykes.com/images/faulty.jpg", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/images/faulty.jpg", :raise_on_failure=>true)
   #   => raises FastImage::SizeNotFound
   #
   # === Supported options
@@ -155,17 +156,17 @@ class FastImage
   #
   #   require 'fastimage'
   #
-  #   FastImage.type("http://stephensykes.com/images/ss.com_x.gif")
+  #   FastImage.type("https://switchstep.com/images/ios.gif")
   #   => :gif
-  #   FastImage.type("http://stephensykes.com/images/pngimage")
+  #   FastImage.type("http://switchstep.com/images/ss_logo.png")
   #   => :png
-  #   FastImage.type("http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg")
+  #   FastImage.type("https://upload.wikimedia.org/wikipedia/commons/0/09/Jpeg_thumb_artifacts_test.jpg")
   #   => :jpeg
-  #   FastImage.type("http://www-ece.rice.edu/~wakin/images/lena512.bmp")
+  #   FastImage.type("https://eeweb.engineering.nyu.edu/~yao/EL5123/image/lena_gray.bmp")
   #   => :bmp
   #   FastImage.type("test/fixtures/test.jpg")
   #   => :jpeg
-  #   FastImage.type("http://stephensykes.com/does_not_exist")
+  #   FastImage.type("http://switchstep.com/does_not_exist")
   #   => nil
   #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
   #   => :gif
@@ -469,7 +470,7 @@ class FastImage
   end
 
   def parse_animated
-    %i(gif webp avif).include?(type!) ? send("parse_animated_for_#{type!}") : nil
+    %i(gif png webp avif).include?(type!) ? send("parse_animated_for_#{type!}") : nil
   end
 
   def fetch_using_base64(uri, property)
@@ -603,9 +604,9 @@ class FastImage
     when /\s\s|\s<|<[?!]/, 0xef.chr + 0xbb.chr
       # Peek 10 more chars each time, and if end of file is reached just raise
       # unknown. We assume the <svg tag cannot be within 10 chars of the end of
-      # the file, and is within the first 250 chars.
+      # the file, and is within the first 1000 chars.
       begin
-        :svg if (1..25).detect {|n| @stream.peek(10 * n).include?("<svg")}
+        :svg if (1..100).detect {|n| @stream.peek(10 * n).include?("<svg")}
       rescue FiberError
         nil
       end
@@ -683,9 +684,9 @@ class FastImage
         when "ispe"
           handle_ispe_box(box_size, index)
         when "mdat"
-          throw :finish
+          @stream.skip(box_size)
         else
-          @stream.read(box_size)
+          @stream.skip(box_size)
         end
 
         index += 1
@@ -763,6 +764,7 @@ class FastImage
     def read_box_header!
       size = read_uint32!
       type = @stream.read(4)
+      size = read_uint64! - 8 if size == 1
       [type, size - 8]
     end
 
@@ -776,6 +778,10 @@ class FastImage
 
     def read_uint32!
       @stream.read(4).unpack("N")[0]
+    end
+
+    def read_uint64!
+      @stream.read(8).unpack("Q>")[0]
     end
   end
 
@@ -1132,6 +1138,25 @@ class FastImage
   def parse_animated_for_gif
     gif = Gif.new(@stream)
     @animated = gif.animated?
+  end
+
+  def parse_animated_for_png
+    # Signature (8) + IHDR chunk (4 + 4 + 13 + 4)
+    @stream.read(33)
+
+    loop do
+      length = @stream.read(4).unpack("L>")[0]
+      type = @stream.read(4)
+
+      case type
+      when "acTL"
+        return true
+      when "IDAT"
+        return false
+      end
+
+      @stream.skip(length + 4)
+    end
   end
 
   def parse_animated_for_webp

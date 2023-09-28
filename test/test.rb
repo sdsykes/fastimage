@@ -15,6 +15,7 @@ GoodFixtures = {
   "test_v5header.bmp"=>[:bmp, [40, 27]],
   "test.gif"=>[:gif, [17, 32]],
   "animated.gif"=>[:gif, [400, 400]],
+  "animated.png"=>[:png, [100, 100]],
   "animated_without_gct.gif"=>[:gif, [859, 478]],
   "test.jpg"=>[:jpeg, [882, 470]],
   "test.png"=>[:png, [30, 20]],
@@ -41,6 +42,7 @@ GoodFixtures = {
   "test3.svg" => [:svg, [255, 48]],
   "test4.svg" => [:svg, [271, 271]],
   "test5.svg" => [:svg, [255, 48]],
+  "test7.svg" => [:svg, [100, 100]],
   "orient_6.jpg"=>[:jpeg, [1250,2500]],
   "heic/test.heic"=>[:heic, [700,476]],
   "heic/heic-empty.heic"=>[:heic, [3992,2992]],
@@ -50,6 +52,7 @@ GoodFixtures = {
   "heic/heic-single.heic"=>[:heif,[1440,960]],
   "heic/heic-collection.heic"=>[:heif,[1440,960]],
   "heic/inverted.heic"=>[:heic,[3024, 4032]],
+  "heic/test-meta-after-mdat.heic"=>[:heic,[4000, 3000]],
   "test6.svg" => [:svg, [450, 450]],
   "avif/hato.avif" => [:avif, [3082, 2048]],
   "avif/fox.avif" => [:avif, [1204, 799]],
@@ -122,9 +125,11 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_report_animated_correctly
-    assert_equal nil, FastImage.animated?(TestUrl + "test.png")
+    assert_equal nil, FastImage.animated?(TestUrl + "test.jpg")
+    assert_equal false, FastImage.animated?(TestUrl + "test.png")
     assert_equal false, FastImage.animated?(TestUrl + "test.gif")
     assert_equal true, FastImage.animated?(TestUrl + "animated.gif")
+    assert_equal true, FastImage.animated?(TestUrl + "animated.png")
     assert_equal true, FastImage.animated?(TestUrl + "animated_without_gct.gif")
     assert_equal false, FastImage.animated?(TestUrl + "webp_vp8x.webp")
     assert_equal true, FastImage.animated?(TestUrl + "webp_animated.webp")
