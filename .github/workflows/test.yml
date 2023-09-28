@@ -9,9 +9,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '2.0'
-          - '2.1'
-          - '2.2'
           - '2.3'
           - '2.4'
           - '2.5'
@@ -20,6 +17,23 @@ jobs:
           - '3.0'
           - '3.1'
           - '3.2'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: bundle exec rake
+  test_old_ruby:
+    name: Test (Ruby ${{ matrix.ruby }})
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '2.0'
+          - '2.1'
+          - '2.2'
     steps:
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
