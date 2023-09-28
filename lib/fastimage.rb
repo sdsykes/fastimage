@@ -35,17 +35,17 @@
 # === Examples
 #   require 'fastimage'
 #
-#   FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
-#   => [266, 56]
-#   FastImage.type("http://stephensykes.com/images/pngimage")
+#   FastImage.size("https://switchstep.com/images/ios.gif")
+#   => [196, 283]
+#   FastImage.type("http://switchstep.com/images/ss_logo.png")
 #   => :png
 #   FastImage.type("/some/local/file.gif")
 #   => :gif
 #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
 #   => :gif
-#   FastImage.new("http://stephensykes.com/images/pngimage").content_length
-#   => 432
-#   FastImage.new("http://stephensykes.com/images/ExifOrientation3.jpg").orientation
+#   FastImage.new("http://switchstep.com/images/ss_logo.png").content_length
+#   => 4679
+#   FastImage.new("http://switchstep.com/images/ExifOrientation3.jpg").orientation
 #   => 3
 #
 # === References
@@ -109,27 +109,27 @@ class FastImage
   #
   #   require 'fastimage'
   #
-  #   FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
-  #   => [266, 56]
-  #   FastImage.size("http://stephensykes.com/images/pngimage")
-  #   => [16, 16]
-  #   FastImage.size("http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg")
-  #   => [500, 375]
-  #   FastImage.size("http://www-ece.rice.edu/~wakin/images/lena512.bmp")
+  #   FastImage.size("https://switchstep.com/images/ios.gif")
+  #   => [196, 283]
+  #   FastImage.size("http://switchstep.com/images/ss_logo.png")
+  #   => [300, 300]
+  #   FastImage.size("https://upload.wikimedia.org/wikipedia/commons/0/09/Jpeg_thumb_artifacts_test.jpg")
+  #   => [1280, 800]
+  #   FastImage.size("https://eeweb.engineering.nyu.edu/~yao/EL5123/image/lena_gray.bmp")
   #   => [512, 512]
   #   FastImage.size("test/fixtures/test.jpg")
   #   => [882, 470]
-  #   FastImage.size("http://pennysmalls.com/does_not_exist")
+  #   FastImage.size("http://switchstep.com/does_not_exist")
   #   => nil
-  #   FastImage.size("http://pennysmalls.com/does_not_exist", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/does_not_exist", :raise_on_failure=>true)
   #   => raises FastImage::ImageFetchFailure
-  #   FastImage.size("http://stephensykes.com/favicon.ico", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/images/favicon.ico", :raise_on_failure=>true)
   #   => [16, 16]
-  #   FastImage.size("http://stephensykes.com/images/squareBlue.icns", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/foo.ics", :raise_on_failure=>true)
   #   => raises FastImage::UnknownImageType
-  #   FastImage.size("http://stephensykes.com/favicon.ico", :raise_on_failure=>true, :timeout=>0.01)
+  #   FastImage.size("http://switchstep.com/images/favicon.ico", :raise_on_failure=>true, :timeout=>0.01)
   #   => raises FastImage::ImageFetchFailure
-  #   FastImage.size("http://stephensykes.com/images/faulty.jpg", :raise_on_failure=>true)
+  #   FastImage.size("http://switchstep.com/images/faulty.jpg", :raise_on_failure=>true)
   #   => raises FastImage::SizeNotFound
   #
   # === Supported options
@@ -155,17 +155,17 @@ class FastImage
   #
   #   require 'fastimage'
   #
-  #   FastImage.type("http://stephensykes.com/images/ss.com_x.gif")
+  #   FastImage.type("https://switchstep.com/images/ios.gif")
   #   => :gif
-  #   FastImage.type("http://stephensykes.com/images/pngimage")
+  #   FastImage.type("http://switchstep.com/images/ss_logo.png")
   #   => :png
-  #   FastImage.type("http://farm4.static.flickr.com/3023/3047236863_9dce98b836.jpg")
+  #   FastImage.type("https://upload.wikimedia.org/wikipedia/commons/0/09/Jpeg_thumb_artifacts_test.jpg")
   #   => :jpeg
-  #   FastImage.type("http://www-ece.rice.edu/~wakin/images/lena512.bmp")
+  #   FastImage.type("https://eeweb.engineering.nyu.edu/~yao/EL5123/image/lena_gray.bmp")
   #   => :bmp
   #   FastImage.type("test/fixtures/test.jpg")
   #   => :jpeg
-  #   FastImage.type("http://stephensykes.com/does_not_exist")
+  #   FastImage.type("http://switchstep.com/does_not_exist")
   #   => nil
   #   File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
   #   => :gif
