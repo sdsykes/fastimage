@@ -41,6 +41,7 @@ GoodFixtures = {
   "test3.svg" => [:svg, [255, 48]],
   "test4.svg" => [:svg, [271, 271]],
   "test5.svg" => [:svg, [255, 48]],
+  "test7.svg" => [:svg, [100, 100]],
   "orient_6.jpg"=>[:jpeg, [1250,2500]],
   "heic/test.heic"=>[:heic, [700,476]],
   "heic/heic-empty.heic"=>[:heic, [3992,2992]],
