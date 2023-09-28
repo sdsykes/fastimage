@@ -52,6 +52,7 @@ GoodFixtures = {
   "heic/heic-single.heic"=>[:heif,[1440,960]],
   "heic/heic-collection.heic"=>[:heif,[1440,960]],
   "heic/inverted.heic"=>[:heic,[3024, 4032]],
+  "heic/test-meta-after-mdat.heic"=>[:heic,[4000, 3000]],
   "test6.svg" => [:svg, [450, 450]],
   "avif/hato.avif" => [:avif, [3082, 2048]],
   "avif/fox.avif" => [:avif, [1204, 799]],
