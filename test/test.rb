@@ -453,6 +453,8 @@ class FastImageTest < Test::Unit::TestCase
     FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
 
     assert_equal 52, FastImage.new(url).content_length
+    assert_equal 268118, FastImage.new(File.join(FixturePath, "test.jpg")).content_length
+    assert_equal 268118, FastImage.new(Pathname.new(File.join(FixturePath, "test.jpg"))).content_length
   end
 
   def test_content_length_not_provided
