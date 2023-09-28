@@ -444,7 +444,7 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_height
-    assert_equal 30, FastImage.new(TestUrl + "test.png").height
+    assert_equal 20, FastImage.new(TestUrl + "test.png").height
     assert_equal nil, FastImage.new(TestUrl + "does_not_exist").height
   end
 

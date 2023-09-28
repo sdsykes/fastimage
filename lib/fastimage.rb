@@ -257,11 +257,11 @@ class FastImage
   end
 
   def width
-    size && size.first
+    size && size[0]
   end
 
   def height
-    size && size.second
+    size && size[1]
   end
 
   def orientation
@@ -1150,9 +1150,9 @@ class FastImage
 
       case type
       when "acTL"
-        return true
+        return @animated = true
       when "IDAT"
-        return false
+        return @animated = false
       end
 
       @stream.skip(length + 4)
