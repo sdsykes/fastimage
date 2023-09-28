@@ -417,7 +417,7 @@ class FastImage
   end
 
   def fetch_using_read(readable, property)
-    return @content_length = readable.size? if property == :content_length && readable.respond_to?(:size?)
+    return @content_length = readable.size if property == :content_length && readable.respond_to?(:size)
 
     readable.rewind if readable.respond_to?(:rewind)
     # Pathnames respond to read, but always return the first
