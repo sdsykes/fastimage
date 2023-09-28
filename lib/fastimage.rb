@@ -650,9 +650,9 @@ class FastImage
         when "ispe"
           handle_ispe_box(box_size, index)
         when "mdat"
-          throw :finish
+          @stream.skip(box_size)
         else
-          @stream.read(box_size)
+          @stream.skip(box_size)
         end
 
         index += 1
@@ -730,6 +730,7 @@ class FastImage
     def read_box_header!
       size = read_uint32!
       type = @stream.read(4)
+      size = read_uint64! - 8 if size == 1
       [type, size - 8]
     end
 
@@ -743,6 +744,10 @@ class FastImage
 
     def read_uint32!
       @stream.read(4).unpack("N")[0]
+    end
+
+    def read_uint64!
+      @stream.read(8).unpack("Q>")[0]
     end
   end
 
