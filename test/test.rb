@@ -464,7 +464,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_content_length_lazy
     fi = FastImage.new(File.join(FixturePath, "test.png"))
     fi.size
-    assert_equal 322, file.content_length
+    assert_equal 322, fi.content_length
   end
 
   def test_content_length_not_provided
