@@ -1,5 +1,5 @@
-!https://img.shields.io/gem/dt/fastimage.svg!:https://rubygems.org/gems/fastimage
-!https://github.com/sdsykes/fastimage/actions/workflows/test.yml/badge.svg?branch=master!:https://github.com/sdsykes/fastimage/actions/workflows/test.yml
+[![https://rubygems.org/gems/fastimage](https://img.shields.io/gem/dt/fastimage.svg)](https://rubygems.org/gems/fastimage)
+[![https://github.com/sdsykes/fastimage/actions/workflows/test.yml](https://github.com/sdsykes/fastimage/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/sdsykes/fastimage/actions/workflows/test.yml)
 
 # FastImage
 
