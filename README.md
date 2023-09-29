@@ -37,7 +37,7 @@ You only need supply the uri, and FastImage will do the rest.
 
 - Gives you information about the parsed display orientation of an image with Exif data (jpeg or tiff).
 
-- Handles [Data URIs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs) correctly.
+- Handles [Data URIs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) correctly.
 
 ## Security
 
@@ -48,21 +48,25 @@ Take care to sanitise the strings passed to FastImage; it will try to read from 
 ```ruby
 require 'fastimage'
 
-FastImage.size("http://stephensykes.com/images/ss.com_x.gif")
-=> [266, 56]  # width, height
-FastImage.type("http://stephensykes.com/images/pngimage")
+FastImage.size("https://switchstep.com/images/ios.gif")
+=> [196, 283]  # width, height
+FastImage.type("http://switchstep.com/images/ss_logo.png")
 => :png
 FastImage.type("/some/local/file.gif")
 => :gif
-FastImage.size("http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg", :raise_on_failure=>true, :timeout=>0.1)
-=> FastImage::ImageFetchFailure: FastImage::ImageFetchFailure
-FastImage.size("http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg", :raise_on_failure=>true, :timeout=>2.0)
-=> [9545, 6623]
-FastImage.new("http://stephensykes.com/images/pngimage").content_length
-=> 432
-FastImage.size("http://stephensykes.com/images/ss.com_x.gif", :http_header => {'User-Agent' => 'Fake Browser'})
-=> [266, 56]
-FastImage.new("http://stephensykes.com/images/ExifOrientation3.jpg").orientation
+File.open("/some/local/file.gif", "r") {|io| FastImage.type(io)}
+=> :gif
+FastImage.size("http://switchstep.com/images/favicon.ico", :raise_on_failure=>true, :timeout=>0.01)
+=> raises FastImage::ImageFetchFailure
+FastImage.size("http://switchstep.com/images/favicon.ico", :raise_on_failure=>true, :timeout=>2)
+=> [16, 16]
+FastImage.size("http://switchstep.com/images/faulty.jpg", :raise_on_failure=>true)
+=> raises FastImage::SizeNotFound
+FastImage.new("http://switchstep.com/images/ss_logo.png").content_length
+=> 4679
+FastImage.size("http://switchstep.com/images/ss_logo.png", :http_header => {'User-Agent' => 'Fake Browser'})
+=> [300, 300]
+FastImage.new("http://switchstep.com/images/ExifOrientation3.jpg").orientation
 => 3
 FastImage.size("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==")
 => [1, 1]
@@ -128,7 +132,7 @@ irb> puts Benchmark.measure {p FastImage.size(uri)}
 
 ## Tests
 
-You'll need to `gem install fakeweb` and possibly also  `gem install test-unit` to be able to run the tests.
+You'll need to bundle, or `gem install fakeweb` and possibly also  `gem install test-unit` to be able to run the tests.
 
 ```sh
 ruby test/test.rb
@@ -137,7 +141,7 @@ ruby test/test.rb
 ## References
 
 - [Pennysmalls - Find jpeg dimensions fast in pure Ruby, no image library needed](http://pennysmalls.wordpress.com/2008/08/19/find-jpeg-dimensions-fast-in-pure-ruby-no-ima/)
-- [Antti Kupila - Getting JPG dimensions with AS3 without loading the entire file](http://www.anttikupila.com/flash/getting-jpg-dimensions-with-as3-without-loading-the-entire-file/)
+- [Antti Kupila - Getting JPG dimensions with AS3 without loading the entire file](https://www.anttikupila.com/archive/getting-jpg-dimensions/)
 - [imagesize gem](https://rubygems.org/gems/imagesize)
 - [EXIF Reader](https://github.com/remvee/exifr)
 
