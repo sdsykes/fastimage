@@ -9,11 +9,11 @@ Gem::Specification.new do |s|
   s.description = %q{FastImage finds the size or type of an image given its uri by fetching as little as needed.}
   s.email = %q{sdsykes@gmail.com}
   s.extra_rdoc_files = [
-    "README.textile"
+    "README.md"
   ]
   s.files = [
     "MIT-LICENSE",
-    "README.textile",
+    "README.md",
     "lib/fastimage.rb",
     "lib/fastimage/version.rb",
   ]
