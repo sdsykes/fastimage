@@ -1,3 +1,11 @@
+Version 2.3.0
+
+24-Dec-2023
+
+- FIX: replace test tiff that triggers Clam-AV
+- FIX: certain heif files could not be parsed
+- FEATURE: Adds animated support for png
+
 Version 2.2.7
 
 23-May-2023
