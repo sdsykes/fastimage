@@ -100,34 +100,75 @@ FastImage is maintained by Stephen Sykes (`sdsykes). Support this project by usi
 
 ## Benchmark
 
-It's way faster than conventional methods (for example the image_size gem) for most types of file when fetching over the wire.
+It's way faster than conventional methods for most types of file when fetching over the wire. Compared here by using OpenURI which will fetch the whole file.
 
 ```ruby
-irb> uri = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
-irb> puts Benchmark.measure {open(uri, 'rb') {|fh| p ImageSize.new(fh).size}}
-[9545, 6623]
-  0.680000   0.250000   0.930000 (  7.571887)
+require 'benchmark'
+require 'fastimage'
+require 'open-uri'
 
-irb> puts Benchmark.measure {p FastImage.size(uri)}
+uri = "http://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
+puts Benchmark.measure {URI.open(uri, 'rb') {|fh| p FastImage.size(fh)}}
 [9545, 6623]
-  0.010000   0.000000   0.010000 (  0.090640)
+  0.059088   0.067694   0.126782 (  0.808131)
+
+puts Benchmark.measure {p FastImage.size(uri)}
+[9545, 6623]
+  0.006198   0.001563   0.007761 (  0.162021)
 ```
 
-The file is fetched in about 7.5 seconds in this test (the number in brackets is the total time taken), but as FastImage doesn't need to fetch the whole thing, it completes in less than 0.1s.
+The file is fetched in about 0.8 seconds in this test (the number in brackets is the total time taken), but as FastImage doesn't need to fetch the whole thing, it completes in 0.16s.
 
-You'll see similar excellent results for the other file types, except for TIFF. Unfortunately TIFFs tend to have their
-metadata towards the end of the file, so it makes little difference to do a minimal fetch. The result shown below is
-mostly dependent on the exact internet conditions during the test, and little to do with the library used.
+You'll see similar excellent results for the other file types.
 
 ```ruby
-irb> uri = "http://upload.wikimedia.org/wikipedia/commons/1/11/Shinbutsureijoushuincho.tiff"
-irb> puts Benchmark.measure {open(uri, 'rb') {|fh| p ImageSize.new(fh).size}}
-[1120, 1559]
-  1.080000   0.370000   1.450000 ( 13.766962)
+require 'benchmark'
+require 'fastimage'
+require 'open-uri'
 
-irb> puts Benchmark.measure {p FastImage.size(uri)}
-[1120, 1559]
-  3.490000   3.810000   7.300000 ( 11.754315)
+uri = "https://upload.wikimedia.org/wikipedia/commons/a/a9/Augustine_Herrman_1670_Map_Virginia_Maryland.tiff"
+puts Benchmark.measure {URI.open(uri, 'rb') {|fh| p FastImage.size(fh)}}
+[12805, 10204]
+  1.332587   2.049915   3.382502 ( 19.925270)
+
+puts Benchmark.measure {p FastImage.size(uri)}
+[12805, 10204]
+  0.004593   0.000924   0.005517 (  0.100592)
+```
+
+Some tiff files however do not have their metadata near the start of the file.
+
+```ruby
+require 'benchmark'
+require 'image_size'
+require 'fastimage'
+require 'open-uri'
+
+uri = "https://upload.wikimedia.org/wikipedia/commons/1/14/Center-Filled_LIMA.tif"
+puts Benchmark.measure {URI.open(uri, 'rb') {|fh| p FastImage.size(fh)}}
+[22841, 19404]
+  0.350304   0.321104   0.671408 (  3.053605)
+
+puts Benchmark.measure {p FastImage.size(uri)}
+[22841, 19404]
+  0.163443   0.214301   0.377744 (  2.880414)
+```
+
+Note that if you want a really fast result for this file type, [image_size](https://github.com/toy/image_size?tab=readme-ov-file#experimental-fetch-image-meta-from-http-server) might be useful as it has an optimisation for this (fetching only the needed data range).
+
+```ruby
+require 'benchmark'
+require 'image_size/uri'
+require 'fastimage'
+
+uri = "https://upload.wikimedia.org/wikipedia/commons/1/14/Center-Filled_LIMA.tif"
+puts Benchmark.measure {p ImageSize.url(uri).size }
+[22841, 19404]
+  0.008983   0.001311   0.010294 (  0.128986)
+
+puts Benchmark.measure {p FastImage.size(uri)}
+[22841, 19404]
+  0.163443   0.214301   0.377744 (  2.880414)
 ```
 
 ## Tests
