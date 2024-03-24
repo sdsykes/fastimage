@@ -137,6 +137,14 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal true, FastImage.animated?(TestUrl + "avif/red_green_flash.avif")
   end
 
+  def test_should_report_multiple_properties
+    fi = FastImage.new(File.join(FixturePath, "animated.gif"))
+    assert_equal :gif, fi.type
+    assert_equal [400, 400], fi.size
+    assert_equal true, fi.animated
+    assert_equal 1001718, fi.content_length
+  end
+
   def test_should_return_nil_on_fetch_failure
     assert_nil FastImage.size(TestUrl + "does_not_exist")
   end
@@ -430,11 +438,33 @@ class FastImageTest < Test::Unit::TestCase
     %x{rm -f shell_test}
   end
 
+  def test_width
+    assert_equal 30, FastImage.new(TestUrl + "test.png").width
+    assert_equal nil, FastImage.new(TestUrl + "does_not_exist").width
+  end
+
+  def test_height
+    assert_equal 20, FastImage.new(TestUrl + "test.png").height
+    assert_equal nil, FastImage.new(TestUrl + "does_not_exist").height
+  end
+
   def test_content_length
     url = "#{TestUrl}with_content_length.gif"
     FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
 
     assert_equal 52, FastImage.new(url).content_length
+    assert_equal 322, FastImage.new(File.join(FixturePath, "test.png")).content_length
+    assert_equal 322, FastImage.new(Pathname.new(File.join(FixturePath, "test.png"))).content_length
+
+    string = File.read(File.join(FixturePath, "test.png"))
+    stringio = StringIO.new(string)
+    assert_equal 322, FastImage.new(stringio).content_length
+  end
+
+  def test_content_length_lazy
+    fi = FastImage.new(File.join(FixturePath, "test.png"))
+    fi.size
+    assert_equal 322, fi.content_length
   end
 
   def test_content_length_not_provided
