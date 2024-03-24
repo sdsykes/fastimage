@@ -96,7 +96,7 @@ http://sdsykes.github.io/fastimage/rdoc/FastImage.html
 
 ## Maintainer
 
-FastImage is maintained by Stephen Sykes (`sdsykes). Support this project by using [LibPixel](https://libpixel.com) cloud based image resizing and processing service.
+FastImage is maintained by Stephen Sykes (sdsykes). SamSaffron also helps out from time to time (thanks!).
 
 ## Benchmark
 
