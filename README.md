@@ -140,7 +140,6 @@ Some tiff files however do not have their metadata near the start of the file.
 
 ```ruby
 require 'benchmark'
-require 'image_size'
 require 'fastimage'
 require 'open-uri'
 
