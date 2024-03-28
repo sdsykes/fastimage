@@ -579,7 +579,7 @@ class FastImage
       # the file, and is within the first 1000 chars.
       begin
         :svg if (1..100).detect {|n| @stream.peek(10 * n).include?("<svg")}
-      rescue FiberError
+      rescue FiberError, CannotParseImage
         nil
       end
     end
