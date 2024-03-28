@@ -321,6 +321,7 @@ class FastImage
         res.read_body do |str|
           Fiber.yield str
         end
+        nil
       end
 
       case res['content-encoding']
@@ -335,6 +336,7 @@ class FastImage
           while data = gzip.readline
             Fiber.yield data
           end
+          nil
         end
       end
 
@@ -388,12 +390,14 @@ class FastImage
           Fiber.yield str
           offset += LocalFileChunkSize
         end
+        nil
       end
     else
       read_fiber = Fiber.new do
         while str = readable.read(LocalFileChunkSize)
           Fiber.yield str
         end
+        nil
       end
     end
 
@@ -471,6 +475,9 @@ class FastImage
     include StreamUtil
     attr_reader :pos
 
+    # read_fiber should return nil if it no longer has anything to return when resumed
+    # so the result of the whole Fiber block should be set to be nil in case yield is no
+    # longer called
     def initialize(read_fiber)
       @read_fiber = read_fiber
       @pos = 0
@@ -484,7 +491,6 @@ class FastImage
         unused_str = @str[@strpos..-1]
 
         new_string = @read_fiber.resume
-        new_string = @read_fiber.resume if new_string.is_a? Net::ReadAdapter
         raise CannotParseImage if !new_string
         # we are dealing with bytes here, so force the encoding
         new_string.force_encoding("ASCII-8BIT") if new_string.respond_to? :force_encoding
@@ -573,7 +579,7 @@ class FastImage
       # the file, and is within the first 1000 chars.
       begin
         :svg if (1..100).detect {|n| @stream.peek(10 * n).include?("<svg")}
-      rescue FiberError
+      rescue FiberError, CannotParseImage
         nil
       end
     end
