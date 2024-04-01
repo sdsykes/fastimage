@@ -93,7 +93,7 @@ class FastImage
 
   LocalFileChunkSize = 256 unless const_defined?(:LocalFileChunkSize)
 
-  SUPPORTED_IMAGE_TYPES = [:bmp, :gif, :jpeg, :png, :tiff, :psd, :heic, :heif, :webp, :svg, :ico, :cur].freeze
+  SUPPORTED_IMAGE_TYPES = [:bmp, :gif, :jpeg, :png, :tiff, :psd, :heic, :heif, :webp, :svg, :ico, :cur, :jxl].freeze
 
   # Returns an array containing the width and height of the image.
   # It will return nil if the image could not be fetched, or if the image type was not recognised.
@@ -104,7 +104,7 @@ class FastImage
   # If you wish FastImage to raise if it cannot size the image for any reason, then pass
   # :raise_on_failure => true in the options.
   #
-  # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG and WEBP files.
+  # FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG, WEBP and JXL files.
   #
   # === Example
   #
