@@ -13,7 +13,7 @@ But the image is not locally stored - it's on another asset server, or in the cl
 
 You don't want to download the entire image to your app server - it could be many tens of kilobytes, or even megabytes just to get this information. For most common image types (GIF, PNG, BMP etc.), the size of the image is simply stored at the start of the file. For JPEG files it's a little bit more complex, but even so you do not need to fetch much of the image to find the size.
 
-FastImage does this minimal fetch for image types GIF, JPEG, PNG, TIFF, BMP, ICO, CUR, PSD, SVG and WEBP. And it doesn't rely on installing external libraries such as RMagick (which relies on ImageMagick or GraphicsMagick) or ImageScience (which relies on FreeImage).
+FastImage does this minimal fetch for image types GIF, JPEG, PNG, TIFF, BMP, ICO, CUR, PSD, SVG, WEBP and JXL. And it doesn't rely on installing external libraries such as RMagick (which relies on ImageMagick or GraphicsMagick) or ImageScience (which relies on FreeImage).
 
 You only need supply the uri, and FastImage will do the rest.
 
@@ -195,6 +195,10 @@ ruby test/test.rb
 - [Objective C by kylehickinson](https://github.com/kylehickinson/FastImage)
 - [Android by qstumn](https://github.com/qstumn/FastImageSize)
 - [Flutter by ky1vstar](https://github.com/ky1vstar/fastimage.dart)
+
+### Also of interest
+- [C++ by xiaozhuai](https://github.com/xiaozhuai/imageinfo)
+- [Rust by xiaozhuai](https://github.com/xiaozhuai/imageinfo-rs)
 
 ## Licence
 
