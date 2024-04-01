@@ -1,3 +1,6 @@
+Version 2.3.1
+- FIX: avoid bug where a NoMethodError exception is raised on faulty images
+
 Version 2.3.0
 
 24-Dec-2023
