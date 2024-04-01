@@ -9,7 +9,7 @@
 # No external libraries such as ImageMagick are used here, this is a very lightweight solution to
 # finding image information.
 #
-# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG and WEBP files.
+# FastImage knows about GIF, JPEG, BMP, TIFF, ICO, CUR, PNG, PSD, SVG, WEBP and JXL files.
 #
 # FastImage can also read files from the local filesystem by supplying the path instead of a uri.
 # In this case FastImage reads the file in chunks of 256 bytes until
@@ -551,6 +551,8 @@ class FastImage
       end
     when '8B'
       :psd
+    when "\xFF\x0A".b
+      :jxl
     when "\0\0"
       case @stream.peek(3).bytes.to_a.last
       when 0
@@ -564,6 +566,10 @@ class FastImage
           :heic
         when "ftypmif1"
           :heif
+        else
+          if @stream.peek(7)[4..-1] == 'JXL'
+            :jxl
+          end
         end
       # ico has either a 1 (for ico format) or 2 (for cursor) at offset 3
       when 1 then :ico
@@ -657,6 +663,8 @@ class FastImage
           handle_ispe_box(box_size, index)
         when "mdat"
           @stream.skip(box_size)
+        when "jxlc"
+          handle_jxlc_box(box_size)
         else
           @stream.skip(box_size)
         end
@@ -733,6 +741,11 @@ class FastImage
       throw :finish
     end
 
+    def handle_jxlc_box(box_size)
+      @final_size = JXL.new(@stream).read_size_header
+      throw :finish
+    end
+
     def read_box_header!
       size = read_uint32!
       type = @stream.read(4)
@@ -770,6 +783,75 @@ class FastImage
   def parse_size_for_heif
     bmff = IsoBmff.new(@stream)
     bmff.width_and_height
+  end
+
+  class JXL
+    LENGTHS = [9, 13, 18, 30]
+    MULTIPLIERS = [1, 1.2, Rational(4, 3), 1.5, Rational(16, 9), 1.25, 2]
+
+    def initialize(stream)
+      @stream = stream
+      @bit_counter = 0
+    end
+
+    def read_size_header
+      @words = @stream.read(6)[2..5].unpack('vv')
+
+      # small mode allows for values <= 256 that are divisible by 8
+      small = get_bits(1)
+      if small == 1
+        y = (get_bits(5) + 1) * 8
+        x = x_from_ratio(y)
+        if !x
+          x = (get_bits(5) + 1) * 8
+        end
+        return [x, y]
+      end
+
+      len = LENGTHS[get_bits(2)]
+      y = get_bits(len) + 1
+      x = x_from_ratio(y)
+      if !x
+        len = LENGTHS[get_bits(2)]
+        x = get_bits(len) + 1
+      end
+      [x, y]
+    end
+
+    def get_bits(size)
+      if @words.size < (@bit_counter + size) / 16 + 1
+        @words += @stream.read(4).unpack('vv')
+      end
+
+      dest_pos = 0
+      dest = 0
+      size.times do
+        word = @bit_counter / 16
+        source_pos = @bit_counter % 16
+        dest |= ((@words[word] & (1 << source_pos)) > 0 ? 1 : 0) << dest_pos
+        dest_pos += 1
+        @bit_counter += 1
+      end
+      dest
+    end
+
+    def x_from_ratio(y)
+      ratio = get_bits(3)
+      if ratio == 0
+        return nil
+      else
+        return (y * MULTIPLIERS[ratio - 1]).to_i
+      end
+    end
+  end
+
+  def parse_size_for_jxl
+    if @stream.peek(2) == "\xFF\x0A".b
+      JXL.new(@stream).read_size_header
+    else
+      bmff = IsoBmff.new(@stream)
+      bmff.width_and_height
+    end
   end
 
   class Gif # :nodoc:

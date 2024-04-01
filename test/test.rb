@@ -58,6 +58,8 @@ GoodFixtures = {
   "avif/fox.avif" => [:avif, [1204, 799]],
   "avif/kimono.avif" => [:avif, [722, 1024]],
   "avif/red_green_flash.avif" => [:avif, [256, 256]],
+  "isobmff.jxl" => [:jxl, [1280,1600]],
+  "naked.jxl" => [:jxl, [1000,1000]],
 }
 
 BadFixtures = [
