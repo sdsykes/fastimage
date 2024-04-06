@@ -6,8 +6,9 @@ module FastImageParsing
   class Jpeg < ImageBase # :nodoc:
     def dimensions
       exif = nil
+      state = nil
       loop do
-        @state = case @state
+        state = case state
         when nil
           @stream.skip(2)
           :started

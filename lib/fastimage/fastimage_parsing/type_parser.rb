@@ -4,6 +4,7 @@ module FastImageParsing
       @stream = stream
     end
     
+    # type will use peek to get enough bytes to determing the type of the image
     def type
       parsed_type = case @stream.peek(2)
       when "BM"

@@ -21,8 +21,6 @@ require_relative 'fastimage_parsing/webp'
 
 class FastImage
   include FastImageParsing
-  
-  attr_reader :size, :type, :content_length, :orientation, :animated
 
   attr_reader :bytes_read
 
@@ -153,7 +151,7 @@ class FastImage
   #   If set to true causes an exception to be raised if the image type cannot be found for any reason.
   #
   def self.type(uri, options={})
-    new(uri, options.merge(:type_only=>true)).type
+    new(uri, options).type
   end
 
   # Returns a boolean value indicating the image is animated.
@@ -181,38 +179,73 @@ class FastImage
   #   If set to true causes an exception to be raised if the image type cannot be found for any reason.
   #
   def self.animated?(uri, options={})
-    new(uri, options.merge(:animated_only=>true)).animated
+    new(uri, options).animated
   end
   
   def initialize(uri, options={})
     @uri = uri
     @options = {
-      :type_only        => false,
       :timeout          => DefaultTimeout,
       :raise_on_failure => false,
       :proxy            => nil,
       :http_header      => {}
     }.merge(options)
+  end
 
-    @property = if @options[:animated_only]
-      :animated
-    elsif @options[:type_only]
-      :type
-    else
-      :size
+  def type
+    @property = :type
+    fetch unless defined?(@type)
+    @type
+  end
+
+  def size
+    @property = :size
+    begin
+      fetch unless defined?(@size)
+    rescue CannotParseImage
     end
 
-    raise BadImageURI if uri.nil?
+    raise SizeNotFound if @options[:raise_on_failure] && !@size
 
-    @type, @state = nil
+    @size
+  end
 
-    if uri.respond_to?(:read)
-      fetch_using_read(uri)
-    elsif uri.start_with?('data:')
-      fetch_using_base64(uri)
+  def orientation
+    size unless defined?(@size)
+    @orientation ||= 1 if @size
+  end
+
+  def width
+    size && @size[0]
+  end
+
+  def height
+    size && @size[1]
+  end
+
+  def animated
+    @property = :animated
+    fetch unless defined?(@animated)
+    @animated
+  end
+  
+  def content_length
+    @property = :content_length
+    fetch unless defined?(@content_length)
+    @content_length
+  end
+
+  # find an appropriate method to fetch the image according to the passed parameter
+  def fetch
+    raise BadImageURI if @uri.nil?
+
+    if @uri.respond_to?(:read)
+      fetch_using_read(@uri)
+    elsif @uri.start_with?('data:')
+      fetch_using_base64(@uri)
     else
       begin
-        @parsed_uri = URI.parse(uri)
+        @parsed_uri = URI.parse(@uri)
       rescue URI::InvalidURIError
         fetch_using_file_open
       else
@@ -230,19 +263,11 @@ class FastImage
     Errno::ENETUNREACH, ImageFetchFailure, Net::HTTPBadResponse, EOFError, Errno::ENOENT,
     OpenSSL::SSL::SSLError
     raise ImageFetchFailure if @options[:raise_on_failure]
-  rescue UnknownImageType, BadImageURI
+  rescue UnknownImageType, BadImageURI, CannotParseImage
     raise if @options[:raise_on_failure]
-  rescue CannotParseImage
-    if @options[:raise_on_failure]
-      if @property == :size
-        raise SizeNotFound
-      else
-        raise ImageFetchFailure
-      end
-    end
-
+  
   ensure
-    uri.rewind if uri.respond_to?(:rewind)
+    @uri.rewind if @uri.respond_to?(:rewind)
 
   end
 
@@ -287,6 +312,7 @@ class FastImage
       raise ImageFetchFailure unless res.is_a?(Net::HTTPSuccess)
 
       @content_length = res.content_length
+      break if @property == :content_length
 
       read_fiber = Fiber.new do
         res.read_body do |str|
@@ -349,6 +375,8 @@ class FastImage
   end
 
   def fetch_using_read(readable)
+    return @content_length = readable.size if @property == :content_length && readable.respond_to?(:size)
+
     readable.rewind if readable.respond_to?(:rewind)
     # Pathnames respond to read, but always return the first
     # chunk of the file unlike an IO (even though the
@@ -376,7 +404,8 @@ class FastImage
   end
 
   def fetch_using_file_open
-    @content_length = File.size?(@uri)
+    return @content_length = File.size?(@uri) if @property == :content_length
+
     File.open(@uri) do |s|
       fetch_using_read(s)
     end
@@ -388,7 +417,7 @@ class FastImage
     rescue
       raise CannotParseImage
     end
-    @content_length = decoded.size
+
     fetch_using_read StringIO.new(decoded)
   end
   
@@ -396,7 +425,17 @@ class FastImage
     @stream = stream
 
     begin
-      result = send("parse_#{@property}")
+      @type = TypeParser.new(@stream).type unless defined?(@type)
+
+      result = case @property
+      when :type
+        @type
+      when :size
+        parse_size
+      when :animated
+        parse_animated
+      end
+
       if result != nil
         # extract exif orientation if it was found
         if @property == :size && result.size == 3
@@ -414,12 +453,7 @@ class FastImage
     end
   end
 
-  def parse_type
-    TypeParser.new(@stream).type
-  end
-
   def parser_class
-    @type ||= parse_type
     klass = Parsers[@type]
     raise UnknownImageType unless klass
     klass

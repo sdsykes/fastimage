@@ -139,6 +139,14 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal true, FastImage.animated?(TestUrl + "avif/red_green_flash.avif")
   end
 
+  def test_should_report_multiple_properties
+    fi = FastImage.new(File.join(FixturePath, "animated.gif"))
+    assert_equal :gif, fi.type
+    assert_equal [400, 400], fi.size
+    assert_equal true, fi.animated
+    assert_equal 1001718, fi.content_length
+  end
+
   def test_should_return_nil_on_fetch_failure
     assert_nil FastImage.size(TestUrl + "does_not_exist")
   end
@@ -437,6 +445,13 @@ class FastImageTest < Test::Unit::TestCase
     FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
 
     assert_equal 52, FastImage.new(url).content_length
+    
+    assert_equal 322, FastImage.new(File.join(FixturePath, "test.png")).content_length
+    assert_equal 322, FastImage.new(Pathname.new(File.join(FixturePath, "test.png"))).content_length
+
+    string = File.read(File.join(FixturePath, "test.png"))
+    stringio = StringIO.new(string)
+    assert_equal 322, FastImage.new(stringio).content_length
   end
 
   def test_content_length_not_provided
@@ -473,7 +488,7 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_support_data_uri_scheme_images
     assert_equal DataUriImageInfo[0], FastImage.type(DataUriImage)
     assert_equal DataUriImageInfo[1], FastImage.size(DataUriImage)
-    assert_raises(FastImage::ImageFetchFailure) do
+    assert_raises(FastImage::CannotParseImage) do
       FastImage.type("data:", :raise_on_failure => true)
     end
   end
@@ -503,5 +518,21 @@ class FastImageTest < Test::Unit::TestCase
     assert_raises(FastImage::BadImageURI) do
       FastImage.size(nil, :raise_on_failure => true)
     end
+  end
+  
+  def test_width
+    assert_equal 30, FastImage.new(TestUrl + "test.png").width
+    assert_equal nil, FastImage.new(TestUrl + "does_not_exist").width
+  end
+
+  def test_height
+    assert_equal 20, FastImage.new(TestUrl + "test.png").height
+    assert_equal nil, FastImage.new(TestUrl + "does_not_exist").height
+  end
+  
+  def test_content_length_after_size
+    fi = FastImage.new(File.join(FixturePath, "test.png"))
+    fi.size
+    assert_equal 322, fi.content_length
   end
 end
