@@ -535,4 +535,9 @@ class FastImageTest < Test::Unit::TestCase
     fi.size
     assert_equal 322, fi.content_length
   end
+  
+  def test_unknown_protocol
+    FakeWeb.register_uri(:get, "http://example.com/test", body: "", location: "hhttp://example.com", :status => 301)
+    assert_nil FastImage.size("http://example.com/test")
+  end
 end

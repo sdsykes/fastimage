@@ -291,6 +291,8 @@ class FastImage
   end
 
   def fetch_using_http_from_parsed_uri
+    raise ImageFetchFailure unless @parsed_uri.is_a?(URI::HTTP)
+
     http_header = {'Accept-Encoding' => 'identity'}.merge(@options[:http_header])
 
     setup_http
