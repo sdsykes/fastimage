@@ -30,8 +30,16 @@ module FastImageParsing
       tag_count = @stream.read(2).unpack(@short)[0]
       tag_count.downto(1) do
         type = @stream.read(2).unpack(@short)[0]
-        @stream.read(6)
-        data = @stream.read(2).unpack(@short)[0]
+        data_type = @stream.read(2).unpack(@short)[0]
+        @stream.read(4)
+
+        if data_type == 4
+          data = @stream.read(4).unpack(@long)[0]
+        else
+          data = @stream.read(2).unpack(@short)[0]
+          @stream.read(2)
+        end
+
         case type
         when 0x0100 # image width
           @width = data
@@ -43,7 +51,6 @@ module FastImageParsing
         if @width && @height && @orientation
           return # no need to parse more
         end
-        @stream.read(2)
       end
     end
   

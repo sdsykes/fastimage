@@ -60,6 +60,7 @@ GoodFixtures = {
   "avif/red_green_flash.avif" => [:avif, [256, 256]],
   "isobmff.jxl" => [:jxl, [1280,1600]],
   "naked.jxl" => [:jxl, [1000,1000]],
+  "test.dng" => [:tiff, [4032, 3024]]
 }
 
 BadFixtures = [
