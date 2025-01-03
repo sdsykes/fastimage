@@ -1,4 +1,17 @@
+Version 2.4.0
+
+03-Jan-2025
+
+- IMPROVED: Refactor code into multiple files
+- FIX: error rising from redirects to unknown url scheme
+- FIX: Handle tiff format with long dimensions values
+- FIX: Remove problematic dependency on base64 gem
+- IMPROVED: properties including content_length are fetched more lazily improving performance
+
 Version 2.3.1
+
+01-Apr-2024
+
 - FIX: avoid bug where a NoMethodError exception is raised on faulty images
 
 Version 2.3.0
