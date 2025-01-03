@@ -13,10 +13,8 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     "MIT-LICENSE",
-    "README.md",
-    "lib/fastimage.rb",
-    "lib/fastimage/version.rb",
-  ]
+    "README.md"
+  ] + Dir.glob("lib/**/*")
   s.homepage = %q{http://github.com/sdsykes/fastimage}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
