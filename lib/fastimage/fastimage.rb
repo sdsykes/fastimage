@@ -415,7 +415,7 @@ class FastImage
 
   def fetch_using_base64(uri)
     decoded = begin
-      Base64.decode64(uri.split(',')[1])
+      uri.split(',')[1].unpack1("m")
     rescue
       raise CannotParseImage
     end

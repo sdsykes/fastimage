@@ -59,7 +59,6 @@ require 'net/https'
 require 'delegate'
 require 'pathname'
 require 'zlib'
-require 'base64'
 require 'uri'
 require 'stringio'
 
