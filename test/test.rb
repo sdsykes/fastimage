@@ -196,6 +196,12 @@ class FastImageTest < Test::Unit::TestCase
     end
   end
 
+  def test_should_raise_unknown_image_type_when_file_is_html_with_inline_svg
+    assert_raises(FastImage::UnknownImageType) do
+      FastImage.size(File.join(FixturePath, "test8.html"), :raise_on_failure=>true)
+    end
+  end
+
   def test_should_raise_unknown_image_type_when_file_is_non_svg_xml
     ["test.xml", "test2.xml"].each do |fn|
       assert_raises(FastImage::UnknownImageType) do
