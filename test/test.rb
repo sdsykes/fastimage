@@ -5,6 +5,8 @@ $LOAD_PATH.unshift File.join(PathHere, "..", "lib")
 
 require 'fastimage'
 require 'fakeweb'
+require_relative 'slow_server'
+require_relative 'https_server'
 
 FixturePath = File.join(PathHere, "fixtures")
 
@@ -77,15 +79,6 @@ BadFixtures = [
 # test.cur courtesy of http://mimidestino.deviantart.com/art/Clash-Of-Clans-Dragon-Cursor-s-Punteros-489070897
 
 TestUrl = "http://example.nowhere/"
-
-# this image fetch allows me to really test that fastimage is truly fast
-# but it's not ideal relying on external resources and connectivity speed
-LargeImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
-LargeImageInfo = [:jpeg, [9545, 6623]]
-LargeImageFetchLimit = 2  # seconds
-
-HTTPSImage = "https://upload.wikimedia.org/wikipedia/commons/b/b4/Mardin_1350660_1350692_33_images.jpg"
-HTTPSImageInfo = [:jpeg, [9545, 6623]]
 
 DataUriImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAD0lEQVR42mNk+M9QzwAEAAmGAYCF+yOnAAAAAElFTkSuQmCC"
 DataUriImageInfo = [:png, [2, 1]]
@@ -352,16 +345,19 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_fetch_info_of_large_image_faster_than_downloading_the_whole_thing
-    time = Time.now
-    size = FastImage.size(LargeImage)
-    size_time = Time.now
-    assert size_time - time < LargeImageFetchLimit
-    assert_equal LargeImageInfo[1], size
-    time = Time.now
-    type = FastImage.type(LargeImage)
-    type_time = Time.now
-    assert type_time - time < LargeImageFetchLimit
-    assert_equal LargeImageInfo[0], type
+    SlowServer.new(File.join(FixturePath, "test.jpg")).open do |port|
+      url = "http://127.0.0.1:#{port}/large.jpg"
+
+      time = Time.now
+      size = FastImage.size(url)
+      assert Time.now - time < 2, "FastImage.size took too long, likely reading the entire body"
+      assert_equal GoodFixtures["test.jpg"][1], size
+
+      time = Time.now
+      type = FastImage.type(url)
+      assert Time.now - time < 2, "FastImage.type took too long, likely reading the entire body"
+      assert_equal GoodFixtures["test.jpg"][0], type
+    end
   end
 
   # This test doesn't actually test the proxy function, but at least
@@ -384,8 +380,14 @@ class FastImageTest < Test::Unit::TestCase
   end
 
   def test_should_handle_https_image
-    size = FastImage.size(HTTPSImage)
-    assert_equal HTTPSImageInfo[1], size
+    replies = {
+      "/test.jpg" => ["image/jpeg", File.binread(File.join(FixturePath, "test.jpg"))]
+    }
+
+    HTTPSServer.new(replies).open do |port|
+      size = FastImage.size("https://localhost:#{port}/test.jpg")
+      assert_equal GoodFixtures["test.jpg"][1], size
+    end
   end
 
   require 'pathname'
@@ -446,7 +448,7 @@ class FastImageTest < Test::Unit::TestCase
     FakeWeb.register_uri(:get, url, :body => File.join(FixturePath, "test.jpg"), :content_length => 52)
 
     assert_equal 52, FastImage.new(url).content_length
-    
+
     assert_equal 322, FastImage.new(File.join(FixturePath, "test.png")).content_length
     assert_equal 322, FastImage.new(Pathname.new(File.join(FixturePath, "test.png"))).content_length
 
@@ -510,17 +512,17 @@ class FastImageTest < Test::Unit::TestCase
       FastImage.size(TestUrl + "a.CRW", :raise_on_failure=>true)
     end
   end
-  
+
   def test_returns_nil_when_uri_is_nil
     assert_equal nil, FastImage.size(nil)
   end
-  
+
   def test_raises_when_uri_is_nil_and_raise_on_failure_is_set
     assert_raises(FastImage::BadImageURI) do
       FastImage.size(nil, :raise_on_failure => true)
     end
   end
-  
+
   def test_width
     assert_equal 30, FastImage.new(TestUrl + "test.png").width
     assert_equal nil, FastImage.new(TestUrl + "does_not_exist").width
@@ -530,13 +532,13 @@ class FastImageTest < Test::Unit::TestCase
     assert_equal 20, FastImage.new(TestUrl + "test.png").height
     assert_equal nil, FastImage.new(TestUrl + "does_not_exist").height
   end
-  
+
   def test_content_length_after_size
     fi = FastImage.new(File.join(FixturePath, "test.png"))
     fi.size
     assert_equal 322, fi.content_length
   end
-  
+
   def test_unknown_protocol
     FakeWeb.register_uri(:get, "http://example.com/test", body: "", location: "hhttp://example.com", :status => 301)
     assert_nil FastImage.size("http://example.com/test")
