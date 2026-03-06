@@ -170,6 +170,10 @@ puts Benchmark.measure {p FastImage.size(uri)}
   0.163443   0.214301   0.377744 (  2.880414)
 ```
 
+## Compatibility
+
+FastImage requires Ruby 1.9.2 or later. It is tested on CI with Ruby 2.3 through 4.0.
+
 ## Tests
 
 You'll need to bundle, or `gem install fakeweb` and possibly also  `gem install test-unit` to be able to run the tests.
