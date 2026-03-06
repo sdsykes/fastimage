@@ -28,7 +28,7 @@ jobs:
       - run: bundle exec rake
   test_old_ruby:
     name: Test (Ruby ${{ matrix.ruby }})
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
