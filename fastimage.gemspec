@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake', ">= 10.5")
   s.add_development_dependency('rdoc')
   s.add_development_dependency('test-unit')
+  s.add_development_dependency('webrick')
 
   s.licenses = ['MIT']
 end
