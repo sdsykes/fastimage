@@ -26,4 +26,5 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          rubygems: ${{ matrix.ruby < '2.6' && '3.2.3' || 'default' }}
       - run: bundle exec rake
