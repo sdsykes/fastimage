@@ -57,7 +57,12 @@ module FastImageParsing
         # unknown. We assume the <svg tag cannot be within 10 chars of the end of
         # the file, and is within the first 1000 chars.
         begin
-          :svg if (1..100).detect {|n| @stream.peek(10 * n).include?("<svg")}
+          :svg if (1..100).any? { |n|
+            peeked = @stream.peek(10 * n)
+            svg_index = peeked.index("<svg")
+            html_index = peeked.index(/<html/i)
+            svg_index && (!html_index || svg_index < html_index)
+          }
         rescue FiberError, FastImage::CannotParseImage
           nil
         end
