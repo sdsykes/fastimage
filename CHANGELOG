@@ -1,3 +1,10 @@
+Version 2.4.1
+
+09-Mar-2026
+
+- FIX: HTML with inline SVG being incorrectly detected as SVG
+- IMPROVED: Replace external test dependencies with local servers
+
 Version 2.4.0
 
 03-Jan-2025
