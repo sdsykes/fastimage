@@ -1,3 +1,12 @@
+Version 2.4.1
+
+07-Mar-2026
+
+- IMPROVED: Improved handling of SVG files
+- IMPROVED: Fix CI for older Ruby versions
+- IMPROVED: Add Ruby 4.0 to CI test matrix
+- IMPROVED: Add compatibility section to README
+
 Version 2.4.0
 
 03-Jan-2025
