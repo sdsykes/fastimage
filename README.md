@@ -37,6 +37,8 @@ You only need supply the uri, and FastImage will do the rest.
 
 - Gives you information about the parsed display orientation of an image with Exif data (jpeg or tiff).
 
+- Returns resolution (pixels per unit) and resolution units for JPEG, PNG, BMP, and TIFF images.
+
 - Handles [Data URIs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) correctly.
 
 ## Security
@@ -70,6 +72,12 @@ FastImage.new("http://switchstep.com/images/ExifOrientation3.jpg").orientation
 => 3
 FastImage.size("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==")
 => [1, 1]
+FastImage.resolution("https://switchstep.com/images/ss_logo.png")
+=> [[72, 72], :inches]
+FastImage.new("https://switchstep.com/images/ss_logo.png").resolution
+=> [72, 72]
+FastImage.new("https://switchstep.com/images/ss_logo.png").resolution_units
+=> :inches
 ```
 
 ## Installation

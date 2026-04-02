@@ -11,58 +11,60 @@ require_relative 'https_server'
 FixturePath = File.join(PathHere, "fixtures")
 
 GoodFixtures = {
-  "test.bmp"=>[:bmp, [40, 27]],
-  "test2.bmp"=>[:bmp, [1920, 1080]],
-  "test_coreheader.bmp"=>[:bmp, [40, 27]],
-  "test_v5header.bmp"=>[:bmp, [40, 27]],
-  "test.gif"=>[:gif, [17, 32]],
-  "animated.gif"=>[:gif, [400, 400]],
-  "animated.png"=>[:png, [100, 100]],
-  "animated_without_gct.gif"=>[:gif, [859, 478]],
-  "test.jpg"=>[:jpeg, [882, 470]],
-  "test.png"=>[:png, [30, 20]],
-  "test2.jpg"=>[:jpeg, [250, 188]],
-  "test3.jpg"=>[:jpeg, [630, 367]],
-  "test4.jpg"=>[:jpeg, [1485, 1299]],
-  "test.tiff"=>[:tiff, [85, 67]],
-  "test2.tiff"=>[:tiff, [333, 225]],
-  "test.psd"=>[:psd, [17, 32]],
-  "exif_orientation.jpg"=>[:jpeg, [600, 450]],
-  "infinite.jpg"=>[:jpeg, [160,240]],
-  "orient_2.jpg"=>[:jpeg, [230,408]],
-  "favicon.ico" => [:ico, [16, 16]],
-  "favicon2.ico" => [:ico, [32, 32]],
-  "man.ico" => [:ico, [256, 256]],
-  "test.cur" => [:cur, [32, 32]],
-  "webp_vp8x.webp" => [:webp, [386, 395]],
-  "webp_vp8l.webp" => [:webp, [386, 395]],
-  "webp_vp8.webp" => [:webp, [550, 368]],
-  "webp_animated.webp" => [:webp, [400, 400]],
-  "test.svg" => [:svg, [200, 300]],
-  "test_partial_viewport.svg" => [:svg, [860, 400]],
-  "test2.svg" => [:svg, [366, 271]],
-  "test3.svg" => [:svg, [255, 48]],
-  "test4.svg" => [:svg, [271, 271]],
-  "test5.svg" => [:svg, [255, 48]],
-  "test7.svg" => [:svg, [100, 100]],
-  "orient_6.jpg"=>[:jpeg, [1250,2500]],
-  "heic/test.heic"=>[:heic, [700,476]],
-  "heic/heic-empty.heic"=>[:heic, [3992,2992]],
-  "heic/heic-iphone.heic"=>[:heic,[4032,3024]],
-  "heic/heic-iphone7.heic"=>[:heic,[4032,3024]],
-  "heic/heic-maybebroken.HEIC"=>[:heic,[4032,3024]],
-  "heic/heic-single.heic"=>[:heif,[1440,960]],
-  "heic/heic-collection.heic"=>[:heif,[1440,960]],
-  "heic/inverted.heic"=>[:heic,[3024, 4032]],
-  "heic/test-meta-after-mdat.heic"=>[:heic,[4000, 3000]],
-  "test6.svg" => [:svg, [450, 450]],
-  "avif/hato.avif" => [:avif, [3082, 2048]],
-  "avif/fox.avif" => [:avif, [1204, 799]],
-  "avif/kimono.avif" => [:avif, [722, 1024]],
-  "avif/red_green_flash.avif" => [:avif, [256, 256]],
-  "isobmff.jxl" => [:jxl, [1280,1600]],
-  "naked.jxl" => [:jxl, [1000,1000]],
-  "test.dng" => [:tiff, [4032, 3024]]
+  "test.bmp"=>[:bmp, [40, 27], [[2834, 2834], :meters]],
+  "test2.bmp"=>[:bmp, [1920, 1080], [[2835, 2835], :meters]],
+  "test_coreheader.bmp"=>[:bmp, [40, 27], nil],
+  "test_v5header.bmp"=>[:bmp, [40, 27], [[2834, 2834], :meters]],
+  "test.gif"=>[:gif, [17, 32], nil],
+  "animated.gif"=>[:gif, [400, 400], nil],
+  "animated.png"=>[:png, [100, 100], nil],
+  "animated_without_gct.gif"=>[:gif, [859, 478], nil],
+  "test.jpg"=>[:jpeg, [882, 470], [[72, 72], :inches]],
+  "test.png"=>[:png, [30, 20], nil],
+  "test_with_resolution.png"=>[:png, [10, 10], [[2835, 2835], :meters]],
+  "test_no_resolution_unit.png"=>[:png, [10, 10], [[1, 1], :no_units]],
+  "test2.jpg"=>[:jpeg, [250, 188], nil],
+  "test3.jpg"=>[:jpeg, [630, 367], [[1, 1], :no_units]],
+  "test4.jpg"=>[:jpeg, [1485, 1299], [[300, 300], :inches]],
+  "test.tiff"=>[:tiff, [85, 67], [[72.0, 72.0], :inches]],
+  "test2.tiff"=>[:tiff, [333, 225], [[72.0, 72.0], :inches]],
+  "test.psd"=>[:psd, [17, 32], nil],
+  "exif_orientation.jpg"=>[:jpeg, [600, 450], [[72, 72], :inches]],
+  "infinite.jpg"=>[:jpeg, [160,240], [[72, 72], :inches]],
+  "orient_2.jpg"=>[:jpeg, [230,408], [[96, 96], :inches]],
+  "favicon.ico" => [:ico, [16, 16], nil],
+  "favicon2.ico" => [:ico, [32, 32], nil],
+  "man.ico" => [:ico, [256, 256], nil],
+  "test.cur" => [:cur, [32, 32], nil],
+  "webp_vp8x.webp" => [:webp, [386, 395], nil],
+  "webp_vp8l.webp" => [:webp, [386, 395], nil],
+  "webp_vp8.webp" => [:webp, [550, 368], nil],
+  "webp_animated.webp" => [:webp, [400, 400], nil],
+  "test.svg" => [:svg, [200, 300], nil],
+  "test_partial_viewport.svg" => [:svg, [860, 400], nil],
+  "test2.svg" => [:svg, [366, 271], nil],
+  "test3.svg" => [:svg, [255, 48], nil],
+  "test4.svg" => [:svg, [271, 271], nil],
+  "test5.svg" => [:svg, [255, 48], nil],
+  "test7.svg" => [:svg, [100, 100], nil],
+  "orient_6.jpg"=>[:jpeg, [1250,2500], nil],
+  "heic/test.heic"=>[:heic, [700,476], nil],
+  "heic/heic-empty.heic"=>[:heic, [3992,2992], nil],
+  "heic/heic-iphone.heic"=>[:heic,[4032,3024], nil],
+  "heic/heic-iphone7.heic"=>[:heic,[4032,3024], nil],
+  "heic/heic-maybebroken.HEIC"=>[:heic,[4032,3024], nil],
+  "heic/heic-single.heic"=>[:heif,[1440,960], nil],
+  "heic/heic-collection.heic"=>[:heif,[1440,960], nil],
+  "heic/inverted.heic"=>[:heic,[3024, 4032], nil],
+  "heic/test-meta-after-mdat.heic"=>[:heic,[4000, 3000], nil],
+  "test6.svg" => [:svg, [450, 450], nil],
+  "avif/hato.avif" => [:avif, [3082, 2048], nil],
+  "avif/fox.avif" => [:avif, [1204, 799], nil],
+  "avif/kimono.avif" => [:avif, [722, 1024], nil],
+  "avif/red_green_flash.avif" => [:avif, [256, 256], nil],
+  "isobmff.jxl" => [:jxl, [1280,1600], nil],
+  "naked.jxl" => [:jxl, [1000,1000], nil],
+  "test.dng" => [:tiff, [4032, 3024], nil]
 }
 
 BadFixtures = [
@@ -117,6 +119,12 @@ class FastImageTest < Test::Unit::TestCase
     GoodFixtures.each do |fn, info|
       assert_equal info[1], FastImage.size(TestUrl + fn), "size for #{fn} must be #{info[1]}"
       assert_equal info[1], FastImage.size(TestUrl + fn, :raise_on_failure=>true), "size for #{fn} must be #{info[1]}"
+    end
+  end
+
+  def test_should_report_resolution_correctly
+    GoodFixtures.each do |fn, info|
+      assert_equal info[2], FastImage.resolution(TestUrl + fn), "resolution for #{fn} must be #{info[2].inspect}"
     end
   end
 
@@ -548,5 +556,17 @@ class FastImageTest < Test::Unit::TestCase
   def test_unknown_protocol
     FakeWeb.register_uri(:get, "http://example.com/test", body: "", location: "hhttp://example.com", :status => 301)
     assert_nil FastImage.size("http://example.com/test")
+  end
+
+  def test_instance_resolution_and_resolution_units
+    fi = FastImage.new(File.join(FixturePath, "test.jpg"))
+    assert_equal [72, 72], fi.resolution
+    assert_equal :inches, fi.resolution_units
+  end
+
+  def test_instance_resolution_returns_nil_for_format_without_resolution
+    fi = FastImage.new(File.join(FixturePath, "test.png"))
+    assert_nil fi.resolution
+    assert_nil fi.resolution_units
   end
 end
