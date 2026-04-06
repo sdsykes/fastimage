@@ -2,6 +2,10 @@ module FastImageParsing
   class Exif # :nodoc:
     attr_reader :width, :height, :orientation, :x_resolution, :y_resolution, :resolution_unit
 
+    RESOLUTION_UNIT_NO_UNITS     = 1
+    RESOLUTION_UNIT_INCHES       = 2
+    RESOLUTION_UNIT_CENTIMETERS  = 3
+
     TAG_IMAGE_WIDTH    = 0x0100
     TAG_IMAGE_HEIGHT   = 0x0101
     TAG_ORIENTATION    = 0x0112

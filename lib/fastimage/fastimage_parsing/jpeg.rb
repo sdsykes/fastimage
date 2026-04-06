@@ -17,6 +17,7 @@ module FastImageParsing
     JFIF_UNIT_CENTIMETERS   = 2
 
     def resolution
+      exif_resolution = nil
       state = nil
       loop do
         state = case state
@@ -41,10 +42,26 @@ module FastImageParsing
               return [[x_density, y_density], unit_sym]
             end
             :started
+          when MARKER_APP1
+            length = @stream.read_int - 2
+            data = @stream.read(length)
+            if exif_resolution.nil? && data[0, 6] == "Exif\0\0"
+              io = StringIO.new(data[6..])
+              exif = Exif.new(IOStream.new(io), parse_resolution: true) rescue nil
+              if exif&.x_resolution && exif&.y_resolution
+                unit_sym = case exif.resolution_unit
+                when Exif::RESOLUTION_UNIT_NO_UNITS    then :no_units
+                when Exif::RESOLUTION_UNIT_CENTIMETERS then :centimeters
+                else :inches
+                end
+                exif_resolution = [[exif.x_resolution, exif.y_resolution], unit_sym]
+              end
+            end
+            :started
           when MARKER_BYTE
             :sof
           when *MARKER_SOF_RANGE, MARKER_SOS, MARKER_EOI
-            return nil
+            return exif_resolution
           else
             :skipframe
           end
