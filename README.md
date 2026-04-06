@@ -72,11 +72,13 @@ FastImage.new("http://switchstep.com/images/ExifOrientation3.jpg").orientation
 => 3
 FastImage.size("data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==")
 => [1, 1]
-FastImage.resolution("https://switchstep.com/images/ss_logo.png")
+FastImage.resolution("https://switchstep.com/images/photo.jpg")
 => [[72, 72], :inches]
-FastImage.new("https://switchstep.com/images/ss_logo.png").resolution
+FastImage.resolution("https://switchstep.com/images/photo.png")
+=> [[2835, 2835], :meters]
+FastImage.new("https://switchstep.com/images/photo.jpg").resolution
 => [72, 72]
-FastImage.new("https://switchstep.com/images/ss_logo.png").resolution_units
+FastImage.new("https://switchstep.com/images/photo.jpg").resolution_units
 => :inches
 ```
 
