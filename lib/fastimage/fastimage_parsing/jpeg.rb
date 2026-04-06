@@ -46,7 +46,7 @@ module FastImageParsing
             length = @stream.read_int - 2
             data = @stream.read(length)
             if exif_resolution.nil? && data[0, 6] == "Exif\0\0"
-              io = StringIO.new(data[6..])
+              io = StringIO.new(data[6..-1])
               exif = Exif.new(IOStream.new(io), parse_resolution: true) rescue nil
               if exif&.x_resolution && exif&.y_resolution
                 unit_sym = case exif.resolution_unit
