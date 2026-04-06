@@ -124,7 +124,12 @@ class FastImageTest < Test::Unit::TestCase
 
   def test_should_report_resolution_correctly
     GoodFixtures.each do |fn, info|
-      assert_equal info[2], FastImage.resolution(TestUrl + fn), "resolution for #{fn} must be #{info[2].inspect}"
+      path = File.join(FixturePath, fn)
+      assert_equal info[2], FastImage.resolution(TestUrl + fn), "resolution for #{fn} via URL must be #{info[2].inspect}"
+      assert_equal info[2], FastImage.resolution(path), "resolution for #{fn} via file path must be #{info[2].inspect}"
+      File.open(path, "rb") do |io|
+        assert_equal info[2], FastImage.resolution(io), "resolution for #{fn} via IO must be #{info[2].inspect}"
+      end
     end
   end
 
