@@ -153,8 +153,18 @@ module FastImageParsing
     def read_box_header!
       size = read_uint32!
       type = @stream.read(4)
-      size = read_uint64! - 8 if size == 1
-      [type, size - 8]
+      if size == 1
+        size = read_uint64!
+        throw :finish if size < 16
+        [type, size - 16]
+      else
+        # size == 0 means the box extends to end of file (ISO/IEC 14496-12 §4.2).
+        # size < 8 is malformed (smaller than the header itself). Either way, no
+        # further boxes can be parsed at this level, so stop rather than looping
+        # on a non-advancing skip.
+        throw :finish if size < 8
+        [type, size - 8]
+      end
     end
 
     def read_uint8!
