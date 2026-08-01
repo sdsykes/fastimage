@@ -73,6 +73,7 @@ BadFixtures = [
   "a.CR2",
   "a.CRW",
   "avif/star.avifs",
+  "heic/zero-sized-box.heic",
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
@@ -283,6 +284,18 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_raise_when_asked_to_when_size_cannot_be_found_for_local_file
     assert_raises(FastImage::SizeNotFound) do
       FastImage.size(File.join(FixturePath, "faulty.jpg"), :raise_on_failure=>true)
+    end
+  end
+
+  # Regression test for issue #167: a zero-sized ISO-BMFF box previously caused
+  # an infinite loop because `size - 8` produced a negative payload length and
+  # `stream.skip` did not advance the read position.
+  def test_should_not_loop_on_zero_sized_isobmff_box
+    path = File.join(FixturePath, "heic/zero-sized-box.heic")
+    assert_equal :heic, FastImage.type(path)
+    assert_nil FastImage.size(path)
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(path, :raise_on_failure => true)
     end
   end
 
