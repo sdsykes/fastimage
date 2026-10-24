@@ -13,8 +13,11 @@ module FastImageParsing
       @str = ''
     end
   
-    # Peeking beyond the end of the input will raise
+    # Peeking beyond the end of the input will raise. A negative length would
+    # move the cursor backwards, so treat it as unparseable data.
     def peek(n)
+      raise FastImage::CannotParseImage if n < 0
+
       while @strpos + n > @str.size
         unused_str = @str[@strpos..-1]
   
@@ -38,6 +41,8 @@ module FastImageParsing
     end
   
     def skip(n)
+      raise FastImage::CannotParseImage if n < 0
+
       discarded = 0
       fetched = @str[@strpos..-1].size
       while n > fetched

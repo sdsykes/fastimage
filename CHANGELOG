@@ -1,3 +1,10 @@
+Version 2.4.3
+
+24-Oct-2026
+
+- FIX: Return nil instead of [nil, nil] for JXL files with no size information
+- FIX: Reject negative read/skip lengths in the stream reader, fixing a TypeError on JPEGs with a zero-length APP1 segment
+
 Version 2.4.2
 
 24-Oct-2026
