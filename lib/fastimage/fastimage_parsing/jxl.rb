@@ -6,6 +6,7 @@ module FastImageParsing
         [jxlc.width, jxlc.height]
       else
         bmff = IsoBmff.new(@stream)
+        return nil unless bmff.width && bmff.height
         [bmff.width, bmff.height]
       end
     end

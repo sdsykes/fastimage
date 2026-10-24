@@ -75,6 +75,8 @@ BadFixtures = [
   "avif/star.avifs",
   "heic/zero-sized-box.heic",
   "heic/zero-sized-box-with-irot.heic",
+  "zero-sized-box.jxl",
+  "zero-length-app1.jpg",
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
@@ -304,6 +306,26 @@ class FastImageTest < Test::Unit::TestCase
   # @final_size stays nil. parse_isobmff must not call `.reverse!` on nil.
   def test_should_not_crash_when_irot_precedes_zero_sized_box
     path = File.join(FixturePath, "heic/zero-sized-box-with-irot.heic")
+    assert_nil FastImage.size(path)
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(path, :raise_on_failure => true)
+    end
+  end
+
+  # A JXL container with no size information must return nil, not [nil, nil].
+  def test_should_return_nil_for_jxl_without_size
+    path = File.join(FixturePath, "zero-sized-box.jxl")
+    assert_equal :jxl, FastImage.type(path)
+    assert_nil FastImage.size(path)
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(path, :raise_on_failure => true)
+    end
+  end
+
+  # A JPEG APP1 segment with length 0 made the parser read a negative number of
+  # bytes, which raised TypeError instead of a FastImage error.
+  def test_should_not_crash_on_zero_length_jpeg_app1_segment
+    path = File.join(FixturePath, "zero-length-app1.jpg")
     assert_nil FastImage.size(path)
     assert_raises(FastImage::SizeNotFound) do
       FastImage.size(path, :raise_on_failure => true)
