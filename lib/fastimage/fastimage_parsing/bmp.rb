@@ -13,5 +13,16 @@ module FastImageParsing
       # ImageHeight is expressed in pixels. The absolute value is necessary because ImageHeight can be negative
       [result.first, result.last.abs]
     end
+
+    def resolution
+      data = @stream.read(46)
+      header_size = data[14, 4].unpack("V")[0]
+      return nil if header_size < 40 # BITMAPCOREHEADER has no resolution fields
+
+      x_ppm, y_ppm = data[38, 8].unpack("l<l<")
+      return nil if x_ppm == 0 && y_ppm == 0
+
+      [[x_ppm, y_ppm], :meters]
+    end
   end
 end

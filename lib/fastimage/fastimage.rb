@@ -181,7 +181,27 @@ class FastImage
   def self.animated?(uri, options={})
     new(uri, options).animated
   end
-  
+
+  # Returns an array of [resolution, units] where resolution is [x, y] in the image's native units
+  # and units is one of :inches, :centimeters, :meters, or :no_units (aspect ratio only).
+  # Returns nil if the image does not contain resolution information or could not be fetched.
+  #
+  # === Example
+  #
+  #   require 'fastimage'
+  #
+  #   FastImage.resolution("test/fixtures/test.jpg")
+  #   => [[72, 72], :inches]
+  #   FastImage.resolution("test/fixtures/test.png")
+  #   => nil
+  #
+  def self.resolution(uri, options={})
+    fi = new(uri, options)
+    res = fi.resolution
+    return nil unless res
+    [res, fi.resolution_units]
+  end
+
   def initialize(uri, options={})
     @uri = uri
     @options = {
@@ -233,6 +253,17 @@ class FastImage
     @property = :content_length
     fetch unless defined?(@content_length)
     @content_length
+  end
+
+  def resolution
+    @property = :resolution
+    fetch unless defined?(@resolution)
+    @resolution
+  end
+
+  def resolution_units
+    resolution unless defined?(@resolution)
+    @resolution_units
   end
 
   # find an appropriate method to fetch the image according to the passed parameter
@@ -436,12 +467,18 @@ class FastImage
         parse_size
       when :animated
         parse_animated
+      when :resolution
+        parse_resolution
       end
 
       if result != nil
         # extract exif orientation if it was found
         if @property == :size && result.size == 3
           @orientation = result.pop
+        elsif @property == :resolution && result.size == 2
+          @resolution = result[0]
+          @resolution_units = result[1]
+          result = result[0]
         else
           @orientation = 1
         end
@@ -467,5 +504,9 @@ class FastImage
 
   def parse_animated
     parser_class.new(@stream).animated?
+  end
+
+  def parse_resolution
+    parser_class.new(@stream).resolution
   end
 end
