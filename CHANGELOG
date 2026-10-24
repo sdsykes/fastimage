@@ -1,3 +1,10 @@
+Version 2.4.2
+
+24-Oct-2026
+
+- FIX: Fix infinite loop when parsing a zero-sized HEIC/AVIF box (#167)
+- FIX: Fix NoMethodError on rotated HEIC/AVIF files with no size information (#169)
+
 Version 2.4.1
 
 07-Mar-2026
