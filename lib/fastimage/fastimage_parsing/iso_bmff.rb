@@ -27,11 +27,11 @@ module FastImageParsing
         read_boxes!
       end
 
-      if [90, 270].include?(@rotation)
+      if @final_size && [90, 270].include?(@rotation)
         @final_size.reverse!
       end
-      
-      @width, @height = @final_size
+
+      @width, @height = @final_size if @final_size
     end
 
     private

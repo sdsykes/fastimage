@@ -74,6 +74,7 @@ BadFixtures = [
   "a.CRW",
   "avif/star.avifs",
   "heic/zero-sized-box.heic",
+  "heic/zero-sized-box-with-irot.heic",
 ]
 # man.ico courtesy of http://www.iconseeker.com/search-icon/artists-valley-sample/business-man-blue.html
 # test_rgb.ct courtesy of http://fileformats.archiveteam.org/wiki/Scitex_CT
@@ -293,6 +294,16 @@ class FastImageTest < Test::Unit::TestCase
   def test_should_not_loop_on_zero_sized_isobmff_box
     path = File.join(FixturePath, "heic/zero-sized-box.heic")
     assert_equal :heic, FastImage.type(path)
+    assert_nil FastImage.size(path)
+    assert_raises(FastImage::SizeNotFound) do
+      FastImage.size(path, :raise_on_failure => true)
+    end
+  end
+
+  # An irot box seen before parsing bails out leaves @rotation set while
+  # @final_size stays nil. parse_isobmff must not call `.reverse!` on nil.
+  def test_should_not_crash_when_irot_precedes_zero_sized_box
+    path = File.join(FixturePath, "heic/zero-sized-box-with-irot.heic")
     assert_nil FastImage.size(path)
     assert_raises(FastImage::SizeNotFound) do
       FastImage.size(path, :raise_on_failure => true)
